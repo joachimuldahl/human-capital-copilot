@@ -12,3 +12,7 @@
 - 82 Vitest tests reproduce every value in BUILD_SPEC section 9; engine coverage 100% lines / 99% branches (`npm run coverage`, new dev dependency @vitest/coverage-v8, approved).
 - Fixed: a risk-fit gap of exactly ±0.15 was misclassified because of floating-point error (now uses a 1e-9 tolerance).
 - Formatters round half away from zero so Apple shows 14.4% (not 14.3%) as in the spec.
+
+## 2026-11-26 · Setup · Automatic prompt logging
+- UserPromptSubmit hook (.claude/hooks/log-prompt.mjs) logs every prompt verbatim to prompts/PROMPT_LOG_AUTO.md; "nolog:" prompts are skipped.
+- Backfilled earlier prompts from the session transcript; CLAUDE.md now says C-entries reference auto-log timestamps.

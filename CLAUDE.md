@@ -5,5 +5,6 @@ Static Vite + React + TS demo. Full spec: @BUILD_SPEC.md (source of truth).
 - Educational wording only: "Example, not advice". Never buy/sell instructions.
 - Work one phase at a time (BUILD_SPEC section 10). Plan first, then build.
 - Before saying done: npm test, npm run lint, npm run build must pass.
-- After each task: append an entry to prompts/PROMPT_LOG.md (BUILD_SPEC section 13) and 2–5 lines to docs/CHANGELOG.md.
+- Prompts are captured automatically (verbatim) in prompts/PROMPT_LOG_AUTO.md by the UserPromptSubmit hook (.claude/hooks/log-prompt.mjs); prompts starting with "nolog:" are skipped.
+- After each task: add a short C-entry to prompts/PROMPT_LOG.md (what you did, files changed, test/lint/build result, lesson) that references the auto-log timestamp instead of copying the prompt, and 2–5 lines to docs/CHANGELOG.md.
 - Ask before adding dependencies outside BUILD_SPEC section 3, and before any git push or GitHub action.

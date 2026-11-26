@@ -17,8 +17,8 @@ import {
   explainBinding,
   explainHumanCapital,
   explainIncomeType,
-  formatEUR,
   formatPct,
+  formatWealthShare,
   formatRatio,
   glidePath,
   loanAmount,
@@ -28,13 +28,14 @@ import {
   type Profile,
 } from '../engine'
 import { PERSONAS } from '../data/personas'
-import { useActivePortfolioRisk, useActiveProfile } from '../store/hooks'
+import { useActivePortfolioRisk, useActiveProfile, useCurrency } from '../store/hooks'
 import { useProfileStore } from '../store/profileStore'
 
 type WhatIf = Partial<Pick<Profile, 'savingsRate' | 'maxLossMoney'>>
 
 export default function Results() {
   const { active, profile: saved, hasAnswers } = useActiveProfile()
+  const { currency, money } = useCurrency()
   const lossIsDefault = useProfileStore((s) => active === 'mine' && s.answers.maxLossMoney === undefined)
   const [whatIf, setWhatIf] = useState<WhatIf>({})
   const [whatIfFor, setWhatIfFor] = useState(active)
@@ -105,9 +106,9 @@ export default function Results() {
             {BINDING_LABEL[t.binding]}
           </Badge>
           <p className="max-w-[620px] text-base leading-relaxed text-panel">
-            {explainBinding(t, profile, { lossIsDefault })}
+            {explainBinding(t, profile, { lossIsDefault, currency })}
             {atCap && ` The model before limits says ${formatRatio(t.rawEEE)}.`}
-            {loan > 0 && ` In practice: stock exposure of ${formatRatio(t.finalEEE)}, using a broker loan of about ${formatEUR(loan)}.`}
+            {loan > 0 && ` In practice: stock exposure of ${formatRatio(t.finalEEE)}, using a broker loan of about ${money(loan)}.`}
           </p>
         </div>
       </section>
@@ -121,8 +122,8 @@ export default function Results() {
           <StatTile title="Risk attitude" value={BAND_LABEL[t.band]}>
             Your answers suggest you would {riskAttitudeLine(t)}.
           </StatTile>
-          <StatTile title="Human capital" value={formatPct(t.hcRatio)} footnote={`Present value of all future earnings: ${formatEUR(t.pvEarnings)}`}>
-            {explainHumanCapital(t)}
+          <StatTile title="Human capital" value={formatWealthShare(t.hcRatio, F)} footnote={`Present value of all future earnings: ${money(t.pvEarnings)}`}>
+            {explainHumanCapital(t, currency, F)}
           </StatTile>
           <StatTile title="Income type" value={incomeTypeTitle(t.betaH)}>
             {explainIncomeType(t.betaH)}
@@ -163,7 +164,7 @@ export default function Results() {
           <div
             className="flex h-3.5 overflow-hidden rounded-full bg-line"
             role="img"
-            aria-label={`Invested today ${formatEUR(F)} (${formatPct(fShare)}), future savings ${formatEUR(t.pvfs)} (${formatPct(t.hcRatio)}).`}
+            aria-label={`Invested today ${money(F)} (${formatPct(fShare)}), future savings ${money(t.pvfs)} (${formatWealthShare(t.hcRatio, F)}).`}
           >
             <div className="bg-lime" style={{ width: `${Math.max(fShare * 100, 1)}%` }} />
             <div className="flex-1 bg-sky" />
@@ -174,14 +175,14 @@ export default function Results() {
                 <span className="h-2.5 w-2.5 rounded-[3px] bg-lime" aria-hidden />
                 Invested today ({formatPct(fShare)})
               </dt>
-              <dd className="font-semibold">{formatEUR(F)}</dd>
+              <dd className="font-semibold">{money(F)}</dd>
             </div>
             <div className="flex justify-between gap-3">
               <dt className="flex items-center gap-2 text-ink-2">
                 <span className="h-2.5 w-2.5 rounded-[3px] bg-sky" aria-hidden />
-                Future savings ({formatPct(t.hcRatio)})
+                Future savings ({formatWealthShare(t.hcRatio, F)})
               </dt>
-              <dd className="font-semibold">{formatEUR(t.pvfs)}</dd>
+              <dd className="font-semibold">{money(t.pvfs)}</dd>
             </div>
           </dl>
           <div className="h-px bg-line" />
@@ -233,7 +234,7 @@ export default function Results() {
               step={100}
               value={profile.maxLossMoney}
               onChange={(v) => setWhatIf((w) => ({ ...w, maxLossMoney: v }))}
-              display={formatEUR(profile.maxLossMoney)}
+              display={money(profile.maxLossMoney)}
             />
           </div>
         </div>

@@ -13,13 +13,19 @@ import type { Profile } from './types'
 
 const clamp = (x: number, lo: number, hi: number) => Math.min(Math.max(x, lo), hi)
 
+/** Unclamped yearly growth implied by the 10-year expectation: (income10y / incomeNow)^(1/10) − 1 (0 if no income). */
+export function rawGrowthRate(p: Pick<Profile, 'incomeNow' | 'income10y'>): number {
+  if (p.incomeNow <= 0) return 0
+  return Math.pow(Math.max(p.income10y, 0) / p.incomeNow, 1 / 10) - 1
+}
+
 /**
  * Early-career real income growth implied by the 10-year expectation.
  * g = clamp((income10y / incomeNow)^(1/10) − 1, growthFloor, growthCap)
  */
 export function growthRate(p: Profile): number {
   if (p.incomeNow <= 0) return 0
-  return clamp(Math.pow(p.income10y / p.incomeNow, 1 / 10) - 1, growthFloor, growthCap)
+  return clamp(rawGrowthRate(p), growthFloor, growthCap)
 }
 
 /**

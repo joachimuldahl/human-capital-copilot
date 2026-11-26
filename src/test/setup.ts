@@ -13,3 +13,6 @@ if (typeof globalThis.localStorage === 'undefined' || typeof globalThis.localSto
   }
   Object.defineProperty(globalThis, 'localStorage', { value: storage, configurable: true })
 }
+
+// Node reports navigator.language 'en-US'; pin a neutral locale so the preselected currency is EUR in tests.
+Object.defineProperty(globalThis, 'navigator', { value: { language: 'en-IE', languages: ['en-IE'] }, configurable: true, writable: true })

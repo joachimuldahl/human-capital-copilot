@@ -1,6 +1,7 @@
 /** React hooks on top of the stores. Selectors return stable values so components don't re-render in a loop. */
 import { useMemo } from 'react'
-import { exposures, netWorth, pendingCaps, portfolioEEE, riskFit, targetEEE, type Holding, type Profile, type RiskFit } from '../engine'
+import { exposures, formatMoney, netWorth, pendingCaps, portfolioEEE, riskFit, targetEEE, type Holding, type Profile, type RiskFit } from '../engine'
+import { FX, type Currency } from '../data/fx'
 import { PRODUCTS } from '../data/products'
 import type { PersonaId } from '../data/personas'
 import { selectPortfolio, usePortfolioStore } from './portfolioStore'
@@ -10,7 +11,8 @@ import { selectProfile, useProfileStore, type ActiveId } from './profileStore'
 export function useActiveProfile(): { active: ActiveId; profile: Profile; hasAnswers: boolean } {
   const active = useProfileStore((s) => s.active)
   const answers = useProfileStore((s) => s.answers)
-  const profile = useMemo(() => selectProfile({ active, answers }), [active, answers])
+  const currency = useProfileStore((s) => s.currency)
+  const profile = useMemo(() => selectProfile({ active, answers, currency }), [active, answers, currency])
   return { active, profile, hasAnswers: Object.keys(answers).length > 0 }
 }
 
@@ -20,11 +22,12 @@ export function useActiveProfile(): { active: ActiveId; profile: Profile; hasAns
  */
 export function useMyTarget() {
   const answers = useProfileStore((s) => s.answers)
+  const currency = useProfileStore((s) => s.currency)
   return useMemo(() => {
-    const profile = selectProfile({ active: 'mine', answers })
+    const profile = selectProfile({ active: 'mine', answers, currency })
     const pending = pendingCaps(answers)
     return { profile, pending, target: targetEEE(profile, { pending }) }
-  }, [answers])
+  }, [answers, currency])
 }
 
 /** Loads a persona and its demo portfolio. */
@@ -49,5 +52,20 @@ export function useActivePortfolioRisk(target: number) {
   const active = useProfileStore((s) => s.active)
   const source = usePortfolioStore((s) => s.source)
   const quick = usePortfolioStore((s) => s.quick)
-  return useMemo(() => portfolioRisk(selectPortfolio(active, { source, quick }).holdings, target), [active, source, quick, target])
+  const currency = useProfileStore((s) => s.currency)
+  return useMemo(() => portfolioRisk(selectPortfolio(active, { source, quick }, currency).holdings, target), [active, source, quick, currency, target])
+}
+
+/** The chosen currency, its rate per EUR, and a money formatter for it. */
+export function useCurrency(): { currency: Currency; fx: number; money: (x: number) => string } {
+  const currency = useProfileStore((s) => s.currency)
+  return useMemo(() => ({ currency, fx: FX[currency], money: (x: number) => formatMoney(x, currency) }), [currency])
+}
+
+/** Changes the currency and converts the stored answers and quick-entry amounts (BUILD_SPEC 18.1). */
+export function changeCurrency(currency: Currency) {
+  const from = useProfileStore.getState().currency
+  if (from === currency) return
+  usePortfolioStore.getState().scaleQuick(FX[currency] / FX[from])
+  useProfileStore.getState().setCurrency(currency)
 }

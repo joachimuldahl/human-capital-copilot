@@ -1,4 +1,7 @@
-/** "Why we ask" text for the 16 onboarding questions (BUILD_SPEC section 16, verbatim). The live effect line comes from the engine. */
+/**
+ * "Why we ask" text for the 16 onboarding questions (BUILD_SPEC section 16, verbatim). The live effect line comes from the engine.
+ * "{minAssets}" is replaced with the borrowing minimum in the chosen currency (€5,000 in EUR).
+ */
 import type { QuestionNo } from '../engine'
 
 export interface WhyWeAskContent {
@@ -20,7 +23,7 @@ export const WHY_WE_ASK: Record<QuestionNo, WhyWeAskContent> = {
   },
   3: {
     why: "Your target depends on the ratio between today's money (F) and future savings (H). With little invested, small amounts carry your whole future.",
-    how: 'F in the formula raw = (w*·F + (w* − βH)·H) / F. It also sizes the loss-limit check and the €5,000 minimum for borrowing.',
+    how: 'F in the formula raw = (w*·F + (w* − βH)·H) / F. It also sizes the loss-limit check and the {minAssets} minimum for borrowing.',
     research: 'Ayres & Nalebuff (2010, 2013)',
   },
   4: {
@@ -35,7 +38,7 @@ export const WHY_WE_ASK: Record<QuestionNo, WhyWeAskContent> = {
   },
   6: {
     why: 'Earnings typically rise steeply early in a career and flatten around mid-career.',
-    how: 'Your implied yearly growth (capped at 8%) until age 45, then 0.5% a year.',
+    how: 'Your implied yearly growth (capped at 12% in the calculation) until age 45, then 0.5% a year.',
     research: 'Cocco, Gomes & Maenhout (2005)',
   },
   7: {
@@ -85,7 +88,14 @@ export const WHY_WE_ASK: Record<QuestionNo, WhyWeAskContent> = {
   },
   16: {
     why: 'Borrowing to invest amplifies both gains and losses, and leveraged ETFs lose value in volatile markets. You should understand that before using either.',
-    how: 'Gate G3: leverage above 1.0× needs all 3 answers right, an explicit opt-in, 15+ years to retirement and €5,000+ invested. Even then we cap at 1.5× (Ayres & Nalebuff use 2.0×).',
+    how: 'Gate G3: leverage above 1.0× needs all 3 answers right, an explicit opt-in, 15+ years to retirement and {minAssets}+ invested. Even then we cap at 1.5× (Ayres & Nalebuff use 2.0×).',
     research: 'Ayres & Nalebuff (2010); Cheng & Madhavan (2009)',
   },
+}
+
+/** Question 0, currency (BUILD_SPEC 18.1). */
+export const CURRENCY_WHY: WhyWeAskContent = {
+  why: "So every amount is in money you think in. It doesn't change your result: the model works with ratios, and every threshold is converted at the same rate.",
+  how: 'Formats every amount, and converts our euro-based demo data, defaults and the {minAssets} borrowing minimum at fixed ECB reference rates.',
+  research: 'ECB euro reference rates (see the Method page for the date and source)',
 }

@@ -2,10 +2,10 @@
  * Plain-English explanation templates filled with engine numbers (BUILD_SPEC 5.5, decision D-14: no AI).
  * Also the display formatters (section 7: 1.50×, €10,000, 14.4%), so wording and numbers stay consistent.
  */
-import { minBufferMonths, policyCap, expensiveDebtRate, floor, defaultMaxLossShare } from './assumptions'
+import { minBufferMonths, policyCap, expensiveDebtRate, floor, defaultMaxLossShare, growthCap, minAssetsForLeverage, minYearsForLeverage } from './assumptions'
 import { solveAllocation } from './allocation'
 import type { PlanSleeve, SleeveRow } from './plan'
-import { growthRate } from './humanCapital'
+import { growthRate, rawGrowthRate } from './humanCapital'
 import type {
   AssetClass,
   Band,
@@ -13,6 +13,7 @@ import type {
   CapId,
   ClassValue,
   ConcentrationFlag,
+  Currency,
   OverlapPair,
   Profile,
   RiskFit,
@@ -34,11 +35,41 @@ export function formatRatio(x: number): string {
   return `${roundHalfAway(x, 2).toFixed(2)}×`
 }
 
+const MONEY_FORMAT = new Map<Currency, Intl.NumberFormat>()
+
+/**
+ * Money without decimals in the chosen currency (BUILD_SPEC 18.1):
+ * 10000 EUR → "€10,000", -4750 EUR → "−€4,750", 74749 DKK → "kr 74,749", 9233 CHF → "CHF 9,233".
+ */
+export function formatMoney(x: number, currency: Currency = 'EUR'): string {
+  let f = MONEY_FORMAT.get(currency)
+  if (!f) {
+    f = new Intl.NumberFormat('en-US', { style: 'currency', currency, currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0, minimumFractionDigits: 0 })
+    MONEY_FORMAT.set(currency, f)
+  }
+  const r = roundHalfAway(x, 0)
+  const s = f.format(Math.abs(r))
+  return r < 0 ? `−${s}` : s
+}
+
 /** EUR without decimals: 10000 → "€10,000", -4750 → "−€4,750". */
 export function formatEUR(x: number): string {
-  const r = roundHalfAway(x, 0)
-  const s = `€${Math.abs(r).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
-  return r < 0 ? `−${s}` : s
+  return formatMoney(x, 'EUR')
+}
+
+/** The currency's symbol as shown by formatMoney ("€", "$", "£", "kr", "CHF"). */
+export function currencySymbol(currency: Currency): string {
+  return formatMoney(0, currency).replace(/[\d\s,.]/g, '')
+}
+
+/**
+ * A converted EUR amount rounded to 2 significant figures, for defaults, slider ends and example steps
+ * (€10,000 in DKK → 75,000 rather than 74,749). Never used for persona or portfolio values.
+ */
+export function niceAmount(x: number): number {
+  if (!Number.isFinite(x) || x === 0) return 0
+  const mag = Math.pow(10, Math.floor(Math.log10(Math.abs(x))) - 1)
+  return Math.round(x / mag) * mag
 }
 
 /** Fraction as percentage with 1 decimal: 0.1435 → "14.4%", -0.475 → "−47.5%". */
@@ -67,21 +98,22 @@ export function betaLabel(betaH: number): string {
 }
 
 /** Why the final Risk Capacity is what it is (the binding constraint). */
-export function explainBinding(t: TargetResult, p: Profile, opts: { lossIsDefault?: boolean } = {}): string {
+export function explainBinding(t: TargetResult, p: Profile, opts: { lossIsDefault?: boolean; currency?: Currency } = {}): string {
+  const money = (x: number) => formatMoney(x, opts.currency)
   switch (t.binding) {
     case 'policy_cap':
       return `Limited by our ${policyCap}× safety cap. Your future savings would justify more, but we never go above ${policyCap}×.`
     case 'G4_loss':
       // BUILD_SPEC 7.2: never quote a default as if the user had said it.
       return opts.lossIsDefault
-        ? `Limited by our starting loss limit of ${formatEUR(p.maxLossMoney)} (${roundHalfAway(defaultMaxLossShare * 100, 0)}% of what you invest). Set your own in question 14.`
-        : `Limited by the most you said you could lose in a bad year (${formatEUR(p.maxLossMoney)}).`
+        ? `Limited by our starting loss limit of ${money(p.maxLossMoney)} (${roundHalfAway(defaultMaxLossShare * 100, 0)}% of what you invest). Set your own in question 14.`
+        : `Limited by the most you said you could lose in a bad year (${money(p.maxLossMoney)}).`
     case 'G1_buffer':
       return `Capped at 1.0× until you have a ${minBufferMonths}-month emergency buffer.`
     case 'G2_debt':
       return `Capped at 1.0× while you have debt above ${roundHalfAway(expensiveDebtRate * 100, 1)}% interest. Paying it off first is a guaranteed return.`
     case 'G3_leverage':
-      return 'Capped at 1.0× because borrowing to invest needs the knowledge check, opt-in, 15+ years to retirement and at least €5,000.'
+      return `Capped at 1.0× because borrowing to invest needs the knowledge check, opt-in, ${minYearsForLeverage}+ years to retirement and at least ${money(minAssetsForLeverage * (p.fx ?? 1))}.`
     case 'floor':
       return `Kept at our minimum of ${formatRatio(floor)}, so your savings still grow with the market.`
     case 'model':
@@ -94,18 +126,57 @@ export function explainBinding(t: TargetResult, p: Profile, opts: { lossIsDefaul
 /** Shown on the onboarding panel while the loss limit (Q14) or the leverage check (Q16) is still unanswered. */
 export const ESTIMATE_NOTE = 'Estimate from your answers so far. Your loss limit and the leverage check come in step 4 and can lower this.'
 
-/** The three drivers in the onboarding summary panel ("What drives this"). */
-export function driverLines(t: TargetResult): { label: string; value: string }[] {
+/** "Based on defaults for 3 questions you haven't answered yet." */
+export function defaultsNote(unanswered: number): string {
+  return `Based on defaults for ${unanswered} ${unanswered === 1 ? 'question' : 'questions'} you haven't answered yet.`
+}
+
+/** Profile field whose question sets each gate (Q10 buffer, Q11 debt, Q16 knowledge check, Q14 loss limit). */
+const GATE_QUESTION: Partial<Record<Binding, keyof Profile>> = {
+  G1_buffer: 'bufferMonths',
+  G2_debt: 'maxDebtRate',
+  G3_leverage: 'knowledgeCheckPassed',
+  G4_loss: 'maxLossMoney',
+}
+
+/**
+ * Explanation lines for the onboarding side panel (BUILD_SPEC 18.3), each shown once.
+ * While anything is still a default: the Estimate (or defaults) sentence, plus the binding sentence only if it
+ * is the 1.5× policy cap or a limit whose question has been answered. Once everything is answered: the binding sentence.
+ */
+export function panelExplanation(
+  t: TargetResult,
+  p: Profile,
+  status: { answers: Partial<Profile>; estimate: boolean; unanswered: number; currency?: Currency },
+): string[] {
+  const binding = explainBinding(t, p, { currency: status.currency })
+  if (!status.estimate && status.unanswered === 0) return [binding]
+  const note = status.estimate ? ESTIMATE_NOTE : defaultsNote(status.unanswered)
+  const q = GATE_QUESTION[t.binding]
+  const fromAnswer = t.binding === 'policy_cap' || (q !== undefined && status.answers[q] !== undefined)
+  return fromAnswer ? [note, binding] : [note]
+}
+
+/**
+ * Share of lifetime wealth in future savings. With nothing invested (F = 0), or when it rounds to 100.0%,
+ * it reads "≈ 100%" (BUILD_SPEC 18.3): the engine uses F = max(F, 1), so it is never exactly 100%.
+ */
+export function formatWealthShare(hcRatio: number, F: number): string {
+  return F <= 0 || roundHalfAway(hcRatio * 100, 1) >= 100 ? '≈ 100%' : formatPct(hcRatio)
+}
+
+/** The three drivers in the onboarding summary panel ("What drives this"). F = invested today. */
+export function driverLines(t: TargetResult, F: number = Infinity, currency: Currency = 'EUR'): { label: string; value: string }[] {
   return [
     { label: 'Risk attitude', value: `${BAND_LABEL[t.band]} · ${formatPct(t.wStar)} in stocks` },
-    { label: 'Future savings', value: `${formatEUR(t.pvfs)} · ${formatPct(t.hcRatio)} of wealth` },
+    { label: 'Future savings', value: `${formatMoney(t.pvfs, currency)} · ${formatWealthShare(t.hcRatio, F)} of wealth` },
     { label: 'Income type', value: `${incomeTypeTitle(t.betaH)} · βH ${roundHalfAway(t.betaH, 2).toFixed(2)}` },
   ]
 }
 
 /** "95.6% of your lifetime investable wealth is still in your future salary (future savings worth €219,484)." */
-export function explainHumanCapital(t: TargetResult): string {
-  return `${formatPct(t.hcRatio)} of your lifetime investable wealth is still in your future salary (future savings worth ${formatEUR(t.pvfs)}).`
+export function explainHumanCapital(t: TargetResult, currency: Currency = 'EUR', F: number = Infinity): string {
+  return `${formatWealthShare(t.hcRatio, F)} of your lifetime investable wealth is still in your future salary (future savings worth ${formatMoney(t.pvfs, currency)}).`
 }
 
 /** Short line for the income-type driver card. */
@@ -174,13 +245,20 @@ export function riskAttitudeLine(t: TargetResult): string {
 }
 
 /** Onboarding question 12, with the user's own amount. */
-export function drawdownQuestion(F: number): string {
-  return `Your ${formatEUR(F)} falls to ${formatEUR(0.7 * F)} in three months. What do you do?`
+export function drawdownQuestion(F: number, currency: Currency = 'EUR'): string {
+  return `Your ${formatMoney(F, currency)} falls to ${formatMoney(0.7 * F, currency)} in three months. What do you do?`
 }
 
 /** Onboarding question 6 helper: "≈ 3.0% per year" (the growth the engine will use). */
 export function impliedGrowthLabel(p: Profile): string {
   return `≈ ${formatPct(growthRate(p))} per year`
+}
+
+/** Question 6 notice when the expected income implies more than the growth cap (BUILD_SPEC 18.2); null otherwise. */
+export function explainGrowthCap(p: Profile): string | null {
+  const g = rawGrowthRate(p)
+  if (g <= growthCap + 1e-12) return null
+  return `That's ${formatPct(g)} a year: possible in some careers, but we cap growth at ${roundHalfAway(growthCap * 100, 1)}% a year in the calculation.`
 }
 
 // ---- Portfolio page (7.4) ----
@@ -205,9 +283,9 @@ export function explainRiskFit(actualEEE: number, targetEEE: number, fit: RiskFi
 }
 
 /** Crash-test sentence: "In a crash like 2008 your portfolio could lose €4,750 (47.5%)." */
-export function explainStress(s: StressResult): string {
+export function explainStress(s: StressResult, currency: Currency = 'EUR'): string {
   const loss = Math.max(-s.money, 0)
-  return `In a crash like 2008 your portfolio could lose ${formatEUR(loss)} (${formatPct(Math.max(-s.pct, 0))}).`
+  return `In a crash like 2008 your portfolio could lose ${formatMoney(loss, currency)} (${formatPct(Math.max(-s.pct, 0))}).`
 }
 
 /** Whether the crash loss stays within the user's own limit. */
@@ -215,10 +293,10 @@ export function stressWithinLimit(s: StressResult, maxLossMoney: number): boolea
   return Math.max(-s.money, 0) <= maxLossMoney
 }
 
-export function explainStressLimit(s: StressResult, maxLossMoney: number): string {
+export function explainStressLimit(s: StressResult, maxLossMoney: number, currency: Currency = 'EUR'): string {
   return stressWithinLimit(s, maxLossMoney)
-    ? `That is within the ${formatEUR(maxLossMoney)} you said you could lose in a bad year.`
-    : `That is more than the ${formatEUR(maxLossMoney)} you said you could lose in a bad year.`
+    ? `That is within the ${formatMoney(maxLossMoney, currency)} you said you could lose in a bad year.`
+    : `That is more than the ${formatMoney(maxLossMoney, currency)} you said you could lose in a bad year.`
 }
 
 /** "What this means" for the asset-class donut. */
@@ -302,14 +380,14 @@ export function explainLetfDrag(drag: number): string {
 }
 
 /** "Put your next monthly savings (€563) into Stocks (global equity)." */
-export function explainNextSavings(monthly: number, sleeve: SleeveRow | null): string {
-  if (!sleeve) return `Your portfolio already matches the plan. Keep investing your monthly savings (${formatEUR(monthly)}) in the same proportions.`
-  return `Put your next monthly savings (${formatEUR(monthly)}) into ${SLEEVE_IN_SENTENCE[sleeve.sleeve]}.`
+export function explainNextSavings(monthly: number, sleeve: SleeveRow | null, currency: Currency = 'EUR'): string {
+  if (!sleeve) return `Your portfolio already matches the plan. Keep investing your monthly savings (${formatMoney(monthly, currency)}) in the same proportions.`
+  return `Put your next monthly savings (${formatMoney(monthly, currency)}) into ${SLEEVE_IN_SENTENCE[sleeve.sleeve]}.`
 }
 
 /** One "Changes to make at your own broker" line, educational wording (no buy/sell orders). */
-export function describeChange(r: SleeveRow): string {
-  const amount = formatEUR(Math.abs(r.diffEUR))
+export function describeChange(r: SleeveRow, currency: Currency = 'EUR'): string {
+  const amount = formatMoney(Math.abs(r.diffEUR), currency)
   if (r.sleeve === 'loan') return r.diffEUR < 0 ? `Borrow ${amount} with a broker loan (only if you are comfortable with the risks under “Borrowing to invest”).` : `Repay ${amount} of borrowing.`
   return r.diffEUR > 0 ? `Increase ${SLEEVE_IN_SENTENCE[r.sleeve]} by ${amount}.` : `Reduce ${SLEEVE_IN_SENTENCE[r.sleeve]} by ${amount}.`
 }

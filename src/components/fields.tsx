@@ -1,10 +1,13 @@
 /** Accessible form fields in the v1.3 dark design (used by onboarding, what-if, quick entry and the plan). */
 import { useState, type ReactNode } from 'react'
 import { focusRing } from './ui'
+import { fromSlider, LOG_STEPS, tidy, toSlider } from './logScale'
 
 interface QuestionProps {
   number: number
   total: number
+  /** Replaces "QUESTION n OF total" (e.g. "BEFORE WE START" for the currency screen). */
+  eyebrow?: string
   label: ReactNode
   /** One-line subline under the question (17px, text-2). */
   hint?: ReactNode
@@ -16,12 +19,12 @@ interface QuestionProps {
 }
 
 /** One onboarding screen: "QUESTION 7 OF 16" in lime, the question at 40px, a subline, then the answer and "Why we ask". */
-export function Question({ number, total, label, hint, htmlFor, children, why }: QuestionProps) {
+export function Question({ number, total, eyebrow, label, hint, htmlFor, children, why }: QuestionProps) {
   return (
     <div className="flex flex-col gap-7">
       <div className="flex flex-col gap-3">
         <p className="text-[13px] font-semibold tracking-[0.04em] text-lime">
-          QUESTION {number} OF {total}
+          {eyebrow ?? `QUESTION ${number} OF ${total}`}
         </p>
         <h1 className="text-[30px] leading-[1.15] font-semibold tracking-[-0.02em] font-display text-ink sm:text-h1">
           {htmlFor ? <label htmlFor={htmlFor}>{label}</label> : label}
@@ -43,8 +46,10 @@ interface NumberFieldProps {
   min?: number
   max?: number
   step?: number
-  /** Shown inside the field on the left; "€" turns on thousands separators. */
+  /** Shown inside the field on the left (currency symbol). */
   prefix?: string
+  /** Money amount: whole numbers with thousands separators. */
+  money?: boolean
   /** Muted unit inside the field on the right ("years", "%"). */
   suffix?: string
   /** Friendly message for a rule that involves other answers. */
@@ -55,8 +60,7 @@ interface NumberFieldProps {
 }
 
 /** Number input that keeps a draft while typing and only commits valid numbers within [min, max]. */
-export function NumberField({ id, value, onChange, min = 0, max = Number.MAX_SAFE_INTEGER, step = 1, prefix, suffix, message, describedBy, size = 'md' }: NumberFieldProps) {
-  const money = prefix === '€'
+export function NumberField({ id, value, onChange, min = 0, max = Number.MAX_SAFE_INTEGER, step = 1, prefix, money = false, suffix, message, describedBy, size = 'md' }: NumberFieldProps) {
   const [draft, setDraft] = useState<string | null>(null)
   const parse = (s: string) => Number(money ? s.replace(/,/g, '') : s)
   const isValid = (s: string) => {
@@ -164,6 +168,52 @@ export function SliderField({ id, value, onChange, min, max, step, display, hint
         </div>
       )}
       {hint && <p className="text-help text-ink-2">{hint}</p>}
+    </div>
+  )
+}
+
+interface MoneyFieldProps {
+  id: string
+  value: number
+  onChange: (v: number) => void
+  /** Currency symbol shown in the field. */
+  symbol: string
+  /** Formats an amount for the slider pill and end labels. */
+  format: (x: number) => string
+  /** Typed-field limits. */
+  max: number
+  /** Log-slider range (min > 0). */
+  sliderMin: number
+  sliderMax: number
+  suffix?: string
+  message?: string
+  /** Accessible name for the slider ("Invested today, slider"). */
+  sliderLabel: string
+  /** Shown under the slider. */
+  hint?: ReactNode
+}
+
+/**
+ * Typed money field plus a logarithmic slider underneath (BUILD_SPEC 18.2), so both small and large amounts
+ * are easy to set. The typed field accepts any value from 0 to max; the slider moves in tidy steps.
+ */
+export function MoneyField({ id, value, onChange, symbol, format, max, sliderMin, sliderMax, suffix, message, sliderLabel, hint }: MoneyFieldProps) {
+  return (
+    <div className="flex flex-col gap-5">
+      <NumberField id={id} size="lg" value={value} onChange={onChange} min={0} max={max} prefix={symbol} money suffix={suffix} message={message} />
+      <SliderField
+        id={`${id}-slider`}
+        value={toSlider(value, sliderMin, sliderMax)}
+        onChange={(pos) => onChange(Math.min(tidy(fromSlider(pos, sliderMin, sliderMax)), max))}
+        min={0}
+        max={LOG_STEPS}
+        step={1}
+        display={format(value)}
+        minLabel={format(sliderMin)}
+        maxLabel={format(sliderMax)}
+        ariaLabel={sliderLabel}
+        hint={hint}
+      />
     </div>
   )
 }

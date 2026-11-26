@@ -1,5 +1,6 @@
 import { defaultIncomeGrowth, defaultMaxLossShare, defaultRetireAge } from './assumptions'
 import type { PendingCap } from './target'
+import { niceAmount } from './explain'
 import type { Profile } from './types'
 
 /** Onboarding defaults (BUILD_SPEC 7.2), except the two that depend on other answers. */
@@ -21,14 +22,28 @@ export const DEFAULT_ANSWERS: Omit<Profile, 'income10y' | 'maxLossMoney'> = {
   leverageOptIn: false,
 }
 
+/** Money fields of a profile (stored in the chosen currency). */
+export const MONEY_KEYS = ['investableAssets', 'incomeNow', 'income10y', 'maxLossMoney'] as const
+
+/** Multiplies every money field that is present by k (currency conversion). Other fields are unchanged. */
+export function scaleMoney<T extends Partial<Profile>>(p: T, k: number): T {
+  const out = { ...p }
+  for (const key of MONEY_KEYS) if (typeof out[key] === 'number') (out[key] as number) = (out[key] as number) * k
+  return out
+}
+
 /**
  * Full profile from (possibly partial) answers; missing answers use the defaults.
- * Unanswered income10y = incomeNow · (1 + 3%)^10; unanswered maxLossMoney = 30% · F (rounded to whole EUR).
+ * fx = units of the chosen currency per EUR: the EUR money defaults are converted and rounded to 2 significant
+ * figures (€10,000 → 75,000 kr). Unanswered income10y = incomeNow · (1 + 3%)^10; unanswered maxLossMoney = 30% · F
+ * (both rounded to whole units).
  */
-export function resolveProfile(answers: Partial<Profile>): Profile {
-  const base = { ...DEFAULT_ANSWERS, ...answers }
+export function resolveProfile(answers: Partial<Profile>, fx = 1): Profile {
+  const money = fx === 1 ? {} : { investableAssets: niceAmount(DEFAULT_ANSWERS.investableAssets * fx), incomeNow: niceAmount(DEFAULT_ANSWERS.incomeNow * fx) }
+  const base = { ...DEFAULT_ANSWERS, ...money, ...answers }
   return {
     ...base,
+    fx,
     income10y: answers.income10y ?? Math.round(base.incomeNow * Math.pow(1 + defaultIncomeGrowth, 10)),
     maxLossMoney: answers.maxLossMoney ?? Math.round(defaultMaxLossShare * base.investableAssets),
   }

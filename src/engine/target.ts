@@ -32,11 +32,11 @@ export interface TargetOptions {
 /** Caps that can wait for their question to be answered. */
 export type PendingCap = 'G3_leverage' | 'G4_loss'
 
-/** True if borrowing to invest is allowed (gate G3 open). */
+/** True if borrowing to invest is allowed (gate G3 open). The €5,000 minimum is converted with p.fx. */
 export function leverageEligible(p: Profile, F: number, age: number): boolean {
   return (
     p.retireAge - age >= minYearsForLeverage &&
-    F >= minAssetsForLeverage &&
+    F >= minAssetsForLeverage * (p.fx ?? 1) &&
     p.knowledgeCheckPassed &&
     p.leverageOptIn &&
     cashNominal + borrowSpread <= equityNominal - leverageHurdle

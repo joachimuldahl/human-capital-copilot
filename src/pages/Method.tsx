@@ -2,8 +2,10 @@ import type { ReactNode } from 'react'
 import { pageWrap, textLink } from '../components/ui'
 import { assumptionRows } from '../content/assumptionNotes'
 import { REFERENCES } from '../content/references'
-import { PERSONAS } from '../data/personas'
-import { assumptions as A, BAND_LABEL, CAP_LABEL, formatEUR, formatPct, formatRatio, roundHalfAway, targetEEE } from '../engine'
+import { FX, FX_DATE, FX_SOURCE, CURRENCIES, CURRENCY_NAME } from '../data/fx'
+import { useCurrency } from '../store/hooks'
+import { selectProfile } from '../store/profileStore'
+import { assumptions as A, BAND_LABEL, CAP_LABEL, formatPct, formatRatio, roundHalfAway, targetEEE } from '../engine'
 
 const SECTIONS = [
   ['idea', 'The idea'],
@@ -35,7 +37,8 @@ function Formula({ children }: { children: ReactNode }) {
 
 /** Method page for the examiner (BUILD_SPEC 17). Every number is read from the engine. */
 export default function Method() {
-  const sofie = PERSONAS.sofie.profile
+  const { money, currency } = useCurrency()
+  const sofie = selectProfile({ active: 'sofie', answers: {}, currency })
   const t = targetEEE(sofie)
   const steps: [string, ReactNode, ReactNode, string][] = [
     [
@@ -48,7 +51,7 @@ export default function Method() {
       'Future savings (human capital, H)',
       'The present value of what you will invest each year until retirement, in today’s money. Income grows at your expected rate until age 45, then slowly; riskier income is discounted more.',
       <>H = Σ savingsRate · income(a) / (1 + {A.rfReal} + spread)^(a − age), for every year to retirement</>,
-      `Sofie: growth ${formatPct(t.growth)} a year → H = ${formatEUR(t.pvfs)} (${formatPct(t.hcRatio)} of Sofie's lifetime investable wealth)`,
+      `Sofie: growth ${formatPct(t.growth)} a year → H = ${money(t.pvfs)} (${formatPct(t.hcRatio)} of Sofie's lifetime investable wealth)`,
     ],
     [
       'How stock-like your income is (βH)',
@@ -60,7 +63,7 @@ export default function Method() {
       'Raw target (before limits)',
       'Hold w* of total wealth (today’s money F plus H) in stocks, after counting the stock-like part of H you already own (Ayres & Nalebuff 2010).',
       <>raw = (w* · F + (w* − βH) · H) / F</>,
-      `Sofie: (${n4(t.wStar)} · ${formatEUR(sofie.investableAssets)} + (${n4(t.wStar)} − ${n2(t.betaH)}) · ${formatEUR(t.pvfs)}) / ${formatEUR(sofie.investableAssets)} = ${formatRatio(t.rawEEE)}`,
+      `Sofie: (${n4(t.wStar)} · ${money(sofie.investableAssets)} + (${n4(t.wStar)} − ${n2(t.betaH)}) · ${money(t.pvfs)}) / ${money(sofie.investableAssets)} = ${formatRatio(t.rawEEE)}`,
     ],
     [
       'Limits → final Risk Capacity',
@@ -95,7 +98,7 @@ export default function Method() {
         </Section>
 
         <Section id="calculation" title="2. How your Risk Capacity is calculated">
-          <p className="text-ink-2">Five steps. The worked example uses the demo person Sofie (24, starting as a consultant, €10,000 invested, saves 15%).</p>
+          <p className="text-ink-2">Five steps. The worked example uses the demo person Sofie (24, starting as a consultant, {money(sofie.investableAssets)} invested, saves 15%).</p>
           <ol className="space-y-7">
             {steps.map(([title, text, formula, example], i) => (
               <li key={title} className="space-y-2">
@@ -136,6 +139,37 @@ export default function Method() {
               </tbody>
             </table>
           </div>
+          <h3 className="pt-2 font-display text-lg font-semibold text-ink">Income growth cap</h3>
+          <p>
+            The growth you expect in question 6 is used until age {A.peakAge}, capped at {roundHalfAway(A.growthCap * 100, 1)}% a year (and at least {roundHalfAway(A.growthFloor * 100, 1)}%). {roundHalfAway(A.growthCap * 100, 1)}% is a
+            generous upper bound for steep early careers, for example a student whose first salary rises quickly. You can enter any expected income; only the calculation is capped.
+          </p>
+          <h3 id="currency" className="pt-2 font-display text-lg font-semibold text-ink">Currencies and exchange rates</h3>
+          <p>
+            You choose the currency at the start. Demo data and the money thresholds (the {money(A.minAssetsForLeverage * FX[currency])} minimum for borrowing, onboarding defaults and slider ranges) are stored in
+            euros and converted at fixed rates. The model works with ratios, so your Risk Capacity is the same in every currency. Rates: {FX_SOURCE}, {FX_DATE}.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full max-w-md text-help">
+              <caption className="sr-only">Units of each currency per 1 euro</caption>
+              <thead>
+                <tr className="border-b border-line text-left">
+                  <th scope="col" className="py-2 pr-3 text-label">Currency</th>
+                  <th scope="col" className="py-2 text-right text-label">Per 1 EUR</th>
+                </tr>
+              </thead>
+              <tbody>
+                {CURRENCIES.map((c) => (
+                  <tr key={c} className="border-b border-line last:border-0">
+                    <th scope="row" className="py-2 pr-3 text-left font-medium text-ink">
+                      {c} <span className="font-normal text-ink-2">· {CURRENCY_NAME[c]}</span>
+                    </th>
+                    <td className="py-2 text-right font-mono text-xs text-ink">{FX[c]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Section>
 
         <Section id="limits" title="4. Limits and gates">
@@ -143,7 +177,7 @@ export default function Method() {
             <li><strong>Safety cap {formatRatio(A.policyCap)}.</strong> Never more than {A.policyCap} times the stock market’s risk, below the 2:1 limit Ayres &amp; Nalebuff use, because borrowing can force sales in a crash.</li>
             <li><strong>G1 Emergency buffer.</strong> Under {A.minBufferMonths} months of expenses saved caps the target at 1.00×, so a job loss never forces you to sell at the bottom.</li>
             <li><strong>G2 Expensive debt.</strong> Debt above {roundHalfAway(A.expensiveDebtRate * 100, 1)}% interest caps the target at 1.00×: repaying it is a guaranteed return close to what stocks are expected to earn.</li>
-            <li><strong>G3 Borrowing rules.</strong> Above 1.00× means borrowing. It needs the knowledge check, an explicit opt-in, {A.minYearsForLeverage}+ years to retirement and at least {formatEUR(A.minAssetsForLeverage)} invested.</li>
+            <li><strong>G3 Borrowing rules.</strong> Above 1.00× means borrowing. It needs the knowledge check, an explicit opt-in, {A.minYearsForLeverage}+ years to retirement and at least {money(A.minAssetsForLeverage * FX[currency])} invested.</li>
             <li><strong>G4 Loss limit.</strong> The target is capped so a {roundHalfAway(A.equityShock * 100, 0)}% stock-market fall never costs more than the amount you said you could lose in a bad year (capacity to bear losses, as in MiFID II suitability).</li>
             <li><strong>Floor {formatRatio(A.floor)}.</strong> We never go below this, so long-run savings still grow faster than inflation.</li>
           </ul>

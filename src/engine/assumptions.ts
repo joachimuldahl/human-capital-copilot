@@ -21,8 +21,8 @@ export const equityNominal = 0.075
 export const lateGrowth = 0.005
 /** Age at which early-career income growth stops. Assumption, editable. */
 export const peakAge = 45
-/** Upper clamp on early-career real income growth. Assumption, editable. */
-export const growthCap = 0.08
+/** Upper clamp on early-career real income growth: a generous bound for steep early careers. Assumption, editable. */
+export const growthCap = 0.12
 /** Lower clamp on early-career real income growth. Assumption, editable. */
 export const growthFloor = -0.02
 /** Policy cap on risk: never above 1.5x global equity. Assumption, editable. */
@@ -35,7 +35,7 @@ export const maintMargin = 0.25
 export const equityShock = 0.5
 /** Leverage only if expected equity return beats loan cost by at least this. Assumption, editable. */
 export const leverageHurdle = 0.02
-/** Minimum invested assets (EUR) before borrowing to invest. Assumption, editable. */
+/** Minimum invested assets (EUR; converted with the profile's fx) before borrowing to invest. Assumption, editable. */
 export const minAssetsForLeverage = 5000
 /** Minimum years to retirement before borrowing to invest. Assumption, editable. */
 export const minYearsForLeverage = 15

@@ -12,13 +12,13 @@ import { pageWrap, textLink } from '../components/ui'
 import {
   SLEEVE_LABEL,
   assetClassValues,
+  currencySymbol,
   describeChange,
   explainCrypto,
   explainLetfDrag,
   explainMarginBuffer,
   explainNextSavings,
   exposures,
-  formatEUR,
   formatPct,
   formatRatio,
   gateCard,
@@ -41,14 +41,15 @@ import {
 import { EXAMPLE_PRODUCTS, LEVERAGED_EXAMPLE } from '../data/examples'
 import { PERSONAS } from '../data/personas'
 import { PRODUCTS } from '../data/products'
-import { useActiveProfile } from '../store/hooks'
+import { useActiveProfile, useCurrency } from '../store/hooks'
 import { selectPortfolio, usePortfolioStore } from '../store/portfolioStore'
 
 export default function Plan() {
   const { active, profile, hasAnswers } = useActiveProfile()
   const source = usePortfolioStore((s) => s.source)
   const quick = usePortfolioStore((s) => s.quick)
-  const holdings = useMemo(() => selectPortfolio(active, { source, quick }).holdings, [active, source, quick])
+  const { currency } = useCurrency()
+  const holdings = useMemo(() => selectPortfolio(active, { source, quick }, currency).holdings, [active, source, quick, currency])
   const [sat, setSat] = useState({ gold: 0, btc: 0 })
   const isPersona = active !== 'mine'
 
@@ -84,6 +85,7 @@ interface PlanBodyProps {
 }
 
 function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
+  const { money, currency } = useCurrency()
   const F = p.investableAssets
   const t = targetEEE(p)
   const alloc = solveAllocation(t.finalEEE, sat)
@@ -170,8 +172,8 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
                     Target
                   </th>
                   <th scope="col" className="py-2 pl-3 text-right font-medium">
-                    <span className="sr-only">Target in euro</span>
-                    <span aria-hidden>€</span>
+                    <span className="sr-only">Target in {currency}</span>
+                    <span aria-hidden>{currencySymbol(currency)}</span>
                   </th>
                 </tr>
               </thead>
@@ -183,13 +185,13 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
                     </th>
                     <td className="py-2 pl-3 text-right tabular-nums text-ink-2">{formatPct(r.currentShare)}</td>
                     <td className="py-2 pl-3 text-right tabular-nums font-semibold text-lime">{formatPct(r.targetShare)}</td>
-                    <td className="py-2 pl-3 text-right tabular-nums">{formatEUR(r.targetEUR)}</td>
+                    <td className="py-2 pl-3 text-right tabular-nums">{money(r.targetEUR)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-muted">Target weights are a share of your invested amount ({formatEUR(F)}). A negative loan means borrowed money.</p>
+          <p className="text-xs text-muted">Target weights are a share of your invested amount ({money(F)}). A negative loan means borrowed money.</p>
         </Card>
       </section>
 
@@ -236,8 +238,8 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
           </h2>
           <Card className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
-              <Stat label="Loan amount" value={formatEUR(loan.amount)} />
-              <Stat label="Interest per year" value={formatEUR(loan.costPerYear)} note={`at ${formatPct(assumptions.cashNominal + assumptions.borrowSpread)}`} />
+              <Stat label="Loan amount" value={money(loan.amount)} />
+              <Stat label="Interest per year" value={money(loan.costPerYear)} note={`at ${formatPct(assumptions.cashNominal + assumptions.borrowSpread)}`} />
               <Stat label="Margin buffer" value={buffer === null ? '—' : formatPct(buffer)} note={buffer === null ? undefined : explainMarginBuffer(buffer)} />
             </div>
             <Tabs
@@ -248,7 +250,7 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
                   label: 'Broker loan (recommended)',
                   content: (
                     <p className="text-help text-panel">
-                      Borrow {formatEUR(loan.amount)} from your broker against your portfolio and invest it in the same global stock fund. You pay interest of about {formatEUR(loan.costPerYear)} a year. If stocks fall a lot, the broker can ask for more collateral or sell your holdings (a margin call): {buffer === null ? '' : explainMarginBuffer(buffer).toLowerCase()}
+                      Borrow {money(loan.amount)} from your broker against your portfolio and invest it in the same global stock fund. You pay interest of about {money(loan.costPerYear)} a year. If stocks fall a lot, the broker can ask for more collateral or sell your holdings (a margin call): {buffer === null ? '' : explainMarginBuffer(buffer).toLowerCase()}
                     </p>
                   ),
                 },
@@ -279,7 +281,7 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
           How to get there
         </h2>
         <Card className="space-y-4">
-          <Explain>{explainNextSavings(monthlySavings(p), mostUnderweight(rows))}</Explain>
+          <Explain>{explainNextSavings(monthlySavings(p), mostUnderweight(rows), currency)}</Explain>
           <div>
             <h3 className="font-semibold text-ink">Changes to make at your own broker</h3>
             {changes.length === 0 ? (
@@ -287,7 +289,7 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
             ) : (
               <ul className="mt-2 list-disc space-y-1 pl-5 text-help text-panel marker:text-lime">
                 {changes.map((c) => (
-                  <li key={c.sleeve}>{describeChange(c)}</li>
+                  <li key={c.sleeve}>{describeChange(c, currency)}</li>
                 ))}
               </ul>
             )}
@@ -310,6 +312,7 @@ function Stat({ label, value, note }: { label: string; value: string; note?: str
 }
 
 function StressTile({ title, s, limit }: { title: string; s: StressResult | null; limit: number }) {
+  const { money } = useCurrency()
   if (!s)
     return (
       <Card>
@@ -327,10 +330,10 @@ function StressTile({ title, s, limit }: { title: string; s: StressResult | null
   return (
     <Card className="space-y-1">
       <h3 className="text-[13px] font-medium text-ink-2">{title}</h3>
-      <p className="text-card-num text-alert">−{formatEUR(Math.max(-s.money, 0))}</p>
+      <p className="text-card-num text-alert">−{money(Math.max(-s.money, 0))}</p>
       <p className="text-help text-ink-2">{formatPct(Math.max(-s.pct, 0))} of the portfolio</p>
       <p className={`text-help font-medium ${ok ? 'text-lime' : 'text-alert'}`}>
-        {ok ? '✔ Within' : '✘ Above'} your limit of {formatEUR(limit)}
+        {ok ? '✔ Within' : '✘ Above'} your limit of {money(limit)}
       </p>
     </Card>
   )

@@ -5,11 +5,11 @@ import Badge, { IllustrativeBadge } from '../components/Badge'
 import PersonaCards from '../components/PersonaCards'
 import RiskGauge from '../components/RiskGauge'
 import { btnPrimary, btnSecondary, card, pageWrap } from '../components/ui'
-import { formatEUR, formatPct, formatRatio, targetEEE } from '../engine'
-import { DEMO_PORTFOLIOS } from '../data/demoPortfolios'
+import { formatPct, formatRatio, targetEEE } from '../engine'
+import { EMPTY_QUICK, selectPortfolio } from '../store/portfolioStore'
 import { PERSONAS } from '../data/personas'
-import { portfolioRisk, usePersonaLoader } from '../store/hooks'
-import { useProfileStore } from '../store/profileStore'
+import { portfolioRisk, useCurrency, usePersonaLoader } from '../store/hooks'
+import { selectProfile, useProfileStore } from '../store/profileStore'
 
 const STEPS = [
   { title: 'Answer 16 questions', text: 'Age, income outlook, how stable your job is and how you handle losses.' },
@@ -81,12 +81,13 @@ export default function Landing() {
 /** Sofie's real result, computed by the engine, as the hero example. */
 function ExampleCard() {
   const loadPersona = usePersonaLoader()
-  const sofie = PERSONAS.sofie
+  const { money, currency } = useCurrency()
+  const sofie = { ...PERSONAS.sofie, profile: selectProfile({ active: 'sofie', answers: {}, currency }) }
   const t = targetEEE(sofie.profile)
-  const risk = portfolioRisk(DEMO_PORTFOLIOS.sofie.holdings, t.finalEEE)
+  const risk = portfolioRisk(selectPortfolio('sofie', { source: 'demo', quick: EMPTY_QUICK }, currency).holdings, t.finalEEE)
   const tiles: [string, string, string?][] = [
-    ['Future savings', formatEUR(t.pvfs)],
-    ['Invested today', formatEUR(sofie.profile.investableAssets)],
+    ['Future savings', money(t.pvfs)],
+    ['Invested today', money(sofie.profile.investableAssets)],
     ...(risk ? [['Portfolio now', formatRatio(risk.actual), risk.fit.status === 'On target' ? 'text-lime' : 'text-warn'] as [string, string, string]] : []),
   ]
   return (

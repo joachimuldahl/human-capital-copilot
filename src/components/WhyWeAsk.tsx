@@ -7,6 +7,8 @@ interface WhyWeAskProps {
   content: WhyWeAskContent
   /** Live "Your answer's effect" line from the engine. */
   effect: string
+  /** Borrowing minimum in the chosen currency, filled into "{minAssets}" (default "€5,000"). */
+  minAssets?: string
 }
 
 const PARTS: [string, keyof WhyWeAskContent | 'effect'][] = [
@@ -17,7 +19,7 @@ const PARTS: [string, keyof WhyWeAskContent | 'effect'][] = [
 ]
 
 /** "Why we ask" as a <details> card with the four labelled parts in a responsive grid (BUILD_SPEC 15 + 16). */
-export default function WhyWeAsk({ content, effect }: WhyWeAskProps) {
+export default function WhyWeAsk({ content, effect, minAssets = '€5,000' }: WhyWeAskProps) {
   return (
     <details className="group rounded-[18px] border border-line bg-surface px-[22px] py-5">
       <summary className="flex cursor-pointer items-center gap-2 rounded text-sm font-semibold text-lime hover:text-lime-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-lime">
@@ -29,7 +31,7 @@ export default function WhyWeAsk({ content, effect }: WhyWeAskProps) {
           <div key={key} className="flex flex-col gap-1.5">
             <span className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{title}</span>
             <span className={`text-help ${key === 'effect' ? 'text-ink' : 'text-panel'}`} aria-live={key === 'effect' ? 'polite' : undefined}>
-              {key === 'effect' ? effect : content[key]}
+              {key === 'effect' ? effect : content[key].replaceAll('{minAssets}', minAssets)}
               {key === 'research' && (
                 <>
                   {' '}

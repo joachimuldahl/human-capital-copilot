@@ -6,19 +6,21 @@ import Logo from '../components/Logo'
 import RiskGauge from '../components/RiskGauge'
 import WhyWeAsk from '../components/WhyWeAsk'
 import { btnPrimary, btnSecondary, btnSmall, card, focusRing, pageWrap, textLink } from '../components/ui'
-import { NotSure, NumberField, Question, RadioCards, SliderField, type RadioOption } from '../components/fields'
-import { WHY_WE_ASK } from '../content/whyWeAsk'
+import { MoneyField, NotSure, NumberField, Question, RadioCards, SliderField, type RadioOption } from '../components/fields'
+import { CURRENCY_WHY, WHY_WE_ASK } from '../content/whyWeAsk'
+import { CURRENCIES, CURRENCY_NAME, type Currency } from '../data/fx'
 import {
   answerEffect,
   assumptions,
   CAP_LABEL,
+  currencySymbol,
   driverLines,
-  ESTIMATE_NOTE,
   drawdownQuestion,
-  explainBinding,
+  explainGrowthCap,
+  niceAmount,
+  panelExplanation,
   unansweredCount,
   type QuestionNo,
-  formatEUR,
   formatPct,
   formatRatio,
   impliedGrowthLabel,
@@ -28,7 +30,7 @@ import {
   type Profile,
   type Sector,
 } from '../engine'
-import { useMyTarget } from '../store/hooks'
+import { changeCurrency, useCurrency, useMyTarget } from '../store/hooks'
 import { useProfileStore } from '../store/profileStore'
 
 const QUESTION_STEPS = 4
@@ -107,6 +109,11 @@ const KNOWLEDGE = [
   },
 ]
 
+const CURRENCY_OPTIONS: RadioOption<Currency>[] = CURRENCIES.map((c) => ({ value: c, label: c, description: CURRENCY_NAME[c] }))
+
+/** Log-slider ranges for the money questions, in EUR (converted with fx and rounded, BUILD_SPEC 18.1–18.2). */
+const SLIDER_EUR = { invested: [500, 1_000_000], income: [5_000, 500_000], loss: [100, 1_000_000] } as const
+
 const STEP_TITLES = ['About you', 'Your income', 'Safety net', 'Risk & knowledge'] as const
 const TOTAL = 16
 const REVIEW = TOTAL + 1
@@ -121,8 +128,8 @@ interface Screen {
   body: ReactNode
 }
 
-/** Step (0–3) of each question 1–16 (index 0 unused). */
-const STEP_OF: number[] = [-1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3]
+/** Step (0–3) of each screen: 0 = currency ("Before we start"), then questions 1–16. */
+const STEP_OF: number[] = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3]
 const firstOfStep = (step: number) => STEP_OF.indexOf(step)
 const countOfStep = (step: number) => STEP_OF.filter((x) => x === step).length
 
@@ -135,6 +142,10 @@ export default function Onboarding() {
   const clearAnswer = useProfileStore((s) => s.clearAnswer)
   const showMyAnswers = useProfileStore((s) => s.showMyAnswers)
   const { profile: p, target, pending } = useMyTarget()
+  const { currency, fx, money } = useCurrency()
+  const symbol = currencySymbol(currency)
+  const range = (k: keyof typeof SLIDER_EUR) => ({ sliderMin: niceAmount(SLIDER_EUR[k][0] * fx), sliderMax: niceAmount(SLIDER_EUR[k][1] * fx) })
+  const minAssets = money(assumptions.minAssetsForLeverage * fx)
 
   // Onboarding always edits "My answers", never a persona.
   useEffect(() => showMyAnswers(), [showMyAnswers])
@@ -152,8 +163,10 @@ export default function Onboarding() {
   const next = () => (q === REVIEW ? finish() : go(q + 1))
   const retireMsg = p.age >= p.retireAge ? 'Retirement age needs to be after your current age.' : undefined
   const unanswered = unansweredCount(answers)
-  // G3/G4 are skipped while pending, so the explanation never names a limit the user hasn't answered.
-  const explanation = explainBinding(target, p)
+  // G3/G4 are skipped while pending, so the explanation never names a limit the user hasn't answered (BUILD_SPEC 18.3).
+  const explanation = panelExplanation(target, p, { answers, estimate: pending.length > 0, unanswered, currency })
+  const growthNotice = explainGrowthCap(p)
+  const incomeBase = p.incomeNow > 0 ? p.incomeNow : niceAmount(40000 * fx)
   const isReview = q === REVIEW
   const step = isReview ? QUESTION_STEPS : STEP_OF[q]
 
@@ -171,7 +184,7 @@ export default function Onboarding() {
       label: 'How much do you have invested or saved for investing today?',
       hint: 'Funds, shares, crypto and cash you set aside for investing.',
       htmlFor: 'q-f',
-      body: <NumberField id="q-f" size="lg" value={p.investableAssets} onChange={set('investableAssets')} min={0} max={100_000_000} step={500} prefix="€" />,
+      body: <MoneyField id="q-f" value={p.investableAssets} onChange={set('investableAssets')} symbol={symbol} format={money} max={100_000_000 * fx} {...range('invested')} sliderLabel="Invested today, slider" />,
     },
     4: {
       step: 0,
@@ -180,7 +193,13 @@ export default function Onboarding() {
       htmlFor: 'q-sav',
       body: <SliderField id="q-sav" value={Math.round(p.savingsRate * 100)} onChange={(v) => setAnswer('savingsRate', v / 100)} min={0} max={40} step={1} display={formatPct(p.savingsRate)} minLabel="0%" maxLabel="40%" />,
     },
-    5: { step: 1, label: 'Your net yearly income now', hint: 'Students: your expected first salary, after tax.', htmlFor: 'q-inc', body: <NumberField id="q-inc" size="lg" value={p.incomeNow} onChange={set('incomeNow')} min={0} max={10_000_000} step={1000} prefix="€" suffix="/ year" /> },
+    5: {
+      step: 1,
+      label: 'Your net yearly income now',
+      hint: 'Students: your expected first salary, after tax.',
+      htmlFor: 'q-inc',
+      body: <MoneyField id="q-inc" value={p.incomeNow} onChange={set('incomeNow')} symbol={symbol} format={money} max={10_000_000 * fx} {...range('income')} suffix="/ year" sliderLabel="Net income now, slider" />,
+    },
     6: {
       step: 1,
       label: 'Where do you expect your income to be in 10 years?',
@@ -188,17 +207,28 @@ export default function Onboarding() {
       htmlFor: 'q-inc10',
       body: (
         <div className="flex flex-col gap-3">
-          <SliderField
+          {/* Exact amount: typed up to 20× today's income, log slider 0.5×–5× (never derived from the growth cap). */}
+          <MoneyField
             id="q-inc10"
             value={p.income10y}
             onChange={set('income10y')}
-            min={Math.round(p.incomeNow * 0.8)}
-            max={Math.max(Math.round(p.incomeNow * 2.2), 1000)}
-            step={500}
-            display={formatEUR(p.income10y)}
-            hint={impliedGrowthLabel(p)}
-            minLabel={formatEUR(p.incomeNow * 0.8)}
-            maxLabel={formatEUR(Math.max(p.incomeNow * 2.2, 1000))}
+            symbol={symbol}
+            format={money}
+            max={Math.round(incomeBase * 20)}
+            sliderMin={Math.round(incomeBase * 0.5)}
+            sliderMax={Math.round(incomeBase * 5)}
+            suffix="/ year"
+            sliderLabel="Income in 10 years, slider"
+            hint={
+              <>
+                <span className="block">{impliedGrowthLabel(p)}</span>
+                {growthNotice && (
+                  <span className="mt-1 block text-warn" role="status">
+                    {growthNotice}
+                  </span>
+                )}
+              </>
+            }
           />
           <NotSure active={answers.income10y === undefined} onClick={() => clearAnswer('income10y')} defaultText={`+${roundPct(assumptions.defaultIncomeGrowth)}% a year`} />
         </div>
@@ -225,7 +255,7 @@ export default function Onboarding() {
     9: { step: 1, label: 'How secure is your income?', hint: 'Riskier income is worth less today, just as a risky bond is priced lower than a safe one.', body: <RadioCards name="security" legend="Income security" options={SECURITY} value={p.incomeSecurity} onChange={set('incomeSecurity')} /> },
     10: { step: 2, label: 'How many months of expenses could you cover with savings?', hint: 'Count cash you could reach quickly, not your investments.', body: <RadioCards name="buffer" legend="Months of buffer" options={BUFFER} value={p.bufferMonths} onChange={set('bufferMonths')} columns={3} /> },
     11: { step: 2, label: 'Highest interest rate on any debt you have?', hint: 'Enter 0 if you have no debt.', htmlFor: 'q-debt', body: <NumberField id="q-debt" size="lg" value={roundPct(p.maxDebtRate)} onChange={(v) => setAnswer('maxDebtRate', v / 100)} min={0} max={100} step={0.5} suffix="%" /> },
-    12: { step: 3, label: `“${drawdownQuestion(p.investableAssets)}”`, hint: "There's no right answer. Pick what you'd actually do.", body: <RadioCards name="drawdown" legend="Reaction to a fall" options={DRAWDOWN} value={p.drawdownReaction} onChange={set('drawdownReaction')} /> },
+    12: { step: 3, label: `“${drawdownQuestion(p.investableAssets, currency)}”`, hint: "There's no right answer. Pick what you'd actually do.", body: <RadioCards name="drawdown" legend="Reaction to a fall" options={DRAWDOWN} value={p.drawdownReaction} onChange={set('drawdownReaction')} /> },
     13: {
       step: 3,
       label: "“You're offered a job: 50% chance it doubles your income, 50% chance it cuts it. What's the largest cut you'd accept?”",
@@ -235,12 +265,12 @@ export default function Onboarding() {
     14: {
       step: 3,
       label: 'What is the most you could lose in a bad year without changing your plans?',
-      hint: 'This is your capacity to bear losses, in euros.',
+      hint: 'This is your capacity to bear losses, in money rather than percentages.',
       htmlFor: 'q-loss',
       body: (
         <div className="flex flex-col gap-3">
-          <NumberField id="q-loss" size="lg" value={p.maxLossMoney} onChange={set('maxLossMoney')} min={0} max={100_000_000} step={500} prefix="€" />
-          <NotSure active={answers.maxLossMoney === undefined} onClick={() => clearAnswer('maxLossMoney')} defaultText={`${roundPct(assumptions.defaultMaxLossShare)}% of what you invest (${formatEUR(p.maxLossMoney)})`} />
+          <MoneyField id="q-loss" value={p.maxLossMoney} onChange={set('maxLossMoney')} symbol={symbol} format={money} max={100_000_000 * fx} {...range('loss')} sliderLabel="Max loss in a bad year, slider" />
+          <NotSure active={answers.maxLossMoney === undefined} onClick={() => clearAnswer('maxLossMoney')} defaultText={`${roundPct(assumptions.defaultMaxLossShare)}% of what you invest (${money(p.maxLossMoney)})`} />
         </div>
       ),
     },
@@ -266,16 +296,27 @@ export default function Onboarding() {
         >
           <div key={q} className="q-enter">
             {isReview ? (
-              <Review profile={p} edited={answers} onEdit={go} />
+              <Review profile={p} edited={answers} onEdit={go} currency={currency} money={money} />
+            ) : q === 0 ? (
+              <Question
+                number={0}
+                total={TOTAL}
+                eyebrow="BEFORE WE START"
+                label="Which currency should we use?"
+                hint="Every amount will be shown in this currency. You can change it later."
+                why={<WhyWeAsk content={CURRENCY_WHY} minAssets={minAssets} effect={`Your Risk Capacity stays ${formatRatio(target.finalEEE)} in every currency: amounts are converted, ratios are not.`} />}
+              >
+                <RadioCards name="currency" legend="Currency" options={CURRENCY_OPTIONS} value={currency} onChange={changeCurrency} columns={3} />
+              </Question>
             ) : (
-              <Question number={q} total={TOTAL} label={screens[q as Q].label} hint={screens[q as Q].hint} htmlFor={screens[q as Q].htmlFor} why={<WhyWeAsk content={WHY_WE_ASK[q as Q]} effect={answerEffect(q as Q, p, { pending })} />}>
+              <Question number={q} total={TOTAL} label={screens[q as Q].label} hint={screens[q as Q].hint} htmlFor={screens[q as Q].htmlFor} why={<WhyWeAsk content={WHY_WE_ASK[q as Q]} minAssets={minAssets} effect={answerEffect(q as Q, p, { pending, currency })} />}>
                 {screens[q as Q].body}
               </Question>
             )}
           </div>
 
           <nav aria-label="Onboarding steps" className="flex flex-wrap items-center justify-between gap-4 pt-2">
-            <button type="button" onClick={() => go(q - 1)} disabled={q === 1} className={`${btnSecondary} disabled:invisible`}>
+            <button type="button" onClick={() => go(q - 1)} disabled={q === 0} className={`${btnSecondary} disabled:invisible`}>
               Back
             </button>
             <div className="flex items-center gap-4">
@@ -290,7 +331,7 @@ export default function Onboarding() {
           <p className="text-[13px] text-muted">You can change any answer later.</p>
         </section>
 
-        <SummaryPanel value={target.finalEEE} estimate={pending.length > 0} unanswered={unanswered} text={explanation} drivers={panelDrivers(driverLines(target), target, answers, pending.length > 0)} />
+        <SummaryPanel value={target.finalEEE} estimate={pending.length > 0} unanswered={unanswered} lines={explanation} drivers={panelDrivers(driverLines(target, p.investableAssets, currency), target, answers, pending.length > 0)} />
       </div>
     </>
   )
@@ -317,7 +358,7 @@ function panelDrivers(
 }
 
 function clampQ(n: number) {
-  return Number.isInteger(n) && n >= 1 && n <= REVIEW ? n : 1
+  return Number.isInteger(n) && n >= 0 && n <= REVIEW ? n : 0
 }
 
 const roundPct = (x: number) => Math.round(x * 1000) / 10
@@ -357,7 +398,8 @@ interface PanelProps {
   value: number
   estimate: boolean
   unanswered: number
-  text: string
+  /** Explanation sentences, each shown once (engine panelExplanation). */
+  lines: string[]
   drivers: { label: string; value: string }[]
 }
 
@@ -406,7 +448,7 @@ function SummaryPanel(props: PanelProps) {
   )
 }
 
-function PanelBody({ value, estimate, unanswered, text, drivers }: PanelProps) {
+function PanelBody({ value, estimate, unanswered, lines, drivers }: PanelProps) {
   const prelim = estimate || unanswered > 0
   return (
     <div className="flex flex-col gap-[22px]">
@@ -421,16 +463,9 @@ function PanelBody({ value, estimate, unanswered, text, drivers }: PanelProps) {
         </p>
       </div>
       <div className="space-y-2 text-help text-ink-2">
-        {estimate ? (
-          <p>{ESTIMATE_NOTE}</p>
-        ) : (
-          prelim && (
-            <p>
-              Based on defaults for {unanswered} {unanswered === 1 ? 'question' : 'questions'} you haven't answered yet.
-            </p>
-          )
-        )}
-        <p>{text}</p>
+        {lines.map((l) => (
+          <p key={l}>{l}</p>
+        ))}
       </div>
       <div className="h-px bg-line" />
       <div className="flex flex-col gap-3.5">
@@ -539,14 +574,15 @@ const BUFFER_LABEL = Object.fromEntries(BUFFER.map((o) => [o.value, o.label]))
 const label = <T extends string | number>(opts: RadioOption<T>[], v: T) => opts.find((o) => o.value === v)?.label ?? String(v)
 
 /** Summary of all 16 answers with links straight back to each question. */
-function Review({ profile: p, edited, onEdit }: { profile: Profile; edited: Partial<Profile>; onEdit: (q: number) => void }) {
-  const rows: [number, string, string, keyof Profile][] = [
+function Review({ profile: p, edited, onEdit, currency, money }: { profile: Profile; edited: Partial<Profile>; onEdit: (q: number) => void; currency: Currency; money: (x: number) => string }) {
+  const rows: [number, string, string, keyof Profile | null][] = [
+    [0, 'Currency', `${currency} · ${CURRENCY_NAME[currency]}`, null],
     [1, 'Age', `${p.age}`, 'age'],
     [2, 'Retirement age', `${p.retireAge}`, 'retireAge'],
-    [3, 'Invested today', formatEUR(p.investableAssets), 'investableAssets'],
+    [3, 'Invested today', money(p.investableAssets), 'investableAssets'],
     [4, 'Share of income invested', formatPct(p.savingsRate), 'savingsRate'],
-    [5, 'Net income now', formatEUR(p.incomeNow), 'incomeNow'],
-    [6, 'Income in 10 years', `${formatEUR(p.income10y)} (${impliedGrowthLabel(p)})`, 'income10y'],
+    [5, 'Net income now', money(p.incomeNow), 'incomeNow'],
+    [6, 'Income in 10 years', `${money(p.income10y)} (${impliedGrowthLabel(p)})`, 'income10y'],
     [7, 'Sector', label(SECTORS, p.sector), 'sector'],
     [8, 'Bonus, commission or shares', formatPct(p.variablePayShare), 'variablePayShare'],
     [9, 'Income security', label(SECURITY, p.incomeSecurity), 'incomeSecurity'],
@@ -554,7 +590,7 @@ function Review({ profile: p, edited, onEdit }: { profile: Profile; edited: Part
     [11, 'Highest debt interest', formatPct(p.maxDebtRate), 'maxDebtRate'],
     [12, 'After a 30% fall', label(DRAWDOWN, p.drawdownReaction), 'drawdownReaction'],
     [13, 'Largest income cut accepted', label(GAMBLE, p.incomeGamble), 'incomeGamble'],
-    [14, 'Max loss in a bad year', formatEUR(p.maxLossMoney), 'maxLossMoney'],
+    [14, 'Max loss in a bad year', money(p.maxLossMoney), 'maxLossMoney'],
     [15, 'Experience', label(EXPERIENCE, p.experience), 'experience'],
     [16, 'Knowledge check / borrowing', `${p.knowledgeCheckPassed ? 'Passed' : 'Not passed'} · ${p.leverageOptIn ? 'opted in' : 'off'}`, 'knowledgeCheckPassed'],
   ]
@@ -572,7 +608,7 @@ function Review({ profile: p, edited, onEdit }: { profile: Profile; edited: Part
             <dd className="flex items-baseline gap-3 text-help font-medium text-ink">
               <span>
                 {value}
-                {edited[key] === undefined && <span className="ml-1.5 text-xs font-normal text-muted">default</span>}
+                {key !== null && edited[key] === undefined && <span className="ml-1.5 text-xs font-normal text-muted">default</span>}
               </span>
               <button type="button" onClick={() => onEdit(q)} className={`text-[13px] ${textLink}`} aria-label={`Edit ${name}`}>
                 Edit

@@ -165,7 +165,7 @@ describe('riskBand and mertonShare', () => {
 
 describe('human capital helpers', () => {
   it('growth is clamped', () => {
-    expect(growthRate({ ...PERSONAS.sofie, income10y: 1e6 })).toBe(0.08)
+    expect(growthRate({ ...PERSONAS.sofie, income10y: 1e6 })).toBe(0.12)
     expect(growthRate({ ...PERSONAS.sofie, income10y: 1000 })).toBe(-0.02)
     expect(growthRate({ ...PERSONAS.sofie, incomeNow: 0 })).toBe(0)
   })

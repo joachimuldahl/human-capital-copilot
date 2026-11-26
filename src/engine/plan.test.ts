@@ -63,7 +63,7 @@ describe('loan, changes and next savings', () => {
     const changes = planChanges(rows, p.investableAssets)
     // target stocks €30,000 vs €5,000 now; cash €0 vs €20,000; loan −€5,000
     expect(changes.map((c) => c.sleeve)).toEqual(['equity', 'cash', 'loan'])
-    expect(changes.map(describeChange)).toEqual([
+    expect(changes.map((r) => describeChange(r))).toEqual([
       'Increase stocks (global equity) by €25,000.',
       'Reduce cash by €20,000.',
       'Borrow €5,000 with a broker loan (only if you are comfortable with the risks under “Borrowing to invest”).',
@@ -74,7 +74,7 @@ describe('loan, changes and next savings', () => {
   })
   it('Sofie: Bitcoin keeps its capital letter', () => {
     const { rows, p } = plan('sofie')
-    expect(planChanges(rows, p.investableAssets).map(describeChange)).toContain('Reduce crypto (Bitcoin) by €1,000.')
+    expect(planChanges(rows, p.investableAssets).map((r) => describeChange(r))).toContain('Reduce crypto (Bitcoin) by €1,000.')
   })
   it('nothing underweight → keep investing message; repay wording', () => {
     expect(mostUnderweight([])).toBeNull()

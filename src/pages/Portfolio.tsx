@@ -19,10 +19,10 @@ import {
   explainRegions,
   explainRiskFit,
   explainSectors,
+  currencySymbol,
   explainStress,
   explainStressLimit,
   exposures,
-  formatEUR,
   formatPct,
   formatRatio,
   lookThrough,
@@ -44,7 +44,7 @@ import { LOOKTHROUGH } from '../data/lookthrough'
 import { PERSONAS } from '../data/personas'
 import { PRODUCTS } from '../data/products'
 import { QUICK_FIELDS } from '../data/quickEntry'
-import { useActiveProfile } from '../store/hooks'
+import { useActiveProfile, useCurrency } from '../store/hooks'
 import { selectPortfolio, usePortfolioStore, type PortfolioSource } from '../store/portfolioStore'
 import { useProfileStore } from '../store/profileStore'
 
@@ -54,7 +54,8 @@ export default function Portfolio() {
   const { active, profile, hasAnswers } = useActiveProfile()
   const source = usePortfolioStore((s) => s.source)
   const quick = usePortfolioStore((s) => s.quick)
-  const portfolio = useMemo(() => selectPortfolio(active, { source, quick }), [active, source, quick])
+  const { currency } = useCurrency()
+  const portfolio = useMemo(() => selectPortfolio(active, { source, quick }, currency), [active, source, quick, currency])
   const isPersona = active !== 'mine'
 
   return (
@@ -97,6 +98,7 @@ interface AnalysisProps {
 }
 
 function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
+  const { money, currency } = useCurrency()
   const total = netWorth(holdings)
   const shares = holdingShares(holdings)
   const x = exposures(holdings, PRODUCTS)
@@ -121,7 +123,7 @@ function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
       <section aria-label="Summary" className="grid gap-4 md:grid-cols-3">
         <Card className="flex flex-col gap-1">
           <h2 className="text-[13px] font-medium text-ink-2">Net worth in this portfolio</h2>
-          <p className="text-card-num">{formatEUR(total)}</p>
+          <p className="text-card-num">{money(total)}</p>
           <p className="text-xs text-muted">
             {holdings.length} holdings in {accounts.length} {accounts.length === 1 ? 'account' : 'accounts'}
           </p>
@@ -133,11 +135,11 @@ function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
         </Card>
         <Card className="flex flex-col gap-2">
           <h2 className="text-[13px] font-medium text-ink-2">Crash test today</h2>
-          <p className="text-card-num text-alert">−{formatEUR(Math.max(-stress.money, 0))}</p>
-          <p className="text-help text-ink-2">{explainStress(stress)}</p>
+          <p className="text-card-num text-alert">−{money(Math.max(-stress.money, 0))}</p>
+          <p className="text-help text-ink-2">{explainStress(stress, currency)}</p>
           <p className={`text-help font-medium ${ok ? 'text-lime' : 'text-alert'}`}>
             <span aria-hidden>{ok ? '✔ ' : '✘ '}</span>
-            {explainStressLimit(stress, profile.maxLossMoney)}
+            {explainStressLimit(stress, profile.maxLossMoney, currency)}
           </p>
         </Card>
       </section>
@@ -171,7 +173,7 @@ function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
                             <span className="block text-ink">{p.name}</span>
                             <span className="block text-xs text-muted">{p.ticker ?? 'Ticker to verify'}</span>
                           </td>
-                          <td className="py-2 text-right tabular-nums">{formatEUR(h.valueEUR)}</td>
+                          <td className="py-2 text-right tabular-nums">{money(h.valueEUR)}</td>
                           <td className="w-16 py-2 text-right tabular-nums text-ink-2">{formatPct(shares[h.id])}</td>
                         </tr>
                       )
@@ -327,6 +329,7 @@ function QuickEntry() {
   const quick = usePortfolioStore((s) => s.quick)
   const setQuickValue = usePortfolioStore((s) => s.setQuickValue)
   const resetQuick = usePortfolioStore((s) => s.resetQuick)
+  const { currency } = useCurrency()
   return (
     <Card className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -341,7 +344,7 @@ function QuickEntry() {
             <label htmlFor={`quick-${f.key}`} className="text-help font-medium text-ink-2">
               {f.label}
             </label>
-            <NumberField id={`quick-${f.key}`} value={quick[f.key]} onChange={(v) => setQuickValue(f.key, v)} min={0} max={100_000_000} step={100} prefix="€" />
+            <NumberField id={`quick-${f.key}`} value={quick[f.key]} onChange={(v) => setQuickValue(f.key, v)} min={0} max={100_000_000} step={100} prefix={currencySymbol(currency)} money />
           </div>
         ))}
       </div>
@@ -352,10 +355,11 @@ function QuickEntry() {
 
 function MismatchBanner({ total, F, canUpdate }: { total: number; F: number; canUpdate: boolean }) {
   const setAnswer = useProfileStore((s) => s.setAnswer)
+  const { money } = useCurrency()
   return (
     <div role="status" className="flex flex-col gap-3 rounded-card border border-warn-line bg-warn-bg p-4 text-help sm:p-5 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-panel">
-        This portfolio adds up to <strong>{formatEUR(total)}</strong>, but your profile says you have <strong>{formatEUR(F)}</strong> invested. Your Risk
+        This portfolio adds up to <strong>{money(total)}</strong>, but your profile says you have <strong>{money(F)}</strong> invested. Your Risk
         Capacity is based on the profile amount.
         {!canUpdate && ' Demo people keep their own amount; switch to "Me" to use yours.'}
       </p>
@@ -365,7 +369,7 @@ function MismatchBanner({ total, F, canUpdate }: { total: number; F: number; can
           onClick={() => setAnswer('investableAssets', total)}
           className={`shrink-0 rounded-control bg-warn px-4 py-2.5 font-semibold text-on-lime hover:brightness-110 ${focusRing}`}
         >
-          Use {formatEUR(total)} as my invested amount
+          Use {money(total)} as my invested amount
         </button>
       )}
     </div>

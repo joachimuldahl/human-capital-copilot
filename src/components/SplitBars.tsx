@@ -1,7 +1,9 @@
-import { formatEUR, formatPct } from '../engine'
+import { formatPct } from '../engine'
+import { useCurrency } from '../store/hooks'
 
 /** Horizontal percentage bars (region / sector look-through). */
 export default function SplitBars({ items, label }: { items: { name: string; share: number; valueEUR: number }[]; label: string }) {
+  const { money } = useCurrency()
   return (
     <ul aria-label={label} className="space-y-2.5">
       {items.map((s) => (
@@ -12,7 +14,7 @@ export default function SplitBars({ items, label }: { items: { name: string; sha
           <span className="h-3 rounded-full bg-line" aria-hidden>
             <span className="block h-3 rounded-full bg-lime" style={{ width: `${Math.max(s.share * 100, 0.5)}%` }} />
           </span>
-          <span className="text-right tabular-nums font-medium text-ink" title={formatEUR(s.valueEUR)}>
+          <span className="text-right tabular-nums font-medium text-ink" title={money(s.valueEUR)}>
             {formatPct(s.share)}
           </span>
         </li>

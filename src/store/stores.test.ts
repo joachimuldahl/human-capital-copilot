@@ -41,7 +41,7 @@ describe('profileStore', () => {
     useProfileStore.getState().setAnswer('age', 33)
     useProfileStore.getState().loadPersona('mads')
     const saved = JSON.parse(localStorage.getItem('hcc-profile')!)
-    expect(saved.state).toEqual({ active: 'mads', answers: { age: 33 } })
+    expect(saved.state).toEqual({ active: 'mads', currency: 'EUR', answers: { age: 33 } })
 
     // Simulate a page reload: the in-memory state is reset, but storage still holds the saved answers.
     const raw = localStorage.getItem('hcc-profile')!
@@ -89,5 +89,41 @@ describe('portfolioStore', () => {
     const saved = JSON.parse(localStorage.getItem('hcc-portfolio')!)
     expect(saved.state.source).toBe('quick')
     expect(saved.state.quick.bonds).toBe(2000)
+  })
+})
+
+describe('currency (BUILD_SPEC 18.1)', () => {
+  it('fresh state is EUR here (locale en-IE); personas in DKK keep their Risk Capacity and demo risk', async () => {
+    const { targetEEE, portfolioEEE, exposures, netWorth } = await import('../engine')
+    const { PRODUCTS } = await import('../data/products')
+    expect(useProfileStore.getState().currency).toBe('EUR')
+    for (const id of ['sofie', 'mads', 'lea', 'jonas'] as const) {
+      const eur = selectProfile({ active: id, answers: {}, currency: 'EUR' })
+      const dkk = selectProfile({ active: id, answers: {}, currency: 'DKK' })
+      expect(dkk.investableAssets).toBeCloseTo(eur.investableAssets * 7.4749, 6)
+      expect(targetEEE(dkk).finalEEE).toBeCloseTo(targetEEE(eur).finalEEE, 9)
+      const h = selectPortfolio(id, { source: 'demo', quick: EMPTY_QUICK }, 'DKK').holdings
+      expect(netWorth(h)).toBeCloseTo(dkk.investableAssets, 6)
+      expect(portfolioEEE(exposures(h, PRODUCTS))).toBeCloseTo(portfolioEEE(exposures(DEMO_PORTFOLIOS[id].holdings, PRODUCTS)), 9)
+    }
+  })
+
+  it('changing currency converts stored money answers and quick-entry amounts', async () => {
+    const { changeCurrency } = await import('./hooks')
+    useProfileStore.getState().setAnswers({ age: 30, investableAssets: 10000, maxLossMoney: 3000 })
+    usePortfolioStore.getState().setQuickValue('cash', 1000)
+    changeCurrency('DKK')
+    expect(useProfileStore.getState()).toMatchObject({ currency: 'DKK', answers: { age: 30, investableAssets: 74749, maxLossMoney: 22425 } })
+    expect(usePortfolioStore.getState().quick.cash).toBe(7475)
+    changeCurrency('EUR')
+    expect(useProfileStore.getState().answers.investableAssets).toBe(10000)
+    useProfileStore.setState({ currency: 'EUR' })
+  })
+
+  it('a saved v1 state (no currency) migrates as EUR', async () => {
+    localStorage.setItem('hcc-profile', JSON.stringify({ state: { active: 'mine', answers: { investableAssets: 20000 } }, version: 1 }))
+    await useProfileStore.persist.rehydrate()
+    expect(useProfileStore.getState().currency).toBe('EUR')
+    expect(useProfileStore.getState().answers.investableAssets).toBe(20000)
   })
 })

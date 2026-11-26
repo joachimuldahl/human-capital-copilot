@@ -1,5 +1,6 @@
 import { CartesianGrid, Line, LineChart, ReferenceDot, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { formatEUR, formatRatio, type GlidePoint } from '../engine'
+import { formatRatio, type GlidePoint } from '../engine'
+import { useCurrency } from '../store/hooks'
 
 interface GlideChartProps {
   points: GlidePoint[]
@@ -10,6 +11,7 @@ const LIME = '#C8F560'
 const MUTED = '#7D8AA3'
 
 function GlideTooltip({ active, payload }: { active?: boolean; payload?: { payload: GlidePoint }[] }) {
+  const { money } = useCurrency()
   if (!active || !payload?.length) return null
   const p = payload[0].payload
   return (
@@ -17,8 +19,8 @@ function GlideTooltip({ active, payload }: { active?: boolean; payload?: { paylo
       <p className="font-semibold text-ink">
         Age {p.age}: {formatRatio(p.final)}
       </p>
-      <p className="text-ink-2">Invested (F): {formatEUR(p.F)}</p>
-      <p className="text-ink-2">Future savings (H): {formatEUR(p.H)}</p>
+      <p className="text-ink-2">Invested (F): {money(p.F)}</p>
+      <p className="text-ink-2">Future savings (H): {money(p.H)}</p>
     </div>
   )
 }

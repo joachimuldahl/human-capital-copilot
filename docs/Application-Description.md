@@ -48,7 +48,7 @@ Students and young professionals (roughly 20–35) who have started investing or
 | Page | What it does | Screenshot |
 |---|---|---|
 | Landing | Hero, "Start (3 minutes)", demo people, how it works, research basis | `screenshots/desktop-landing.png` |
-| Onboarding | One question per screen (16 screens in 4 steps, Enter to continue) + review with edit links; a "Why we ask" card with research and a live effect line on every question; live Risk Capacity panel with an "Estimate" / "Preliminary" chip and the three drivers (a bottom bar that opens as a sheet on phones); "I'm not sure" on three questions; knowledge check and borrowing opt-in | `screenshots/desktop-onboarding-7.png`, `screenshots/desktop-onboarding-1.png`, `screenshots/mobile-onboarding-2.png` |
+| Onboarding | Currency choice first (DKK, EUR, USD, GBP, SEK, NOK, CHF; preselected from the browser language), then one question per screen (16 screens in 4 steps, Enter to continue); money questions as a typed field plus a logarithmic slider + review with edit links; a "Why we ask" card with research and a live effect line on every question; live Risk Capacity panel with an "Estimate" / "Preliminary" chip and the three drivers (a bottom bar that opens as a sheet on phones); "I'm not sure" on three questions; knowledge check and borrowing opt-in | `screenshots/desktop-onboarding-7.png`, `screenshots/desktop-onboarding-1.png`, `screenshots/mobile-onboarding-2.png` |
 | Results | Risk Capacity, the limit that applies, four drivers, lifetime balance sheet, glide path, what-if sliders | `screenshots/desktop-results-sofie.png`, `screenshots/mobile-results-sofie.png` |
 | Portfolio | Demo portfolio or quick entry; risk fit; crash test; look-through by asset class, region, sector, concentration, overlap | `screenshots/desktop-portfolio-sofie-conc.png`, `screenshots/mobile-portfolio-sofie.png` |
 | Plan | Safety gates, satellites, target vs current, example products, crash test, borrowing panel, how to get there, Assumptions | `screenshots/desktop-plan-sofie.png`, `screenshots/mobile-plan-gates.png` |
@@ -61,14 +61,16 @@ The app works on phones (375 px) and desktops, saves answers in the browser (no 
 All human-capital maths is in real (inflation-adjusted) terms. The full specification is in `BUILD_SPEC.md` section 5, and all values are in `src/engine/assumptions.ts`.
 
 1. **Risk attitude.** The average of two questions (reaction to a 30% fall; a job gamble) gives a risk band and a risk aversion γ (1.75 to 7). The optimal share of total wealth in stocks follows Merton (1969): **w\* = min(ERP / (γ·σ²), 1)**, with ERP = 4.5% and σ = 16%.
-2. **Human capital.** Future savings are projected from today's income, growing at the user's expected rate until age 45 and 0.5% a year after, and discounted at the real risk-free rate (1%) plus a spread for income security (1–4.5%): **H = Σ savingsRate · yₐ / (1+d)^(a−age)**.
+2. **Human capital.** Future savings are projected from today's income, growing at the user's expected rate (capped at 12% a year in the calculation; the user may enter any figure and sees a notice above 12%) until age 45 and 0.5% a year after, and discounted at the real risk-free rate (1%) plus a spread for income security (1–4.5%): **H = Σ savingsRate · yₐ / (1+d)^(a−age)**.
 3. **Income type.** βH = sector base (0.05 public … 0.65 founder) + 0.3 × variable-pay share, capped at 0.9.
 4. **Risk Capacity.** Stocks the investor should hold across financial wealth F and human capital H, expressed relative to F: **raw = (w\*·F + (w\* − βH)·H) / F**. Stock-like income (high βH) lowers the result, bond-like income raises it.
 5. **Limits, in order:** policy cap 1.5×; 1.0× without a 3-month buffer; 1.0× with debt above 7%; 1.0× unless borrowing is allowed (15+ years to retirement, at least €5,000, knowledge check passed, opted in, and borrowing cheap enough); and a loss cap = max loss ÷ (50% × F). The final value is the raw value capped by the lowest limit, with a floor of 0.2×.
 6. **Allocation.** The target is turned into weights for stocks, bonds, gold and Bitcoin with the same volatility (target × 16%), solved by bisection using a fixed correlation matrix. Weights above 100% stocks mean a broker loan.
 7. **Portfolio checks.** Actual risk = portfolio volatility ÷ 16%; crash test = equity −50%, Bitcoin −75%, bonds +3%, gold +5%; look-through via ETF top holdings; risk fit is "on target" within ±0.15×.
 
-**Testing.** 181 automated tests reproduce every expected value in the specification (all four personas, demo portfolios, allocations, crash tests, glide path, gate cases) and check the pages themselves. Engine coverage is 100% of lines.
+8. **Currency.** Every amount is shown in the currency the user picks. Demo data and the money thresholds (the €5,000 borrowing minimum, defaults, slider ranges) are stored in euros and converted at fixed ECB reference rates (17 Nov 2026). The model works with ratios, so the Risk Capacity is identical in every currency; a test checks this for all four personas in all seven currencies.
+
+**Testing.** 282 automated tests reproduce every expected value in the specification (all four personas, demo portfolios, allocations, crash tests, glide path, gate cases) and check the pages themselves. Engine coverage is about 99% of lines.
 
 ## 7. How AI was used in development
 
@@ -87,7 +89,7 @@ The app was built with **Claude Code** (Anthropic's coding agent) working from a
 
 - **Illustrative data.** Product names, tickers, fees (TER) and ETF holdings are placeholders until verified against factsheets. Only top holdings are used for look-through and overlap.
 - **Judgement-based income betas.** How stock-like each sector's income is (βH) is a conservative model assumption, not an estimate from data.
-- **Simplified model.** Fixed return, volatility and correlation assumptions; no taxes, fees, inflation scenarios or currency risk; the crash test is one historical-style scenario, not a forecast.
+- **Simplified model.** Fixed return, volatility and correlation assumptions; no taxes, fees, inflation scenarios or currency risk (FX rates are fixed and only used for display and thresholds); the crash test is one historical-style scenario, not a forecast.
 - **Income model.** One growth rate until 45, then 0.5% a year; no career breaks, unemployment or pensions.
 - **Not advice.** The app shows sleeve weights and example products for education. It never gives buy or sell instructions and never places orders.
 - **Local only.** Answers are stored in the user's browser and are not shared between devices.

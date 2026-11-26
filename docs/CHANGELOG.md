@@ -72,3 +72,9 @@
 - Onboarding panel: "What drives this" shows "not answered yet" for risk attitude (Q12–13) and a new Limits row (Q14/Q16), then names the limit that applies.
 - Accessibility: chart SVGs inside aria-hidden wrappers are no longer keyboard-focusable (Recharts accessibilityLayer off, pie rootTabIndex −1).
 - Lighthouse accessibility now 100 on all pages with a demo person loaded, phone and desktop; description and two screenshots updated.
+
+## 2026-11-26 · Phase 3d · Currency and income input (spec v1.4)
+- Currency question before Q1 (7 currencies, preselected from the browser locale); fixed ECB rates of 17 Nov 2026 in src/data/fx.ts. Personas, demo portfolios, defaults, slider ranges and the €5,000 borrowing minimum are converted; changing currency converts stored answers.
+- Q3/Q5/Q6/Q14 are a typed field plus a log slider; Q6 spans 0.5×–5× today's income (typed up to 20×) with a notice above 12% a year. growthCap raised to 0.12.
+- Side panel: explanation shown once (estimate note + binding sentence only from answered limits or the 1.5× cap); "≈ 100% of wealth" when nothing is invested.
+- Method page: FX table with date and source, growth-cap note. 87 new tests, including currency invariance for every persona × currency.

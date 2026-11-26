@@ -106,3 +106,9 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 ### 2026-11-26 19:42:30 +02:00 · session 8e6a053f
 > yes please go ahead with that and i'll try and gather what i can on my end.
 
+### 2026-11-26 20:16:38 +02:00 · session 8e6a053f
+> mv ~/Downloads/BUILD_SPEC.md ~/Projects/human-capital-copilot/BUILD_SPEC.md
+
+### 2026-11-26 20:18:05 +02:00 · session 8de8bac7
+> Read BUILD_SPEC.md section 18 (and D-1, 5.1, 16). Add the currency question and FX conversion, change Q3/Q5/Q6/Q14 to typed field + log slider, raise growthCap to 0.12 with the over-12% notice, and fix the side-panel issues in 18.3. Add the currency-invariance tests and update the Method page (FX source/date, growth cap). All section 9 tests must still pass. Commit and push.
+

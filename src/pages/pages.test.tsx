@@ -6,6 +6,7 @@ import type { Profile } from '../engine'
 import { PERSONAS } from '../data/personas'
 import type { ActiveId } from '../store/profileStore'
 import type { QuickValues } from '../store/portfolioStore'
+import type { Currency } from '../data/fx'
 
 // Server rendering normally uses the store's *initial* state (zustand persist sets it to the defaults on purpose).
 // For these tests, serve the live state instead, as a browser does after load. zustand is inlined in vite.config.ts
@@ -22,13 +23,13 @@ type Page = 'Landing' | 'Onboarding' | 'Results' | 'Portfolio' | 'Plan' | 'Metho
 /** Server-render a page with the given profile state. */
 async function renderPage(
   page: Page,
-  state: { active: ActiveId; answers: Partial<Profile> } = { active: 'mine', answers: {} },
+  state: { active: ActiveId; answers: Partial<Profile>; currency?: Currency } = { active: 'mine', answers: {} },
   quick: Partial<QuickValues> = {},
   url = '/',
 ) {
   const { useProfileStore } = await import('../store/profileStore')
   const { usePortfolioStore, EMPTY_QUICK } = await import('../store/portfolioStore')
-  useProfileStore.setState(state)
+  useProfileStore.setState({ currency: 'EUR', ...state })
   usePortfolioStore.setState({ source: 'demo', quick: { ...EMPTY_QUICK, ...quick } })
   const mod = (await import(`./${page}.tsx`)) as { default: () => ReactElement }
   const Comp = mod.default
@@ -83,8 +84,18 @@ describe('Results presets (Phase 3 acceptance)', () => {
 })
 
 describe('Onboarding', () => {
-  it('starts at step 1 with an estimate that ignores the unanswered step-4 limits', async () => {
+  it('starts with the currency question ("Before we start") in step 1', async () => {
     const t = await renderPage('Onboarding')
+    expect(t).toContain('Step 1 of 4 · About you')
+    expect(t).toContain('BEFORE WE START')
+    expect(t).toContain('Which currency should we use?')
+    for (const c of ['DKK', 'EUR', 'USD', 'GBP', 'SEK', 'NOK', 'CHF']) expect(t).toContain(c)
+    expect(t).toContain("So every amount is in money you think in. It doesn't change your result")
+    expect(t).not.toContain('QUESTION')
+  })
+
+  it('question 1 with an estimate that ignores the unanswered step-4 limits', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: {} }, {}, '/onboarding?q=1')
     expect(t).toContain('Step 1 of 4')
     expect(t).toContain('About you')
     expect(t).toContain('How old are you?')
@@ -138,7 +149,7 @@ describe('Onboarding', () => {
 
   it('one question per screen, each with its own 4-part "Why we ask" card and the method link', async () => {
     const { WHY_WE_ASK } = await import('../content/whyWeAsk')
-    const t = await renderPage('Onboarding')
+    const t = await renderPage('Onboarding', { active: 'mine', answers: {} }, {}, '/onboarding?q=1')
     expect(t.match(/Why we ask/g)).toHaveLength(1)
     expect(t).toContain('QUESTION 1 OF 16')
     expect(t).not.toContain('When do you expect to retire?')
@@ -158,11 +169,63 @@ describe('Onboarding', () => {
     expect(t).toContain('Salaried private job')
   })
 
-  it('the review screen lists all 16 answers with edit links', async () => {
+  it('the review screen lists the currency and all 16 answers with edit links', async () => {
     const t = await renderPage('Onboarding', { active: 'mine', answers: { age: 30 } }, {}, '/onboarding?q=17')
     expect(t).toContain('Your answers')
-    expect(t.match(/ Edit /g)).toHaveLength(16)
+    expect(t).toContain('Currency EUR · Euro')
+    expect(t.match(/ Edit /g)).toHaveLength(17)
     expect(t).toContain('See my result')
+  })
+})
+
+describe('Currency (BUILD_SPEC 18)', () => {
+  it.each([
+    ['sofie', '1.50×'],
+    ['mads', '1.20×'],
+    ['lea', '0.34×'],
+    ['jonas', '0.67×'],
+  ] as const)('%s in DKK: same Risk Capacity (%s), amounts in kr', async (id, ratio) => {
+    const t = await renderPage('Results', { active: id, answers: {}, currency: 'DKK' })
+    expect(t).toContain(ratio)
+    expect(t).toMatch(/kr\s?\d/)
+    expect(t).not.toContain('€')
+  })
+
+  it('Sofie in GBP: same portfolio analysis (Apple 14.4%, 15.0% overlap), amounts in £', async () => {
+    const t = await renderPage('Portfolio', { active: 'sofie', answers: {}, currency: 'GBP' })
+    expect(t).toContain('1.01×')
+    expect(t).toContain('Apple 14.4%')
+    expect(t).toContain('15.0%')
+    expect(t).toContain('£8,331') // €10,000 · 0.83305
+  })
+
+  it('onboarding money questions use the chosen currency and converted, rounded defaults', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: {}, currency: 'DKK' }, {}, '/onboarding?q=3')
+    expect(t).toMatch(/kr\s?75,000/) // €10,000 default → 75,000 kr
+    expect(t).toMatch(/kr\s?37,000/) // the borrowing minimum, €5,000 → 37,000 kr in the effect line
+  })
+
+  it('Q6: log slider from 0.5× to 5× today\'s income, and the notice above 12% a year', async () => {
+    const plain = await renderPage('Onboarding', { active: 'mine', answers: { incomeNow: 40000 } }, {}, '/onboarding?q=6')
+    expect(plain).toContain('€20,000')
+    expect(plain).toContain('€200,000')
+    expect(plain).not.toContain('we cap growth at 12%')
+    const steep = await renderPage('Onboarding', { active: 'mine', answers: { incomeNow: 40000, income10y: 200000 } }, {}, '/onboarding?q=6')
+    expect(steep).toContain("That's 17.5% a year: possible in some careers, but we cap growth at 12% a year in the calculation.")
+  })
+
+  it('side panel: with nothing invested, future savings read "≈ 100% of wealth"', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: { investableAssets: 0 } }, {}, '/onboarding?q=3')
+    expect(t).toContain('≈ 100% of wealth')
+    expect(t).not.toContain('100.0% of wealth')
+  })
+
+  it('Method page shows the FX table with date and source, and the growth cap', async () => {
+    const t = await renderPage('Method')
+    expect(t).toContain('17 Nov 2026')
+    expect(t).toContain("ECB euro reference rates, as published by Banca d'Italia")
+    expect(t).toContain('7.4749')
+    expect(t).toContain('capped at 12% a year')
   })
 })
 

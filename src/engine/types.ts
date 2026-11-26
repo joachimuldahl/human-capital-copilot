@@ -10,13 +10,13 @@ export interface Profile {
   age: number
   /** Default 67. */
   retireAge: number
-  /** F: invested assets today, EUR. */
+  /** F: invested assets today, in the profile currency. */
   investableAssets: number
   /** Share of net income invested, 0–1. */
   savingsRate: number
-  /** Net income now, EUR/yr (students: expected starting salary). */
+  /** Net income now per year, in the profile currency (students: expected starting salary). */
   incomeNow: number
-  /** Expected net income in 10 years, EUR/yr. */
+  /** Expected net income in 10 years per year, in the profile currency. */
   income10y: number
   sector: Sector
   /** Bonus/commission/shares as share of pay, 0–1. */
@@ -27,12 +27,20 @@ export interface Profile {
   maxDebtRate: number
   drawdownReaction: Likert
   incomeGamble: Likert
-  /** EUR the user could lose in a bad year without changing plans. */
+  /** Money the user could lose in a bad year without changing plans (profile currency). */
   maxLossMoney: number
   experience: Experience
   knowledgeCheckPassed: boolean
   leverageOptIn: boolean
+  /**
+   * Units of the profile's currency per 1 EUR (BUILD_SPEC 18.1); default 1 (EUR).
+   * Money fields are stored in that currency; EUR thresholds (minAssetsForLeverage) are multiplied by it.
+   */
+  fx?: number
 }
+
+/** Currencies the user can choose (BUILD_SPEC 18.1). Rates live in src/data/fx.ts. */
+export type Currency = 'DKK' | 'EUR' | 'USD' | 'GBP' | 'SEK' | 'NOK' | 'CHF'
 
 /** Allocation assets with volatility, in matrix order. */
 export type AllocAsset = 'equity' | 'bonds' | 'gold' | 'btc'
@@ -133,6 +141,7 @@ export interface Holding {
   id: string
   accountId: string
   productId: string
+  /** Amount in the active currency (demo source data is in EUR and converted with fx before use). */
   valueEUR: number
 }
 

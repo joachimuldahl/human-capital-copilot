@@ -1,6 +1,6 @@
 # Human Capital Copilot: demo build spec (for Claude Code)
 
-*v1.3 · 26 Nov 2026 · Single source of truth for building the demo. Replaces the staged S0–S11 plan (project docs 04/06) for this deadline. Financial maths matches project doc 03 (reference engine v2) exactly.*
+*v1.4 · 26 Nov 2026 · Single source of truth for building the demo. Replaces the staged S0–S11 plan (project docs 04/06) for this deadline. Financial maths matches project doc 03 (reference engine v2) exactly.*
 
 ---
 
@@ -152,7 +152,7 @@ The app turns 16 questions into one number, **Risk Capacity**: risk as a multipl
 
 | # | Decision |
 |---|---|
-| D-1 | Generic international demo. Base currency **EUR** for all demo data. No tax logic. |
+| D-1 | Generic international demo. The user **chooses a currency** at the start (section 18). Demo data and thresholds are stored in EUR and converted with fixed ECB reference rates. No tax logic. |
 | D-2 | Maximum risk **1.5× global equity** via a broker loan. Leveraged ETFs are shown only as an alternative, with a volatility-decay warning. |
 | D-3 | The plan shows **sleeve weights + 2–3 example products per sleeve**, always labelled "Example, not advice". No buy/sell instructions. |
 | D-4 | All numbers come from a **deterministic engine** (pure TypeScript functions). No AI-generated numbers in the app. |
@@ -210,7 +210,7 @@ All human-capital maths is in **real** (inflation-adjusted) terms. Implement exa
 ```
 rfReal 0.01            erp 0.045            sigmaEq 0.16          borrowSpread 0.015
 cashNominal 0.03       equityNominal 0.075  lateGrowth 0.005      peakAge 45
-growthCap 0.08         growthFloor -0.02    policyCap 1.5         floor 0.2
+growthCap 0.12         growthFloor -0.02    policyCap 1.5         floor 0.2
 maintMargin 0.25       equityShock 0.50     leverageHurdle 0.02
 minAssetsForLeverage 5000   minYearsForLeverage 15   minBufferMonths 3   expensiveDebtRate 0.07
 
@@ -395,7 +395,7 @@ Progress bar, Back/Next, one step per screen on mobile. **Live needle**: a stick
 | | 3 | How much do you have invested or saved for investing today? | € | 10,000 |
 | | 4 | What share of your net income do you invest? | slider 0–40% | 10% |
 | 2 Your income | 5 | Your net yearly income now (students: expected first salary) | € | 40,000 |
-| | 6 | Where do you expect your income to be in 10 years? | € slider, shows "≈ x% per year" | +3%/yr |
+| | 6 | Where do you expect your income to be in 10 years? | exact amount: typed field + log-scale slider (section 18) | +3%/yr |
 | | 7 | Which sector do you work (or plan to work) in? | 7 radio cards with examples | salaried |
 | | 8 | How much of your pay is bonus, commission or shares? | slider 0–100% | 0 |
 | | 9 | How secure is your income? | 4 radio cards (very stable: tenured public job … volatile: commission/founder) | average |
@@ -528,6 +528,7 @@ Static Vite + React + TS demo. Full spec: @BUILD_SPEC.md (source of truth).
 - **Phase 6:** `Read BUILD_SPEC.md sections 8 and 14. Do Phase 6: responsive and accessibility pass, empty states, Assumptions dialog, README with the live link, and a draft docs/Application-Description.md. Then commit, push and confirm the Vercel deploy.`
 - **Phase 3b (design + help content, v1.2):** `Read BUILD_SPEC.md sections 7.2, 15, 16 and 17. Redesign the global layout and the Onboarding page to match section 15 exactly (Inter, tokens, header, two-column layout, question blocks, inputs, sliders, radio cards, semicircle gauge with the Preliminary state). Replace every "Why we ask" with the 4-part panel and the section 16 text, including the live effect line computed with the engine. Add the Method page (section 17) and link it from the footer and every panel. Don't change engine maths. When done, check the result at 375px and 1280px (take screenshots with Playwright if available) and list anything that still deviates from section 15.`
 - **Phase 3c (dark redesign, v1.3):** `Read BUILD_SPEC.md section 15 (v1.3) and the three mockups in docs/design/. Restyle the whole app to this design: tokens, fonts and header first, then Landing, Onboarding (convert to one question per screen, keep the pending-gates fix and the Why-we-ask content), Results, Portfolio, Plan and Method. Don't change the engine or data; all tests must still pass. Then rerun the 375px/1280px browser check, retake the screenshots in docs/Application-Description.md, update its design paragraph, commit, push and run npm run zip.`
+- **Phase 3d (currency + income input, v1.4):** `Read BUILD_SPEC.md section 18 (and D-1, 5.1, 16). Add the currency question and FX conversion, change Q3/Q5/Q6/Q14 to typed field + log slider, raise growthCap to 0.12 with the over-12% notice, and fix the side-panel issues in 18.3. Add the currency-invariance tests and update the Method page (FX source/date, growth cap). All section 9 tests must still pass. Commit and push.`
 - **Bug fix (any time):** `Bug on <page>: when I <steps>, I expected <x> but got <y>. Find the root cause first, explain it in 2–3 sentences, fix it, add a test if it is in src/engine, and run tests/lint/build.`
 
 ---
@@ -611,7 +612,7 @@ Format per question: **Why it matters** · **How we use it** · **Your answer's 
 | 3 Invested today | Your target depends on the **ratio** between today's money (F) and future savings (H). With little invested, small amounts carry your whole future. | F in the formula raw = (w*·F + (w* − βH)·H) / F. It also sizes the loss-limit check and the €5,000 minimum for borrowing. | Ayres & Nalebuff (2010, 2013) |
 | 4 Share invested | Only what you actually invest reaches your portfolio. Ayres & Nalebuff measure human capital as the present value of future **contributions**, not total salary. | Multiplies every future salary in H. | Ayres & Nalebuff (2013), "Diversification Across Time" |
 | 5 Income now | The starting point of your earnings path. | Year-1 income in H (net, after tax, in today's money). | Ibbotson, Milevsky, Chen & Zhu (2007) |
-| 6 Income in 10 years | Earnings typically rise steeply early in a career and flatten around mid-career. | Your implied yearly growth (capped at 8%) until age 45, then 0.5% a year. | Cocco, Gomes & Maenhout (2005) |
+| 6 Income in 10 years | Earnings typically rise steeply early in a career and flatten around mid-career. | Your implied yearly growth (capped at 12% in the calculation) until age 45, then 0.5% a year. | Cocco, Gomes & Maenhout (2005) |
 | 7 Sector | Whether your salary moves with the stock market decides whether it acts like a **bond** (stable) or a **stock** (market-linked). A bond-like income lets your portfolio carry more stock risk; a stock-like one means you're already exposed. | Sets βH, the stock-like share of your future savings: public 0.05 … founder 0.65. These are our model assumptions, set conservatively; average empirical correlations are low. | Ibbotson et al. (2007); Benzoni, Collin-Dufresne & Goldstein (2007) |
 | 8 Variable pay | Bonuses, commission and share options usually fall exactly when markets fall. | Adds 0.3 × your variable share to βH (max 0.9). | Ibbotson et al. (2007) |
 | 9 Income security | Riskier income is worth less today, just as a risky bond is priced lower than a safe one. | Sets the discount rate for H: real risk-free rate 1% + a spread of 1–4.5%. | Ibbotson et al. (2007); Viceira (2001) |
@@ -648,3 +649,27 @@ Sections:
    - Merton, R. C. (1969). Lifetime portfolio selection under uncertainty: the continuous-time case. *Review of Economics and Statistics*, 51(3).
    - Samuelson, P. A. (1969). Lifetime portfolio selection by dynamic stochastic programming. *Review of Economics and Statistics*, 51(3).
    - Viceira, L. (2001). Optimal portfolio choice for long-horizon investors with nontradable labor income. *Journal of Finance*, 56(2).
+
+---
+
+## 18. v1.4 changes: currency choice and income input
+
+### 18.1 Currency (new question 0, before Q1)
+- **Q0 "Which currency should we use?"** with radio cards: DKK · EUR · USD · GBP · SEK · NOK · CHF. Preselect from the browser locale (`da-DK` → DKK, `sv-SE` → SEK, `nb-NO`/`nn-NO` → NOK, `de-CH`/`fr-CH` → CHF, `en-GB` → GBP, `en-US` → USD, otherwise EUR). It sits on the first onboarding screen. The question count stays "of 16"; Q0 is labelled "Before we start".
+- **Why we ask:** "So every amount is in money you think in. It doesn't change your result: the model works with ratios, and every threshold is converted at the same rate."
+- **FX table** (`src/data/fx.ts`), units per 1 EUR, **ECB euro reference rates of 17 Nov 2026** (source: Banca d'Italia's publication of the ECB reference rates): USD 1.0989 · GBP 0.83305 · DKK 7.4749 · SEK 11.1100 · NOK 10.5755 · CHF 0.9233 · EUR 1. Show the date and source on the Method page.
+- **Rules:** profile money (incomes, F, maxLossMoney) is stored in the chosen currency. Every EUR-denominated constant or data value (`minAssetsForLeverage` €5,000, onboarding defaults, slider ranges, product/demo portfolio values, persona money) is converted with `fx[currency]` before use. Format with `Intl.NumberFormat(locale, {style: 'currency', currency, maximumFractionDigits: 0})`. Changing the currency later converts the stored amounts.
+- **Personas** are shown in the chosen currency (all their money converted). Their Risk Capacity must not change.
+- **Test:** for every persona and every currency, finalEEE, rawEEE, binding and the allocation are identical to EUR (±0.0005).
+
+### 18.2 Income in 10 years (Q6): an exact amount, not brackets
+- **Decision:** keep an exact figure; **don't use income brackets with midpoints.** Brackets of 50k are too coarse at normal income levels (a €45k earner would count as €25k), and an open top bracket has no midpoint.
+- **Input:** a typed money field (any value up to 20× today's income) plus a **logarithmic slider** from 0.5× to 5× today's income, so both €40k→€55k and €40k→€200k are easy to set. Never derive the slider's range from the growth cap.
+- Under it, show the implied yearly growth. Above 12% a year, add a notice: "That's x% a year: possible in some careers, but we cap growth at 12% a year in the calculation." "I'm not sure" keeps +3% a year.
+- **Engine:** `growthCap` becomes **0.12** (assumption, editable; the Method page explains it as a generous upper bound for steep early careers, e.g. a student's first salary rising quickly). Persona values in section 9 are unchanged (all ≤ 6%).
+- The same typed-field + log-slider pattern applies to Q5 (income now), Q3 (invested today) and Q14 (max loss).
+
+### 18.3 Side-panel fixes seen in testing
+- "Risk attitude" shows **"not answered yet"** until Q12 and Q13 are answered (it currently shows "Moderate · 58.6%" from defaults).
+- With F = 0, show future savings as "≈ 100% of wealth", not "100.0%".
+- Show the explanation once: the Estimate sentence, plus the binding-cap sentence only if it comes from an answered question or the 1.5× policy cap.

@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Profile } from '../engine'
+import { PERSONAS } from '../data/personas'
 import type { ActiveId } from '../store/profileStore'
 import type { QuickValues } from '../store/portfolioStore'
 
@@ -16,7 +17,7 @@ vi.mock('react', async (importOriginal) => {
   return { ...actual, default: { ...actual, useSyncExternalStore }, useSyncExternalStore }
 })
 
-type Page = 'Landing' | 'Onboarding' | 'Results' | 'Portfolio'
+type Page = 'Landing' | 'Onboarding' | 'Results' | 'Portfolio' | 'Plan'
 
 /** Server-render a page with the given profile state. */
 async function renderPage(
@@ -36,7 +37,7 @@ async function renderPage(
     </MemoryRouter>,
   )
   // Strip tags so text split across elements can be matched.
-  return html.replace(/<[^>]+>/g, ' ').replace(/&#x27;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ')
+  return html.replace(/<!-- -->/g, '').replace(/<[^>]+>/g, ' ').replace(/&#x27;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ')
 }
 
 beforeEach(() => {
@@ -156,5 +157,58 @@ describe('Portfolio quick entry', () => {
   it('no banner within 5%', async () => {
     const t = await renderPage('Portfolio', { active: 'mine', answers: { investableAssets: 10000 } }, { globalEquity: 10400 })
     expect(t).not.toContain('as my invested amount')
+  })
+})
+
+describe('Plan (Phase 5 acceptance)', () => {
+  it.each([
+    ['sofie', ['150.0%', '−50.0%', '€15,000', '−€5,000'], '€7,500', '75.0%'],
+    ['mads', ['120.0%', '−20.0%', '€30,000', '−€5,000'], '€15,000', '60.0%'],
+    ['lea', ['18.6%', '81.4%'], '€2,745', '6.9%'],
+    ['jonas', ['63.4%', '36.6%'], '€4,593', '30.6%'],
+  ] as const)('%s: target allocation and crash test at target', async (id, weights, loss, pct) => {
+    const t = await renderPage('Plan', { active: id, answers: {} })
+    for (const w of weights) expect(t).toContain(w)
+    expect(t).toContain(`−${loss}`)
+    expect(t).toContain(`${pct} of the portfolio`)
+    expect(t).toContain('Example, not advice')
+    expect(t).toContain('Changes to make at your own broker')
+  })
+
+  it('leverage panel only above 1×: Sofie yes (loan €5,000, €225/yr, 56%), Lea no', async () => {
+    const sofie = await renderPage('Plan', { active: 'sofie', answers: {} })
+    expect(sofie).toContain('Borrowing to invest')
+    expect(sofie).toContain('€225')
+    expect(sofie).toContain('Stocks could fall 56% before a margin call.')
+    expect(sofie).toContain('Broker loan (recommended)')
+    expect(sofie).toContain('about 2.6% a year')
+    expect(sofie).toContain('2× daily leveraged S&P 500 ETF')
+    const lea = await renderPage('Plan', { active: 'lea', answers: {} })
+    expect(lea).not.toContain('Borrowing to invest')
+    expect(lea).not.toContain('2× daily leveraged S&P 500 ETF')
+  })
+
+  it('gate cards appear for the gate tests', async () => {
+    const g1 = await renderPage('Plan', { active: 'mine', answers: { ...PERSONAS.sofie.profile, bufferMonths: 2 } })
+    expect(g1).toContain('Build a 3-month buffer first')
+    expect(g1).not.toContain('Borrowing to invest') // capped at 1.0×
+    const g2 = await renderPage('Plan', { active: 'mine', answers: { ...PERSONAS.sofie.profile, maxDebtRate: 0.09 } })
+    expect(g2).toContain('Repay your 9% debt first')
+    const none = await renderPage('Plan', { active: 'sofie', answers: {} })
+    expect(none).not.toContain('Do this first')
+  })
+
+  it('Mads: next savings go to stocks; Assumptions dialog lists the engine values', async () => {
+    const t = await renderPage('Plan', { active: 'mads', answers: {} })
+    expect(t).toContain('Put your next monthly savings (€688) into stocks (global equity).')
+    expect(t).toContain('Increase stocks (global equity) by €25,000.')
+    expect(t).toContain('Assumptions')
+    expect(t).toContain('policyCap')
+    expect(t).toContain('very high 1.75')
+  })
+
+  it('empty state without answers', async () => {
+    const t = await renderPage('Plan')
+    expect(t).toContain('Answer the 16 questions')
   })
 })

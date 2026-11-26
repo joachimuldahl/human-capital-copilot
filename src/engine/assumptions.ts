@@ -127,3 +127,6 @@ export const defaultMaxLossShare = 0.3
 
 /** Portfolio total differing from F by more than this share triggers the "use as invested amount" banner. Assumption, editable. */
 export const portfolioMismatchTolerance = 0.05
+
+/** "How to get there" lists only changes larger than this share of F. Assumption, editable. */
+export const planChangeThreshold = 0.02

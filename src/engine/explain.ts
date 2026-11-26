@@ -4,6 +4,7 @@
  */
 import { minBufferMonths, policyCap, expensiveDebtRate, floor } from './assumptions'
 import { solveAllocation } from './allocation'
+import type { PlanSleeve, SleeveRow } from './plan'
 import { growthRate } from './humanCapital'
 import type {
   AssetClass,
@@ -244,4 +245,55 @@ export function explainOverlap(pairs: OverlapPair[], label: (productId: string) 
   const top = pairs[0]
   if (top.overlap === 0) return 'Your ETFs share none of their top holdings.'
   return `${label(top.a)} and ${label(top.b)} share ${formatPct(top.overlap)} of their top holdings, so part of your money buys the same companies twice.`
+}
+
+// ---- Plan page (7.5) ----
+
+export const SLEEVE_LABEL: Record<PlanSleeve, string> = {
+  equity: 'Stocks (global equity)',
+  bonds: 'Bonds',
+  gold: 'Gold',
+  crypto: 'Crypto (Bitcoin)',
+  cash: 'Cash',
+  loan: 'Broker loan',
+}
+
+/** Sleeve names inside sentences (keeps "Bitcoin" capitalised). */
+const SLEEVE_IN_SENTENCE: Record<PlanSleeve, string> = {
+  equity: 'stocks (global equity)',
+  bonds: 'bonds',
+  gold: 'gold',
+  crypto: 'crypto (Bitcoin)',
+  cash: 'cash',
+  loan: 'the broker loan',
+}
+
+/** "Stocks could fall 56% before a margin call." */
+export function explainMarginBuffer(buffer: number): string {
+  return `Stocks could fall ${roundHalfAway(buffer * 100, 0)}% before a margin call.`
+}
+
+/** Leveraged-ETF warning with the yearly volatility drag. */
+export function explainLetfDrag(drag: number): string {
+  return `A 2× daily leveraged ETF resets its leverage every day. In normal markets that costs about ${formatPct(drag)} a year compared with twice the index (volatility decay), and much more when markets swing a lot.`
+}
+
+/** "Put your next monthly savings (€563) into Stocks (global equity)." */
+export function explainNextSavings(monthly: number, sleeve: SleeveRow | null): string {
+  if (!sleeve) return `Your portfolio already matches the plan. Keep investing your monthly savings (${formatEUR(monthly)}) in the same proportions.`
+  return `Put your next monthly savings (${formatEUR(monthly)}) into ${SLEEVE_IN_SENTENCE[sleeve.sleeve]}.`
+}
+
+/** One "Changes to make at your own broker" line, educational wording (no buy/sell orders). */
+export function describeChange(r: SleeveRow): string {
+  const amount = formatEUR(Math.abs(r.diffEUR))
+  if (r.sleeve === 'loan') return r.diffEUR < 0 ? `Borrow ${amount} with a broker loan (only if you are comfortable with the risks under “Borrowing to invest”).` : `Repay ${amount} of borrowing.`
+  return r.diffEUR > 0 ? `Increase ${SLEEVE_IN_SENTENCE[r.sleeve]} by ${amount}.` : `Reduce ${SLEEVE_IN_SENTENCE[r.sleeve]} by ${amount}.`
+}
+
+/** Gate card text (G1, G2). */
+export function gateCard(gate: 'G1_buffer' | 'G2_debt', p: Profile): { title: string; text: string } {
+  return gate === 'G1_buffer'
+    ? { title: 'Build a 3-month buffer first', text: `You have ${p.bufferMonths} ${p.bufferMonths === 1 ? 'month' : 'months'} of expenses saved. Until you have 3, we keep your risk at 1.0× or less so a surprise bill never forces you to sell in a crash.` }
+    : { title: `Repay your ${roundHalfAway(p.maxDebtRate * 100, 1)}% debt first`, text: 'Paying off debt above 7% interest is a guaranteed return that investing is unlikely to beat. Until then we keep your risk at 1.0× or less.' }
 }

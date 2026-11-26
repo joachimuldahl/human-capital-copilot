@@ -33,3 +33,8 @@
 - Portfolio page: demo/quick-entry source selector, mismatch banner ("Use €x as my invested amount", > 5%), net worth, risk-fit gauge (0–2.5×), crash test vs the user's limit, accounts list, and tabs for asset class (donut), region, sector, concentration (top 10 with flags and sources) and overlap, each with a "What this means" caption.
 - Engine: assetClassValues, overlapPairs, portfolioMismatch, holdingShares, and caption templates (risk fit, stress, asset classes, regions, sectors incl. job-sector warning, concentration, overlap).
 - Page tests reproduce the section 9 portfolio table, Sofie's Apple 14.4% alert and the 15.0% overlap. 144 tests.
+
+## 2026-11-26 · Phase 5 · Plan
+- Plan page: gate cards (G1 buffer, G2 debt), gold/crypto satellite sliders with the crypto explanation, target vs current (grouped bars + table in % and €), example products per sleeve ("Example, not advice"), crash test now vs target, leverage panel only above 1× (loan, interest, margin buffer, broker loan vs leveraged ETF with volatility-drag warning), "How to get there", Assumptions dialog generated from assumptions.ts.
+- Engine: plan.ts (planSleeves, planLoan, planChanges, mostUnderweight, monthlySavings) and plan text templates.
+- Page tests reproduce the section 9 target allocations and crash losses, the leverage panel rule and the gate cards. 163 tests.

@@ -56,3 +56,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ (144/144) · lint ✔ · build ✔
 **Human check:** (to fill in by Joachim)
 **Lesson:** A component defined inside another component is a new component on every render, so its state (the open tab) resets while typing. Self-review caught it before it shipped.
+
+### C-007 · 2026-11-26 · Joachim · Claude Code · Phase 5
+**Prompt:** "Push 4, start 5" chosen in a question dialog (no typed prompt).
+**What the AI did:** Committed and pushed Phase 4, then built the Plan page per section 7.5 (gates, satellites, target vs current, example products, crash test, leverage panel, how to get there, Assumptions dialog) with a new engine module plan.ts. Page tests check the section 9 allocations and crash numbers.
+**Files changed:** src/pages/Plan.tsx, src/pages/pages.test.tsx, src/components/{ProductCard,SleeveChart,AssumptionsDialog}.tsx, src/data/examples.ts, src/engine/{plan,plan.test,explain,assumptions,index}.ts, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (163/163) · lint ✔ · build ✔
+**Human check:** (to fill in by Joachim)
+**Lesson:** Reading the full rendered page text in a failing test exposed two wording bugs that unit tests missed ("risks below" pointing to a panel above; "bitcoin" lowercased).

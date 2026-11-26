@@ -22,3 +22,4 @@ export {
   UNKNOWN,
 } from './portfolio'
 export * from './explain'
+export { PLAN_SLEEVES, planSleeves, planLoan, planChanges, mostUnderweight, monthlySavings, type PlanSleeve, type SleeveRow } from './plan'

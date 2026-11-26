@@ -5,6 +5,7 @@ import { REFERENCES } from '../content/references'
 import { FX, FX_DATE, FX_SOURCE, CURRENCIES, CURRENCY_NAME } from '../data/fx'
 import { useCurrency } from '../store/hooks'
 import { selectProfile } from '../store/profileStore'
+import { formatSourceDate, VERIFIED_PRODUCTS } from '../data/products'
 import { assumptions as A, BAND_LABEL, CAP_LABEL, formatPct, formatRatio, roundHalfAway, targetEEE } from '../engine'
 
 const SECTIONS = [
@@ -144,6 +145,43 @@ export default function Method() {
             The growth you expect in question 6 is used until age {A.peakAge}, capped at {roundHalfAway(A.growthCap * 100, 1)}% a year (and at least {roundHalfAway(A.growthFloor * 100, 1)}%). {roundHalfAway(A.growthCap * 100, 1)}% is a
             generous upper bound for steep early careers, for example a student whose first salary rises quickly. You can enter any expected income; only the calculation is capped.
           </p>
+          <h3 id="data-sources" className="pt-2 font-display text-lg font-semibold text-ink">Product data sources</h3>
+          <p>
+            Five example products use data from the issuers’ official factsheets, collected and checked by Damien (team member) and audited against the PDFs: name,
+            ticker, ISIN, fee, top 10 holdings, country and sector weights. Products are matched on ISIN. Company names are mapped to one id per company (e.g.
+            “APPLE INC” and “Apple Inc.” are the same), countries are grouped into regions using MSCI’s market classification (so Korea and Taiwan count as
+            Emerging), and sector names are aligned. Vanguard reports ICB industries and the others GICS sectors, so “Technology” is defined slightly differently
+            between funds. VWCE’s factsheet lists only its top 10 countries; the remaining 11.3% is shown as “Other countries”. Everything else (the
+            financials ETF, short government bonds, Bitcoin ETP, 2× leveraged ETF and single-stock details) stays illustrative.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-help">
+              <caption className="sr-only">Verified product data and sources</caption>
+              <thead>
+                <tr className="border-b border-line text-left">
+                  <th scope="col" className="py-2 pr-3 text-label">Product</th>
+                  <th scope="col" className="py-2 pr-3 text-label">ISIN</th>
+                  <th scope="col" className="py-2 text-label">Source and date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {VERIFIED_PRODUCTS.map((p) => (
+                  <tr key={p.id} className="border-b border-line align-top last:border-0">
+                    <th scope="row" className="py-2 pr-3 text-left font-medium text-ink">
+                      {p.ticker} <span className="block text-xs font-normal text-ink-2">{p.name}</span>
+                    </th>
+                    <td className="py-2 pr-3 font-mono text-xs text-ink">{p.isin}</td>
+                    <td className="py-2 text-ink-2">
+                      <a href={p.source!.url} target="_blank" rel="noreferrer" className={textLink}>
+                        {p.source!.issuer} factsheet
+                      </a>
+                      , {formatSourceDate(p.source!.asOf)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <h3 id="currency" className="pt-2 font-display text-lg font-semibold text-ink">Currencies and exchange rates</h3>
           <p>
             You choose the currency at the start. Demo data and the money thresholds (the {money(A.minAssetsForLeverage * FX[currency])} minimum for borrowing, onboarding defaults and slider ranges) are stored in
@@ -190,7 +228,7 @@ export default function Method() {
             <li>Sector betas (βH) are judgement-based, not estimated from data.</li>
             <li>The savings rate is held constant over your working life.</li>
             <li>No insurance, housing or pensions outside your portfolio.</li>
-            <li>Product and ETF data is illustrative until verified factsheet data arrives.</li>
+            <li>Only five products use verified factsheet data (listed under Assumptions); all other product data, the demo people and their portfolios are illustrative. Look-through uses each ETF’s top 10 holdings only.</li>
           </ul>
         </Section>
 

@@ -40,7 +40,7 @@ import {
 } from '../engine'
 import { EXAMPLE_PRODUCTS, LEVERAGED_EXAMPLE } from '../data/examples'
 import { PERSONAS } from '../data/personas'
-import { PRODUCTS } from '../data/products'
+import { isIllustrative, PRODUCTS } from '../data/products'
 import { useActiveProfile, useCurrency } from '../store/hooks'
 import { selectPortfolio, usePortfolioStore } from '../store/portfolioStore'
 
@@ -201,7 +201,7 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
           <h2 id="ex" className="text-h2">
             Example products
           </h2>
-          <IllustrativeBadge />
+          {shownSleeves.some((r) => EXAMPLE_PRODUCTS[r.sleeve as keyof typeof EXAMPLE_PRODUCTS].some(isIllustrative)) && <IllustrativeBadge />}
         </div>
         <div className="space-y-5">
           {shownSleeves.map((r) => (

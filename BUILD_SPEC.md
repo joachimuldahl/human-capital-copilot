@@ -1,6 +1,6 @@
 # Human Capital Copilot: demo build spec (for Claude Code)
 
-*v1.4 · 26 Nov 2026 · Single source of truth for building the demo. Replaces the staged S0–S11 plan (project docs 04/06) for this deadline. Financial maths matches project doc 03 (reference engine v2) exactly.*
+*v1.5 · 26 Nov 2026 · Single source of truth for building the demo. Replaces the staged S0–S11 plan (project docs 04/06) for this deadline. Financial maths matches project doc 03 (reference engine v2) exactly.*
 
 ---
 
@@ -160,7 +160,7 @@ The app turns 16 questions into one number, **Risk Capacity**: risk as a multipl
 | D-13 | Hosted on **Vercel** from a public GitHub repo under the personal account `joachimuldahl`. The live link is the demo link for the submission. |
 | D-14 | **No in-app AI chat.** "Explain" boxes use pre-written templates filled with engine numbers. |
 | D-15 | Scope = Landing, Onboarding, Results, Portfolio, Plan, **Method** (section 17). Out of scope: AI chat, alerts page, CSV import, performance/benchmarks, dividends, star investors, bank connections. |
-| D-16 | Demo data (products, ETF look-through) is **illustrative** until Damien's verified factsheet data arrives. It is isolated in `src/data/` so swapping it changes no other code. Show a small "Illustrative data" badge wherever it is used. |
+| D-16 | Demo data (products, ETF look-through) is **illustrative** unless verified. It is isolated in `src/data/` so swapping it changes no other code. Show a small "Illustrative data" badge wherever illustrative data is used. **v1.5:** five products use Damien's verified factsheet data (section 6.5); they show their source instead of the badge. |
 
 ---
 
@@ -316,7 +316,7 @@ Pure functions that return short plain-English strings built from engine results
 
 ## 6. Demo data (`src/data/`, illustrative: D-16)
 
-Every product has `illustrative: true`. The UI shows an "Illustrative data" badge. Keep the shapes stable; Damien's verified data will replace the values.
+Every product has `illustrative: true`, except the five verified products in section 6.5 (`illustrative: false`, with ISIN and source). The UI shows an "Illustrative data" badge for illustrative data. Keep the shapes stable.
 
 ### 6.1 Personas (`personas.ts`)
 
@@ -350,7 +350,7 @@ Fields: id, name, ticker, assetClass ('equity'|'bonds'|'gold'|'btc'|'cash'), sle
 | jpm | JPMorgan Chase | JPM | equity | single_stock (North America, Financials) |
 | cash | Cash account | — | cash | cash |
 
-Set `ter: null` and show "TER: see factsheet" until verified data arrives.
+Set `ter: null` and show "TER: see factsheet" until verified data arrives. **v1.5:** vwce, cspx, cndx, aggbond and sgln now carry the verified name, ticker, ISIN and TER of the matching factsheet ETF (section 6.5); their ids are unchanged.
 
 ### 6.3 Look-through (`lookthrough.ts`, weights in %, illustrative)
 
@@ -362,7 +362,7 @@ Set `ter: null` and show "TER: see factsheet" until verified data arrives.
 | finetf | JPMorgan 9.0 · Berkshire Hathaway 7.0 · Visa 5.0 · Mastercard 4.0 · Bank of America 3.0 | N. America 70 · Europe 20 · Japan & Pacific 10 | Financials 100 |
 | lev2x | same as cspx | N. America 100 | as cspx |
 
-Region and sector splits each sum to 100. Bonds, gold, bitcoin and cash are shown as "Non-equity" and are not part of the region/sector charts.
+Region and sector splits each sum to 100. Bonds, gold, bitcoin and cash are shown as "Non-equity" and are not part of the region/sector charts. **v1.5:** the vwce, cspx and cndx rows above are replaced by verified factsheet data (section 6.5); finetf and lev2x stay illustrative.
 
 ### 6.4 Demo portfolios (`demoPortfolios.ts`, values in EUR, totals = F exactly)
 
@@ -372,6 +372,21 @@ Region and sector splits each sum to 100. Bonds, gold, bitcoin and cash are show
 | mads (25,000) | Bank: cash 20,000 — Online broker: vwce 5,000 | Mostly cash, far below target |
 | lea (40,000) | Online broker: finetf 16,000 · jpm 8,000 · cspx 8,000 · aggbond 4,000 — Bank: cash 4,000 | Finance job AND finance-heavy portfolio |
 | jonas (15,000) | Crypto exchange: btcetp 9,000 — Online broker: nvda 4,500 — Bank: cash 1,500 | Far too much risk vs a 0.67× target |
+
+
+### 6.5 Verified product data (v1.5)
+
+Five products use Damien's factsheet extracts (`Team/Damien/Headroom_package/2_Demo_data`, audited in `docs/audit-damien.md`), matched on ISIN and generated into `src/data/verifiedEtfs.ts` by `npm run data:etf`:
+
+| Our id | Factsheet ETF | Ticker | ISIN | TER | Factsheet date |
+|---|---|---|---|---|---|
+| vwce | Vanguard FTSE All-World UCITS ETF (USD) Accumulating | VWCE | IE00BK5BQT80 | 0.14% | 31 Oct 2026 |
+| cspx | State Street SPDR S&P 500 UCITS ETF (Dist) | SPY5 | IE00B6YX5C33 | 0.03% | 31 Oct 2026 |
+| cndx | Invesco EQQQ NASDAQ-100 UCITS ETF Dist | EQQQ | IE0032077012 | 0.30% | 31 Oct 2026 |
+| aggbond | iShares Core Global Aggregate Bond UCITS ETF EUR Hedged (Acc) | AGGH | IE00BDBRDM35 | 0.10% | 31 Oct 2026 |
+| sgln | WisdomTree Physical Gold | PHAU | JE00B1VS3770 | 0.39% | 30 Oct 2026 |
+
+Rules: one security id per company (e.g. "APPLE INC" and "Apple Inc." → aapl; Alphabet class A + C merged); countries grouped into the four regions by MSCI market classification; VWCE's unlisted 11.3% of countries shown as "Other countries" with a footnote; sector labels (GICS, ICB) aligned to one set. Source URL and date per product are listed on the Method page. The financials ETF, short government bonds, Bitcoin ETP, 2× leveraged ETF and single-stock details stay illustrative.
 
 ---
 
@@ -475,7 +490,7 @@ Other checks:
 - solveAllocation(1.5, gold 0.05, btc 0.05) → equity 1.4094, loan −0.5094 · solveAllocation(1.5, btc 0.10) → equity 1.3101, loan −0.4101 · Lea with gold 0.05 → equity 0.1799, bonds 0.7701
 - marginBuffer(1.5) = 0.5556 · marginBuffer(1.2) = 0.7778 · marginBuffer(1.0) = null · letfDrag(2, 0.16) = 0.0256
 - Sofie's glide path finalEEE: age 24 → 1.50 · 30 → 1.50 · 39 → 1.50 · 40 → 1.45 · 42 → 1.33 · 45 → 1.20 · 48 → 1.11 · 53 → 1.00 · 60 → 0.93 · 67 → 0.88 (±0.005)
-- Sofie look-through: Apple = 1,000 + 4,000·4.5% + 3,000·8.5% = €1,435 = **14.4%** → alert. Overlap(vwce, cndx) = 4.5 + 4.2 + 4.0 + 2.3 = **15.0%**
+- Sofie look-through (v1.5, verified factsheet weights): Apple = 1,000 + 4,000·4.80% + 3,000·8.17% = **€1,437** (1,437.10) = **14.4%** → alert. Overlap(vwce, cndx) = Apple 4.80 + NVIDIA 4.60 + Microsoft 3.70 + Alphabet 2.67 + Amazon 2.30 + Meta 1.30 + Tesla 1.10 = 20.47% ≈ **20.5%** (was €1,435 and 15.0% with the illustrative v1.4 data)
 - Gate tests on Sofie: bufferMonths 2 → final 1.0, binding G1_buffer · maxDebtRate 0.09 → 1.0, G2_debt · leverageOptIn false → 1.0, G3_leverage · experience 'none' + knowledge check not passed → band moderate, final 1.0, binding G3_leverage
 
 ---

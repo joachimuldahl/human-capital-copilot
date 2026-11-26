@@ -79,6 +79,11 @@ export function formatPct(x: number): string {
   return r < 0 ? `−${s}` : s
 }
 
+/** Fund fee with 2 decimals: 0.0003 → "0.03%" (fees are too small for formatPct's 1 decimal). */
+export function formatFee(x: number): string {
+  return `${roundHalfAway(x * 100, 2).toFixed(2)}%`
+}
+
 export type IncomeType = 'bond-like' | 'mixed' | 'stock-like'
 
 /** Title for the income-type card: "Mixed". */

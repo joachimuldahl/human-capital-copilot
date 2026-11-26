@@ -8,6 +8,7 @@ import {
   ESTIMATE_NOTE,
   explainBinding,
   explainGrowthCap,
+  formatFee,
   formatMoney,
   formatWealthShare,
   niceAmount,
@@ -32,6 +33,9 @@ describe('formatMoney (18.1)', () => {
     expect(currencySymbol('EUR')).toBe('€')
     expect(currencySymbol('DKK')).toBe('kr')
     expect(currencySymbol('CHF')).toBe('CHF')
+  })
+  it('fees keep 2 decimals', () => {
+    expect([0.0014, 0.0003, 0.003, 0.001, 0.0039].map(formatFee)).toEqual(['0.14%', '0.03%', '0.30%', '0.10%', '0.39%'])
   })
   it('niceAmount rounds to 2 significant figures', () => {
     expect(niceAmount(74749)).toBe(75000)

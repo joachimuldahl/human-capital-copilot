@@ -165,3 +165,9 @@ They serve a different purpose. They can't replace our personas without inventin
 - **Sofie's overlap VWCE/CNDX: 15.0% → about 20.5%** (VWCE vs EQQQ, matching names across issuers). The spec's 15.0% value and its test would change.
 - **Lea's JPMorgan and financials story breaks:** no financials ETF, and SPY5's top 10 has no JPMorgan (our illustrative CSPX has 1.3%). Her "finance job and finance-heavy portfolio" needs a financials-ETF factsheet from Damien or a new demo portfolio.
 - **Other tests that would change** (not in section 9): the VWCE "North America 64%" region figures (Mads 64.0%, Lea 85.0%, Sofie €6,560), Mads's "Technology 26.0%", Lea's "Financials 78.3%", and the Lea overlap (1.3%).
+
+---
+
+## Decisions (26 Nov 2026)
+
+Joachim decided to use the verified data only for the five shared products (vwce, cspx → SPY5, cndx → EQQQ, aggbond → AGGH, sgln → PHAU), keep the financials ETF and the other products illustrative, accept the new section 9 values (Apple €1,437; overlap ≈ 20.5%), and merge parts of the description draft. Implemented in BUILD_SPEC v1.5 (sections 6.5 and 9).

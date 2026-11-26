@@ -37,10 +37,26 @@ describe('demo portfolios (6.4)', () => {
 })
 
 describe('products (6.2)', () => {
-  it('14 products, unique ids, all illustrative with TER pending', () => {
+  it('14 products, unique ids; five verified from factsheets, the rest illustrative with TER pending', () => {
     expect(PRODUCT_LIST).toHaveLength(14)
     expect(Object.keys(PRODUCTS)).toHaveLength(14)
-    expect(PRODUCT_LIST.every((p) => p.illustrative && p.ter === null)).toBe(true)
+    const verified = PRODUCT_LIST.filter((p) => !p.illustrative)
+    expect(verified.map((p) => p.id).sort()).toEqual(['aggbond', 'cndx', 'cspx', 'sgln', 'vwce'])
+    for (const p of verified) {
+      expect(p.isin, p.id).toMatch(/^[A-Z]{2}[A-Z0-9]{10}$/)
+      expect(p.source?.url, p.id).toMatch(/^https:\/\//)
+      expect(p.source?.asOf, p.id).toMatch(/^2026-10-3[01]$/)
+    }
+    expect(PRODUCT_LIST.filter((p) => p.illustrative).every((p) => p.ter === null && !p.isin && !p.source)).toBe(true)
+  })
+  it('verified products show the factsheet tickers and TERs', () => {
+    expect(['vwce', 'cspx', 'cndx', 'aggbond', 'sgln'].map((id) => [PRODUCTS[id].ticker, PRODUCTS[id].ter])).toEqual([
+      ['VWCE', 0.0014],
+      ['SPY5', 0.0003],
+      ['EQQQ', 0.003],
+      ['AGGH', 0.001],
+      ['PHAU', 0.0039],
+    ])
   })
   it('single stocks have region and sector; only lev2x is 2×', () => {
     for (const p of PRODUCT_LIST.filter((x) => x.sleeve === 'single_stock')) {
@@ -60,9 +76,25 @@ describe('products (6.2)', () => {
 })
 
 describe('look-through (6.3)', () => {
-  it.each(Object.keys(LOOKTHROUGH))('%s: region and sector splits sum to 100', (id) => {
-    expect(sum(LOOKTHROUGH[id].regions)).toBeCloseTo(100, 10)
-    expect(sum(LOOKTHROUGH[id].sectors)).toBeCloseTo(100, 10)
+  // Factsheets print 1–2 decimals, so verified splits sum to 100 within 0.1 (EQQQ sectors: 99.9).
+  it.each(Object.keys(LOOKTHROUGH))('%s: region and sector splits sum to 100 (±0.1)', (id) => {
+    expect(Math.abs(sum(LOOKTHROUGH[id].regions) - 100)).toBeLessThanOrEqual(0.1 + 1e-9)
+    expect(Math.abs(sum(LOOKTHROUGH[id].sectors) - 100)).toBeLessThanOrEqual(0.1 + 1e-9)
+  })
+  it('VWCE: the 11.3% of countries the factsheet does not list is "Other countries", with a footnote', () => {
+    expect(LOOKTHROUGH.vwce.regions['Other countries']).toBe(11.3)
+    expect(LOOKTHROUGH.vwce.regionNote).toContain('only its top 10 countries')
+  })
+  it('one security id per company (Alphabet class A + C merged)', () => {
+    for (const e of Object.values(LOOKTHROUGH)) {
+      const ids = e.topHoldings.map((h) => h.securityId)
+      expect(new Set(ids).size).toBe(ids.length)
+    }
+    expect(LOOKTHROUGH.cspx.topHoldings.find((h) => h.securityId === 'googl')!.weight).toBeCloseTo(2.51 + 2.02, 10)
+  })
+  it('verified look-through is not illustrative; the financials ETF and lev2x are', () => {
+    expect([LOOKTHROUGH.vwce, LOOKTHROUGH.cspx, LOOKTHROUGH.cndx].every((e) => !e.illustrative)).toBe(true)
+    expect(LOOKTHROUGH.finetf.illustrative && LOOKTHROUGH.lev2x.illustrative).toBe(true)
   })
   it('top holdings that are also products use the product id and name', () => {
     for (const e of Object.values(LOOKTHROUGH)) {
@@ -73,6 +105,6 @@ describe('look-through (6.3)', () => {
     }
   })
   it('lev2x has the same holdings as cspx', () => {
-    expect(LOOKTHROUGH.lev2x).toEqual(LOOKTHROUGH.cspx)
+    expect({ ...LOOKTHROUGH.lev2x, illustrative: false }).toEqual(LOOKTHROUGH.cspx)
   })
 })

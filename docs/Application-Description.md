@@ -2,7 +2,7 @@
 
 *Draft · 26 Nov 2026 · Team: Jens, Damien, Joachim · Live demo: https://building-your-wealth.vercel.app/*
 
-> **Draft notes for the team (delete before submission):** check the wording of each section, export this file to PDF, add Damien's verified product data when it arrives (section 8), and add any prompts from Jens and Damien to `prompts/`, and add the design-phase export as `prompts/design-phase-log.md` (referenced in section 7, not in the repo yet). Screenshots are in `docs/screenshots/`.
+> **Draft notes for the team (delete before submission):** check the wording of each section, export this file to PDF, replace `prompts/team/damien.md` with Damien's original prompts when they arrive, add any prompts from Jens to `prompts/`, and add the design-phase export as `prompts/design-phase-log.md` (referenced in section 7, not in the repo yet). Screenshots are in `docs/screenshots/`.
 
 ## 1. Problem
 
@@ -15,7 +15,17 @@ That matters for risk, in two directions:
 
 Standard risk questionnaires miss both effects. Young people with safe jobs often hold too little risk (lots of cash), while people in finance often double up on the same risk.
 
+Today's tools don't close this gap:
+
+- **Portfolio trackers look backwards.** They show what you own, not whether that risk fits your life.
+- **Robo-advisor questionnaires mostly ask about willingness, not capacity.** A review of the risk questionnaires of 30 robo-advisors in seven Asia-Pacific economies found that risk-tolerance questions outnumber risk-capacity questions (Lai & Chow, 2023). Future earnings and job risk, the core of capacity, are rarely measured.
+- **AI chatbots are not a substitute.** Their advice can change with how a question is worded, and it is hard to check. That is why every number in this app comes from tested formulas, and the explanations are fixed templates filled with those numbers.
+
+Robo-advice can help: in one study it left investors who started out under-diversified with better-diversified portfolios (D'Acunto, Prabhala & Rossi, 2019). But borrowing to invest amplifies losses, so the app offers decision support with explicit risk explanations, not financial advice.
+
 ## 2. Solution
+
+*Know what you own. Know how much risk to take.* (The product was presented as "Headroom" in the team's pitch; the app is called Human Capital Copilot.)
 
 Human Capital Copilot turns 16 questions into one number, **Risk Capacity**: how much risk your portfolio can carry, as a multiple of the global stock market (1.00× = 100% in a global stock index fund; 1.50× = the most we ever suggest, using a broker loan). The app then:
 
@@ -29,7 +39,7 @@ Human Capital Copilot turns 16 questions into one number, **Risk Capacity**: how
 - **Show, don't tell.** Every question has a "Why we ask" panel with the reason, how the answer is used, the research behind it and a live line computed by the engine, for example "Retiring 2 years later would add €5,274 to your future savings, but your target stays at 1.50× because it is limited by our 1.5× safety cap."
 - **Income type changes the answer.** The same age, savings and risk attitude give very different results for a doctor and a trader, because the app measures how stock-like each income is (βH).
 - **Safety built into the number.** A 1.5× policy cap, gates for missing emergency savings and expensive debt, a knowledge check before borrowing, and a cap based on the user's own maximum loss.
-- **Look-through of ETFs.** The app shows hidden concentration (Sofie owns 14.4% Apple across a stock and two ETFs) and overlap between ETFs (VWCE and CNDX share 15% of their top holdings).
+- **Look-through of ETFs.** The app shows hidden concentration (Sofie owns 14.4% Apple across a stock and two ETFs) and overlap between ETFs (VWCE and EQQQ share 20.5% of their top holdings, using the issuers' October 2026 factsheets).
 - **Transparent and deterministic.** Every number comes from tested formulas, and every assumption is shown in an Assumptions table. There is no AI chat and no AI-generated numbers.
 
 ## 4. Users and personas
@@ -70,7 +80,11 @@ All human-capital maths is in real (inflation-adjusted) terms. The full specific
 
 8. **Currency.** Every amount is shown in the currency the user picks. Demo data and the money thresholds (the €5,000 borrowing minimum, defaults, slider ranges) are stored in euros and converted at fixed ECB reference rates (17 Nov 2026). The model works with ratios, so the Risk Capacity is identical in every currency; a test checks this for all four personas in all seven currencies.
 
-**Testing.** 282 automated tests reproduce every expected value in the specification (all four personas, demo portfolios, allocations, crash tests, glide path, gate cases) and check the pages themselves. Engine coverage is about 99% of lines.
+**The research does not all point one way.** If your income doesn't move with the stock market, it works like a bond, so workers should hold more stocks than retirees (Viceira, 2001) and the stock share should fall with age (Cocco, Gomes & Maenhout, 2005). But if wages and stock returns move together over the long run, a young worker's human capital is already stock-like, and the best stock share for the young can be close to zero (Benzoni, Collin-Dufresne & Goldstein, 2007). Income type therefore matters, which is why the app asks about sector, variable pay and job security and turns them into βH, instead of assuming every young person should take more risk. Leveraged ETFs are only shown as an alternative to a broker loan, with a warning that daily resetting makes long-run returns differ from the stated multiple (Avellaneda & Zhang, 2010; Cheng & Madhavan, 2009).
+
+**Product data.** Five example products (VWCE, SPY5, EQQQ, AGGH, PHAU) use verified data from the issuers' factsheets (31 Oct 2026; PHAU 30 Oct): fees, top 10 holdings, and country and sector weights. Each product's source and date are listed on the Method page. All other product data is illustrative and marked as such.
+
+**Testing.** 296 automated tests reproduce every expected value in the specification (all four personas, demo portfolios, allocations, crash tests, glide path, gate cases) and check the pages themselves. Engine coverage is about 99% of lines.
 
 ## 7. How AI was used in development
 
@@ -86,11 +100,21 @@ The app was built with **Claude Code** (Anthropic's coding agent) working from a
 - **Team prompts.** Damien's prompts (pitch, demo data, his description draft) are in `prompts/team/damien.md`. That file is a summary written by Damien with AI assistance, NOT verbatim; his original prompts were requested on 26 Nov 2026 and will replace it when received.
 - **Humans decided.** Joachim approved every plan, every dependency outside the agreed stack, every commit and every push, and checked the result in the browser.
 
+**Team contributions.** Damien collected the ETF demo data from ten official issuer factsheets (October 2026) and wrote the first draft of this description, including the evidence on robo-advisors and the research that disagrees. Claude Code audited his data against the factsheet PDFs (`docs/audit-damien.md`, no errors found), imported the five products we use, and checked the citations; only those listed in the Method page references or verified to exist were kept.
+
 ## 8. Limitations
 
-- **Illustrative data.** Product names, tickers, fees (TER) and ETF holdings are placeholders until verified against factsheets. Only top holdings are used for look-through and overlap.
+- **Partly illustrative data.** Five products use verified factsheet data; the financials ETF, short government bonds, Bitcoin ETP, 2× leveraged ETF, single-stock details, the demo people and their portfolios are illustrative. Look-through and overlap use only each ETF's top 10 holdings, and VWCE's factsheet lists only its top 10 countries (the rest is shown as "Other countries").
 - **Judgement-based income betas.** How stock-like each sector's income is (βH) is a conservative model assumption, not an estimate from data.
 - **Simplified model.** Fixed return, volatility and correlation assumptions; no taxes, fees, inflation scenarios or currency risk (FX rates are fixed and only used for display and thresholds); the crash test is one historical-style scenario, not a forecast.
 - **Income model.** One growth rate until 45, then 0.5% a year; no career breaks, unemployment or pensions.
 - **Not advice.** The app shows sleeve weights and example products for education. It never gives buy or sell instructions and never places orders.
 - **Local only.** Answers are stored in the user's browser and are not shared between devices.
+
+## References (in addition to the Method page)
+
+- Avellaneda, M. & Zhang, S. (2010). Path-dependence of leveraged ETF returns. *SIAM Journal on Financial Mathematics*, 1, 586–603.
+- D'Acunto, F., Prabhala, N. & Rossi, A. G. (2019). The promises and pitfalls of robo-advising. *Review of Financial Studies*, 32(5), 1983–2020.
+- Lai, T. Y. & Chow, Y. P. (2023). An evaluation of robo-advisor risk assessment questionnaires in selected Asia Pacific economies. *Tra Vinh University Journal of Science*, 13(3). doi:10.35382/TVUJS.13.3.2023.2428
+
+All other works cited (Viceira; Cocco, Gomes & Maenhout; Benzoni, Collin-Dufresne & Goldstein; Cheng & Madhavan; Ayres & Nalebuff; Ibbotson et al.) are listed in full on the Method page.

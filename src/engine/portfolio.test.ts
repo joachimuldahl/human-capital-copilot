@@ -45,13 +45,14 @@ describe('look-through (Sofie)', () => {
   const lt = lookThrough(PORTFOLIOS.sofie, PRODUCTS, LOOKTHROUGH)
   const apple = lt.securities.find((s) => s.securityId === 'aapl')!
 
-  it('Apple = 1,000 + 4,000·4.5% + 3,000·8.5% = €1,435 = 14.4% → alert', () => {
-    near(apple.valueEUR, 1435, 0.01)
-    near(apple.share, 0.1435, 1e-9)
+  // Verified factsheet weights (Oct 2026): VWCE Apple 4.80%, EQQQ (cndx) Apple 8.17%.
+  it('Apple = 1,000 + 4,000·4.8% + 3,000·8.17% = €1,437.10 = 14.4% → alert', () => {
+    near(apple.valueEUR, 1437.1, 0.01)
+    near(apple.share, 0.14371, 1e-9)
     const flags = concentrationFlags(lt.securities)
     expect(flags[0].securityId).toBe('aapl')
     expect(flags[0].level).toBe('alert')
-    expect(explainConcentration(flags[0])).toBe('Apple 14.4%: direct 10.0% + VWCE 1.8% + CNDX 2.6%')
+    expect(explainConcentration(flags[0])).toBe('Apple 14.4%: direct 10.0% + VWCE 1.9% + EQQQ 2.5%')
   })
 
   it('largest security first; equity value and net worth', () => {
@@ -63,13 +64,16 @@ describe('look-through (Sofie)', () => {
   it('region and sector splits are over equity value and sum to 100%', () => {
     const sum = (xs: { share: number }[]) => xs.reduce((s, x) => s + x.share, 0)
     near(sum(lt.regions), 1, 1e-9)
-    near(sum(lt.sectors), 1, 1e-9)
-    // N. America = 4000·64% + 3000 + 1000 = 6560 of 8000
-    near(lt.regions.find((r) => r.name === 'North America')!.valueEUR, 6560, 1e-6)
+    // EQQQ's sectors are printed with 1 decimal and sum to 99.9: 3000·0.1% = €3 of €8,000 is unassigned.
+    near(sum(lt.sectors), 1 - 3 / 8000, 1e-9)
+    // N. America = 4000·65.9% (US 62.8 + Canada 3.1) + 3000·98.1% (US 97.0 + Canada 1.1) + 1000 (Apple) = 6579 of 8000
+    near(lt.regions.find((r) => r.name === 'North America')!.valueEUR, 6579, 1e-6)
   })
 
-  it('overlap(vwce, cndx) = 15.0%', () => {
-    near(overlap(LOOKTHROUGH.vwce, LOOKTHROUGH.cndx), 0.15, 1e-9)
+  // Shared top holdings, min of the two weights: Apple 4.8 + NVIDIA 4.6 + Microsoft 3.7 + Alphabet 2.67
+  // + Amazon 2.3 + Meta 1.3 + Tesla 1.1 = 20.47%
+  it('overlap(vwce, cndx) = 20.47% ≈ 20.5%', () => {
+    near(overlap(LOOKTHROUGH.vwce, LOOKTHROUGH.cndx), 0.2047, 1e-9)
     expect(overlap(LOOKTHROUGH.cndx, LOOKTHROUGH.finetf)).toBe(0)
   })
 })
@@ -78,10 +82,10 @@ describe('portfolio edge cases', () => {
   it('Lea gets a warning for JPMorgan (direct + ETFs)', () => {
     const flags = concentrationFlags(lookThrough(PORTFOLIOS.lea, PRODUCTS, LOOKTHROUGH).securities)
     const jpm = flags.find((f) => f.securityId === 'jpm')!
-    // 8000 + 16000·9% + 8000·1.3% = 9544 → 23.9%
-    near(jpm.share, 0.2386, 1e-4)
+    // 8000 + 16000·9% (illustrative financials ETF) = 9440 → 23.6%; JPMorgan is not in SPY5's verified top 10
+    near(jpm.share, 0.236, 1e-4)
     expect(jpm.level).toBe('alert')
-    expect(jpm.sources.map((s) => s.label)).toEqual(['direct', 'World financials sector ETF', 'CSPX'])
+    expect(jpm.sources.map((s) => s.label)).toEqual(['direct', 'World financials sector ETF'])
   })
   it('a 2× ETF counts double in exposures', () => {
     const x = exposures([mk('a', 'lev2x', 500), mk('a', 'cash', 500)], PRODUCTS)
@@ -101,7 +105,7 @@ describe('portfolio edge cases', () => {
     const lt = lookThrough([mk('a', 'vwce', 1000), mk('b', 'vwce', 1000)], PRODUCTS, LOOKTHROUGH)
     const apple = lt.securities.find((s) => s.securityId === 'aapl')!
     expect(apple.sources).toHaveLength(1)
-    near(apple.sources[0].share, 0.045, 1e-9)
+    near(apple.sources[0].share, 0.048, 1e-9)
   })
   it('empty portfolio', () => {
     expect(exposures([], PRODUCTS)).toEqual({ equity: 0, bonds: 0, gold: 0, btc: 0, cash: 0 })

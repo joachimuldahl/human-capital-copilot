@@ -34,16 +34,16 @@ describe('assetClassValues', () => {
 })
 
 describe('overlapPairs', () => {
-  it('Sofie: VWCE/CNDX 15.0%', () => {
+  it('Sofie: VWCE/CNDX (EQQQ) 20.47%', () => {
     const pairs = overlapPairs(PORTFOLIOS.sofie, LOOKTHROUGH)
     expect(pairs).toHaveLength(1)
     expect(pairs[0]).toMatchObject({ a: 'vwce', b: 'cndx' })
-    expect(pairs[0].overlap).toBeCloseTo(0.15, 10)
+    expect(pairs[0].overlap).toBeCloseTo(0.2047, 10)
   })
-  it('Lea: finetf/cspx share only JPMorgan (1.3%)', () => {
+  it('Lea: the financials ETF and SPY5 share no top holdings (JPMorgan is not in SPY5\'s verified top 10)', () => {
     const pairs = overlapPairs(PORTFOLIOS.lea, LOOKTHROUGH)
     expect(pairs).toHaveLength(1)
-    expect(pairs[0].overlap).toBeCloseTo(0.013, 10)
+    expect(pairs[0].overlap).toBe(0)
   })
   it('sorted largest first; stocks and duplicates ignored', () => {
     const pairs = overlapPairs([mk('a', 'vwce', 1), mk('a', 'finetf', 1), mk('a', 'cndx', 1), mk('b', 'vwce', 1), mk('a', 'aapl', 1)], LOOKTHROUGH)
@@ -91,30 +91,31 @@ describe('portfolio captions', () => {
   it('regions and sectors (Lea: finance job + finance-heavy stocks)', () => {
     const lea = lookThrough(PORTFOLIOS.lea, PRODUCTS, LOOKTHROUGH)
     expect(explainRegions(lea.regions)).toBe('North America is 85.0% of your stocks. That is more concentrated than the global stock market.')
-    // Financials = 16,000 + 8,000 + 8,000·13% = 25,040 of 32,000 = 78.3%
+    // Financials = 16,000 + 8,000 + 8,000·12.2% (SPY5) = 24,976 of 32,000 = 78.05% → 78.1%
     expect(explainSectors(lea.sectors, 'finance')).toBe(
-      'Financials is the largest sector: 78.3% of your stocks. Your salary also depends on financials: 78.3% of your stocks are in the same sector as your job, so a downturn could hit both at once.',
+      'Financials is the largest sector: 78.1% of your stocks. Your salary also depends on financials: 78.1% of your stocks are in the same sector as your job, so a downturn could hit both at once.',
     )
     const mads = lookThrough(PORTFOLIOS.mads, PRODUCTS, LOOKTHROUGH)
-    expect(explainRegions(mads.regions)).toBe('North America is 64.0% of your stocks.')
-    expect(explainSectors(mads.sectors, 'public')).toBe('Technology is the largest sector: 26.0% of your stocks.')
+    // VWCE: US 62.8 + Canada 3.1; ICB Technology 33.5
+    expect(explainRegions(mads.regions)).toBe('North America is 65.9% of your stocks.')
+    expect(explainSectors(mads.sectors, 'public')).toBe('Technology is the largest sector: 33.5% of your stocks.')
     expect(explainRegions([])).toContain('no stocks')
     expect(explainSectors([], 'tech')).toContain('no stocks')
   })
   it('concentration and overlap summaries', () => {
     const flags = concentrationFlags(lookThrough(PORTFOLIOS.sofie, PRODUCTS, LOOKTHROUGH).securities)
     expect(explainConcentrationSummary(flags)).toBe(
-      '1 company is above 5% of your portfolio once you count what your ETFs hold. Largest: Apple 14.4%: direct 10.0% + VWCE 1.8% + CNDX 2.6%.',
+      '1 company is above 5% of your portfolio once you count what your ETFs hold. Largest: Apple 14.4%: direct 10.0% + VWCE 1.9% + EQQQ 2.5%.',
     )
     expect(explainConcentrationSummary([])).toContain('No single company')
     const lea = concentrationFlags(lookThrough(PORTFOLIOS.lea, PRODUCTS, LOOKTHROUGH).securities)
     // Only JPMorgan is above 5% (Berkshire via the financials ETF is 2.8%)
     expect(explainConcentrationSummary(lea)).toBe(
-      '1 company is above 5% of your portfolio once you count what your ETFs hold. Largest: JPMorgan Chase 23.9%: direct 20.0% + World financials sector ETF 3.6% + CSPX 0.3%.',
+      '1 company is above 5% of your portfolio once you count what your ETFs hold. Largest: JPMorgan Chase 23.6%: direct 20.0% + World financials sector ETF 3.6%.',
     )
     expect(explainConcentrationSummary([...flags, ...flags])).toMatch(/^2 companies are above 5%/)
     expect(explainOverlap(overlapPairs(PORTFOLIOS.sofie, LOOKTHROUGH), ticker)).toBe(
-      'VWCE and CNDX share 15.0% of their top holdings, so part of your money buys the same companies twice.',
+      'VWCE and EQQQ share 20.5% of their top holdings, so part of your money buys the same companies twice.',
     )
     expect(explainOverlap([], ticker)).toContain('fewer than two ETFs')
     expect(explainOverlap([{ a: 'vwce', b: 'finetf', overlap: 0 }], ticker)).toBe('Your ETFs share none of their top holdings.')

@@ -42,7 +42,7 @@ import {
 import { DEMO_PORTFOLIOS } from '../data/demoPortfolios'
 import { LOOKTHROUGH } from '../data/lookthrough'
 import { PERSONAS } from '../data/personas'
-import { PRODUCTS } from '../data/products'
+import { formatSourceDate, isIllustrative, PRODUCTS } from '../data/products'
 import { QUICK_FIELDS } from '../data/quickEntry'
 import { useActiveProfile, useCurrency } from '../store/hooks'
 import { selectPortfolio, usePortfolioStore, type PortfolioSource } from '../store/portfolioStore'
@@ -62,7 +62,7 @@ export default function Portfolio() {
     <div className={`${pageWrap} flex flex-col gap-6 pt-8 pb-20 sm:pt-12`}>
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="font-display text-[32px] font-semibold tracking-[-0.02em] sm:text-h1">Portfolio</h1>
-        <IllustrativeBadge />
+        {portfolio.holdings.some((h) => isIllustrative(h.productId)) && <IllustrativeBadge />}
       </div>
 
       <SourceSelector personaName={isPersona ? PERSONAS[active].name : null} source={portfolio.source} story={isPersona ? DEMO_PORTFOLIOS[active].story : null} />
@@ -112,6 +112,8 @@ function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
   const flagOf = new Map(flags.map((f) => [f.securityId, f.level]))
   const classes = assetClassValues(holdings, PRODUCTS)
   const pairs = overlapPairs(holdings, LOOKTHROUGH)
+  // Source footnotes (e.g. VWCE lists only its top 10 countries), one per ETF held.
+  const regionNotes = [...new Set(holdings.map((h) => LOOKTHROUGH[h.productId]?.regionNote).filter((n): n is string => !!n))]
 
   return (
     <>
@@ -171,7 +173,10 @@ function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
                         <tr key={h.id} className="border-b border-line last:border-0">
                           <td className="py-2 pr-2">
                             <span className="block text-ink">{p.name}</span>
-                            <span className="block text-xs text-muted">{p.ticker ?? 'Ticker to verify'}</span>
+                            <span className="block text-xs text-muted">
+                              {p.ticker ?? 'Ticker to verify'}
+                              {p.source ? ` · factsheet ${formatSourceDate(p.source.asOf)}` : isIllustrative(p.id) ? ' · illustrative' : ''}
+                            </span>
                           </td>
                           <td className="py-2 text-right tabular-nums">{money(h.valueEUR)}</td>
                           <td className="w-16 py-2 text-right tabular-nums text-ink-2">{formatPct(shares[h.id])}</td>
@@ -208,7 +213,7 @@ function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
                 id: 'region',
                 label: 'Region',
                 content: (
-                  <Panel caption={explainRegions(lt.regions)} note="Stocks only, looking through your ETFs.">
+                  <Panel caption={explainRegions(lt.regions)} note={['Stocks only, looking through your ETFs.', ...regionNotes].join(' ')}>
                     <SplitBars items={lt.regions} label="Stocks by region" />
                   </Panel>
                 ),

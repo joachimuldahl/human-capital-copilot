@@ -129,7 +129,12 @@ export interface Product {
   region?: string
   /** Single stocks only. */
   sector?: string
-  illustrative: true
+  /** ISIN, for products with verified data. */
+  isin?: string
+  /** Where verified data comes from (issuer factsheet page and its date). */
+  source?: { issuer: string; url: string; asOf: string }
+  /** Demo data until verified (D-16); false for the products filled from issuer factsheets. */
+  illustrative: boolean
 }
 
 export interface Account {
@@ -159,8 +164,10 @@ export interface LookThroughEntry {
   regions: Record<string, number>
   /** Percent per sector; sums to 100. */
   sectors: Record<string, number>
-  /** Demo data until verified factsheets arrive (D-16). */
-  illustrative: true
+  /** Footnote when the region split is incomplete in the source (e.g. only the top 10 countries are printed). */
+  regionNote?: string
+  /** Demo data until verified (D-16); false for data from issuer factsheets. */
+  illustrative: boolean
 }
 
 /** Product id → product. */

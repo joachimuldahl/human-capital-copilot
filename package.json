@@ -10,6 +10,7 @@
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "preview": "vite preview",
+    "data:etf": "node scripts/import-etf-data.mjs",
     "zip": "git archive --format=zip --prefix=human-capital-copilot/ -o human-capital-copilot-submission.zip HEAD"
   },
   "dependencies": {

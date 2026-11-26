@@ -191,11 +191,11 @@ describe('Currency (BUILD_SPEC 18)', () => {
     expect(t).not.toContain('€')
   })
 
-  it('Sofie in GBP: same portfolio analysis (Apple 14.4%, 15.0% overlap), amounts in £', async () => {
+  it('Sofie in GBP: same portfolio analysis (Apple 14.4%, 20.5% overlap), amounts in £', async () => {
     const t = await renderPage('Portfolio', { active: 'sofie', answers: {}, currency: 'GBP' })
     expect(t).toContain('1.01×')
     expect(t).toContain('Apple 14.4%')
-    expect(t).toContain('15.0%')
+    expect(t).toContain('20.5%')
     expect(t).toContain('£8,331') // €10,000 · 0.83305
   })
 
@@ -271,12 +271,12 @@ describe('Portfolio (Phase 4 acceptance: section 9 numbers)', () => {
     expect(t).not.toContain('adds up to') // demo totals equal F: no mismatch banner
   })
 
-  it("Sofie: Apple alert 14.4% with sources, and 15.0% VWCE/CNDX overlap", async () => {
+  it("Sofie: Apple alert 14.4% with sources, and 20.5% VWCE/EQQQ overlap (verified factsheet data)", async () => {
     const t = await renderPage('Portfolio', { active: 'sofie', answers: {} })
-    expect(t).toContain('Apple 14.4%: direct 10.0% + VWCE 1.8% + CNDX 2.6%')
+    expect(t).toContain('Apple 14.4%: direct 10.0% + VWCE 1.9% + EQQQ 2.5%')
     expect(t).toContain('Over 10%')
-    expect(t).toContain('VWCE and CNDX share 15.0% of their top holdings')
-    expect(t).toContain('VWCE + CNDX')
+    expect(t).toContain('VWCE and EQQQ share 20.5% of their top holdings')
+    expect(t).toContain('VWCE + EQQQ')
     expect(t).toContain('Online broker')
     expect(t).toContain('Crypto exchange')
   })

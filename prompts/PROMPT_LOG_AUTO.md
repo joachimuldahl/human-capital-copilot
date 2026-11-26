@@ -138,3 +138,17 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 > </pasted_content id="e8ab">
 >
 
+### 2026-11-26 21:55:25 +02:00 · session 8de8bac7
+>
+>
+> <pasted_content id="e8ab">
+> Decisions on Damien's audit (docs/audit-damien.md):
+> 1. Replace our illustrative data with Damien's verified data ONLY for the five products we share: VWCE, S&P 500, Nasdaq-100, global bond, gold. Match on ISIN, show his tickers, and normalise security names to one id per company (e.g. "APPLE" and "Apple Inc." → aapl) so look-through works. Keep the source URL and as-of date for each product and list them on the Method page. These five lose the "Illustrative data" badge; everything else keeps it.
+> 2. VWCE regions sum to 88.7%: put the remaining 11.3% into "Other countries" with a footnote saying the factsheet only lists the top 10 countries.
+> 3. Lea keeps the illustrative financials ETF (badge stays), so her story still works. The short government bond, Bitcoin ETP and 2× leveraged products also stay illustrative.
+> 4. Update BUILD_SPEC section 9: the VWCE/CNDX overlap (≈20.5%) and Sofie's Apple amount (€1,437) to the new data-driven values. If ANY other section 9 value would change, stop and tell me before changing it.
+> 5. Application description: add Damien's evidence on robo-advisors and AI chatbots, his paragraph on research that disagrees, and his tagline, rewritten to match the app (name: Human Capital Copilot; no AI agents, alerts or star investors; 1.5× cap, not 200%). Keep only citations that are in BUILD_SPEC 17 or that you can verify exist. List the 7 unverified ones for me and leave them out for now. Add a line saying the product was presented as "Headroom" in the pitch. Add a "Team contributions" paragraph crediting Damien for the verified ETF demo data and the description draft.
+> Run tests, lint and build, retake the screenshots that changed, commit and push, then show me every number that changed on screen.
+> </pasted_content id="e8ab">
+>
+

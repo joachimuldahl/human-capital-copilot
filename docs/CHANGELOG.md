@@ -67,3 +67,8 @@
 - Onboarding is now one question per screen (`#/onboarding?q=1…17`), with Enter to continue, a `<details>` "Why we ask" card, a step progress bar and a phone bottom bar that opens the panel as a sheet. The pending-gates estimate logic is unchanged.
 - Landing, Results (hero card, glide-path markers, balance sheet with the portfolio's actual risk), Portfolio, Plan and Method restyled; the gauge is now a progress arc (lime ≥ 1.0×, sky below).
 - No engine or data changes. 193 tests; browser check at 375/1280 px clean; Lighthouse accessibility 100. Screenshots refreshed.
+
+## 2026-11-26 · Phase 3c follow-up · Gaps from the audit
+- Onboarding panel: "What drives this" shows "not answered yet" for risk attitude (Q12–13) and a new Limits row (Q14/Q16), then names the limit that applies.
+- Accessibility: chart SVGs inside aria-hidden wrappers are no longer keyboard-focusable (Recharts accessibilityLayer off, pie rootTabIndex −1).
+- Lighthouse accessibility now 100 on all pages with a demo person loaded, phone and desktop; description and two screenshots updated.

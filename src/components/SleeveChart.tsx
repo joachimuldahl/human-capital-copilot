@@ -10,7 +10,7 @@ export default function SleeveChart({ rows }: { rows: SleeveRow[] }) {
   return (
     <div className="h-64 w-full" aria-hidden>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
+        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -12 }} accessibilityLayer={false}>
           <CartesianGrid stroke="#1E293B" vertical={false} />
           <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#A3AEC2' }} interval={0} stroke="#1E293B" tickLine={false} />
           <YAxis tickFormatter={(v: number) => `${Math.round(v * 100)}%`} tick={{ fontSize: 12, fill: '#7D8AA3' }} axisLine={false} tickLine={false} />

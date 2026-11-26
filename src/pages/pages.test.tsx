@@ -124,6 +124,18 @@ describe('Onboarding', () => {
     expect(t).toContain('1.50×')
   })
 
+  it('"What drives this" says "not answered yet" for risk attitude and limits until those questions are answered', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: { age: 30 } })
+    expect(t).toContain('Risk attitude not answered yet')
+    expect(t).toContain('Limits not answered yet')
+  })
+
+  it('"What drives this" names the limit that applies once everything is answered', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: PERSONAS.sofie.profile })
+    expect(t).not.toContain('not answered yet')
+    expect(t).toContain('Limits Safety cap (1.5×) · 1.50×')
+  })
+
   it('one question per screen, each with its own 4-part "Why we ask" card and the method link', async () => {
     const { WHY_WE_ASK } = await import('../content/whyWeAsk')
     const t = await renderPage('Onboarding')

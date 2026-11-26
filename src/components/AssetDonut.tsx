@@ -17,8 +17,8 @@ export default function AssetDonut({ values }: { values: ClassValue[] }) {
       {/* Fixed size (not ResponsiveContainer): the chart sits in a tab panel that can be hidden, and a hidden
           responsive chart measures 0×0 and logs a warning. */}
       <div className="mx-auto h-52 w-52" aria-hidden>
-        <PieChart width={208} height={208}>
-            <Pie data={values} dataKey="valueEUR" nameKey="assetClass" innerRadius="58%" outerRadius="95%" paddingAngle={1} stroke="#0E1422" strokeWidth={2} isAnimationActive={false}>
+        <PieChart width={208} height={208} accessibilityLayer={false}>
+            <Pie data={values} dataKey="valueEUR" nameKey="assetClass" innerRadius="58%" outerRadius="95%" paddingAngle={1} stroke="#0E1422" strokeWidth={2} isAnimationActive={false} rootTabIndex={-1}>
               {values.map((v) => (
                 <Cell key={v.assetClass} fill={CLASS_COLOR[v.assetClass]} />
               ))}

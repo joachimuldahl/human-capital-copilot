@@ -11,6 +11,7 @@ import { WHY_WE_ASK } from '../content/whyWeAsk'
 import {
   answerEffect,
   assumptions,
+  CAP_LABEL,
   driverLines,
   ESTIMATE_NOTE,
   drawdownQuestion,
@@ -289,10 +290,30 @@ export default function Onboarding() {
           <p className="text-[13px] text-muted">You can change any answer later.</p>
         </section>
 
-        <SummaryPanel value={target.finalEEE} estimate={pending.length > 0} unanswered={unanswered} text={explanation} drivers={driverLines(target)} />
+        <SummaryPanel value={target.finalEEE} estimate={pending.length > 0} unanswered={unanswered} text={explanation} drivers={panelDrivers(driverLines(target), target, answers, pending.length > 0)} />
       </div>
     </>
   )
+}
+
+const NOT_ANSWERED = 'not answered yet'
+
+/**
+ * "What drives this" rows for the side panel (BUILD_SPEC 15): risk attitude says "not answered yet" until Q12–13
+ * are answered, and a Limits row names the limit that applies, or "not answered yet" while Q14/Q16 are pending.
+ * Display only: every value is engine output.
+ */
+function panelDrivers(
+  lines: { label: string; value: string }[],
+  t: ReturnType<typeof useMyTarget>['target'],
+  answers: Partial<Profile>,
+  limitsPending: boolean,
+): { label: string; value: string }[] {
+  const attitudeOpen = answers.drawdownReaction === undefined || answers.incomeGamble === undefined
+  const rows = lines.map((d) => (d.label === 'Risk attitude' && attitudeOpen ? { ...d, value: NOT_ANSWERED } : d))
+  const cap = t.caps.find((c) => c.id === t.binding)
+  const limits = limitsPending ? NOT_ANSWERED : cap ? `${CAP_LABEL[cap.id]} · ${formatRatio(cap.value)}` : 'None reached'
+  return [...rows, { label: 'Limits', value: limits }]
 }
 
 function clampQ(n: number) {
@@ -418,7 +439,7 @@ function PanelBody({ value, estimate, unanswered, text, drivers }: PanelProps) {
           {drivers.map((d) => (
             <div key={d.label} className="flex items-baseline justify-between gap-3 text-help">
               <dt className="whitespace-nowrap text-ink-2">{d.label}</dt>
-              <dd className="text-right font-medium text-ink">{d.value}</dd>
+              <dd className={`text-right ${d.value === NOT_ANSWERED ? 'text-muted italic' : 'font-medium text-ink'}`}>{d.value}</dd>
             </div>
           ))}
         </dl>

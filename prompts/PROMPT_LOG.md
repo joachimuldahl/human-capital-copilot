@@ -112,3 +112,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ (193/193) · lint ✔ · build ✔ · browser check ✔ (43 states) · Lighthouse a11y 100
 **Human check:** (to fill in by Joachim)
 **Lesson:** The mockups' copy and the spec's copy disagreed (landing headline, CTA labels). Keeping the spec text that tests already check, and taking only layout and tone from the mockups, avoided a silent change to the source of truth.
+
+### C-014 · 2026-11-26 · Joachim · Claude Code · Phase 3c follow-up
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entries 2026-11-26 19:39:22 (are we missing anything?) and 19:42:30 +02:00 (go ahead).
+**What the AI did:** Audited the build against spec sections 14–15 and listed the gaps. Then (1) the onboarding "What drives this" panel now says "not answered yet" for risk attitude until Q12–13 are answered, and has a Limits row that says "not answered yet" while Q14/Q16 are pending, otherwise it names the limit that applies (display only, engine unchanged); (2) ran Lighthouse accessibility on Results, Portfolio and Plan with a demo person loaded (localStorage seeded over CDP, storage reset off). Portfolio and Plan scored 96–97 because Recharts 3 makes chart SVGs focusable inside aria-hidden wrappers; turned that off (accessibilityLayer={false}, Pie rootTabIndex={-1}). Now 100 on every page.
+**Files changed:** src/pages/Onboarding.tsx, src/pages/pages.test.tsx, src/components/{AssetDonut,SleeveChart}.tsx, docs/Application-Description.md, docs/screenshots/{desktop-onboarding-7,mobile-onboarding-2}.png, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (195/195) · lint ✔ · build ✔ · browser check ✔ (43 states) · Lighthouse a11y 100 on all pages (phone + desktop)
+**Human check:** (to fill in by Joachim)
+**Lesson:** Lighthouse runs from a clean profile, so pages that need saved state were never really audited until storage was seeded first; the empty states had hidden the chart issue.

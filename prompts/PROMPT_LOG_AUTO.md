@@ -1,5 +1,5 @@
 # Prompt log (automatic): Human Capital Copilot
-Captured verbatim by the UserPromptSubmit hook in .claude/hooks/log-prompt.mjs. Prompts starting with "nolog:" are skipped.
+Captured verbatim by the UserPromptSubmit hook in .claude/hooks/log-prompt.mjs. Prompts starting with "nolog:" are skipped. A few passages about personal account details are shortened, marked [shortened: …].
 Hand-written task summaries (C-entries) are in prompts/PROMPT_LOG.md and reference the timestamps below.
 
 ## Backfilled from transcripts
@@ -151,4 +151,37 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 > Run tests, lint and build, retake the screenshots that changed, commit and push, then show me every number that changed on screen.
 > </pasted_content id="e8ab">
 >
+
+### 2026-11-26 22:23:58 +02:00 · session 8de8bac7
+> mv ~/Downloads/design-phase-log.md ~/Hcc/human-capital-copilot/prompts/design-phase-log.md
+
+### 2026-11-26 22:24:58 +02:00 · session 8de8bac7
+> mv ~/Downloads/design-phase-log.md ~/Hcc/human-capital-copilot/prompts/design-phase-log.md
+
+### 2026-11-26 22:28:55 +02:00 · session 8de8bac7
+>
+>
+> <pasted_content id="e8ab">
+> Handle prompts/design-phase-log.md like this:
+>
+> 1. Teammate passages: shorten them with a visible marker, keep everything else verbatim.
+>    - D-011: replace "who haven't done anything for the project so far" with "[shortened: comment about teammates' workload]".
+>    - D-020: replace "as i suspect that they have spent very limited time on their tasks" with "[shortened: comment about teammates' workload]".
+>    - Check every other entry, including the "What the AI did" and "Lesson" lines, for similar remarks about Jens or Damien, and neutralise them the same way. List what you changed.
+>
+> 2. Remove entries D-005 and D-007 completely. Also remove any sentence in other entries that mentions [shortened: account-related terms]. Under the title, add: "Note: two setup-troubleshooting prompts about personal account configuration (D-005, D-007) are omitted; they don't concern the app's development. Shortened passages are marked [shortened: …]."
+>
+> 3. Fix the small items: change line 3 so it doesn't point to prompts/claude-code-prompts.md (say that file belonged to an earlier staged plan that was replaced by BUILD_SPEC.md), and put a one-line pointer in the empty "Build phase (Claude Code)" section to prompts/PROMPT_LOG.md and prompts/PROMPT_LOG_AUTO.md.
+>
+> 4. Before committing, search the whole repo (prompts/, docs/, README, BUILD_SPEC.md) for [shortened: account-related search terms]. List every hit for me and don't change them yet.
+>
+> Then wait for my OK before committing.
+> </pasted_content id="e8ab">
+>
+
+### 2026-11-26 22:30:51 +02:00 · session 8de8bac7
+> ok
+
+### 2026-11-26 22:31:51 +02:00 · session 8de8bac7
+> 2
 

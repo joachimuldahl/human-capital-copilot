@@ -154,3 +154,11 @@ Team prompts: Damien → `prompts/team/damien.md` (summary written by Damien wit
 **Result:** tests ✔ (296/296, no code changed) · lint ✔ · build ✔
 **Human check:** (to fill in by Joachim)
 **Lesson:** A verbatim log written for one audience (the team) can contain remarks that shouldn't go to another (the public repo and the examiner); read it before publishing and mark every edit so it stays honest.
+
+### C-019 · 2026-11-26 · Joachim · Claude Code · Auto log shortened
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entry 2026-11-26 22:31:51 +02:00 (option 2).
+**What the AI did:** Shortened the two auto-log lines that listed account-related terms with a visible [shortened: …] marker, added a note to the auto log's header, rechecked prompts/, docs/, README and BUILD_SPEC.md (no hits), and committed the auto log.
+**Files changed:** prompts/PROMPT_LOG_AUTO.md, prompts/PROMPT_LOG.md, docs/CHANGELOG.md
+**Result:** tests ✔ · lint ✔ · build ✔ (no code changed)
+**Human check:** (to fill in by Joachim)
+**Lesson:** A verbatim auto log also captures the instructions about what to hide, so it needs the same check as any other file before it is published.

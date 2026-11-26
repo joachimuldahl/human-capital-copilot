@@ -1,4 +1,5 @@
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { focusRing } from './ui'
 
 export interface Tab {
   id: string
@@ -26,7 +27,7 @@ export default function Tabs({ tabs, label }: { tabs: Tab[]; label: string }) {
 
   return (
     <div>
-      <div role="tablist" aria-label={label} className="flex flex-wrap gap-x-1 border-b border-slate-200">
+      <div role="tablist" aria-label={label} className="flex flex-wrap gap-x-1 border-b border-line">
         {tabs.map((t, i) => {
           const on = t.id === active
           return (
@@ -43,8 +44,8 @@ export default function Tabs({ tabs, label }: { tabs: Tab[]; label: string }) {
               tabIndex={on ? 0 : -1}
               onClick={() => setActive(t.id)}
               onKeyDown={(e) => onKey(e, i)}
-              className={`-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700 ${
-                on ? 'border-accent-700 text-accent-800' : 'border-transparent text-slate-600 hover:text-slate-900'
+              className={`-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap ${focusRing} ${
+                on ? 'border-lime text-ink' : 'border-transparent text-ink-2 hover:text-ink'
               }`}
             >
               {t.label}
@@ -60,7 +61,7 @@ export default function Tabs({ tabs, label }: { tabs: Tab[]; label: string }) {
           aria-labelledby={`${base}-tab-${t.id}`}
           hidden={t.id !== active}
           tabIndex={0}
-          className="pt-5 focus-visible:outline-2 focus-visible:outline-accent-700"
+          className={`rounded pt-5 ${focusRing}`}
         >
           {t.content}
         </div>

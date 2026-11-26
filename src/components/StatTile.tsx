@@ -8,15 +8,17 @@ interface StatTileProps {
   children?: ReactNode
   /** Small print under the explanation. */
   footnote?: ReactNode
+  className?: string
 }
 
-export default function StatTile({ title, value, children, footnote }: StatTileProps) {
+/** Driver card: small title, 30px Space Grotesk number, explanation. */
+export default function StatTile({ title, value, children, footnote, className = '' }: StatTileProps) {
   return (
-    <Card className="flex flex-col gap-2">
-      <h3 className="text-caption text-slate-500">{title}</h3>
-      <p className="text-2xl font-semibold tracking-tight text-slate-900">{value}</p>
-      {children && <div className="text-sm text-slate-700">{children}</div>}
-      {footnote && <p className="text-xs text-slate-500">{footnote}</p>}
+    <Card className={`flex flex-col gap-2.5 ${className}`}>
+      <h3 className="text-[13px] font-medium text-ink-2">{title}</h3>
+      <p className="text-card-num text-ink">{value}</p>
+      {children && <div className="text-help text-ink-2">{children}</div>}
+      {footnote && <p className="text-xs text-muted">{footnote}</p>}
     </Card>
   )
 }

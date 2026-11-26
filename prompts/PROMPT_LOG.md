@@ -104,3 +104,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ · lint ✔ · build ✔ (see below)
 **Human check:** (to fill in by Joachim)
 **Lesson:** Inspect a downloaded archive before running "unzip -o" on a project: this one silently replaced the source-of-truth spec, which is fine here but should be a conscious, separate commit.
+
+### C-013 · 2026-11-26 · Joachim · Claude Code · Phase 3c
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entry 2026-11-26 17:00:37 +02:00 (Phase 3c prompt from BUILD_SPEC section 12).
+**What the AI did:** Planned (approved), then restyled the whole app to the v1.3 mockups: tokens, fonts and header first, then Landing, Onboarding (rebuilt as one question per screen, with the question number in the URL, a review screen with edit links, Enter to continue and a mobile sheet), Results, Portfolio, Plan and Method. Kept the §7.1 copy that the tests pin down and used the mockups' layout. Engine and data untouched. Reran the headless-Chrome check (43 states at 375/1280 px), compared screenshots with the mockups and fixed what didn't match (wrapping CTAs, a two-row phone header). Ran Lighthouse accessibility via npx (not a project dependency): 100 on four pages, after fixing one label/name mismatch. Refreshed the screenshots and the design text in docs/Application-Description.md.
+**Files changed:** src/index.css, src/App.tsx, src/routes.ts (+test), src/components/{ui.ts,Logo,Nav,Footer,Card,Badge,StatTile,Explain,PersonaSwitcher,PersonaCards,RiskGauge,RiskFitGauge,GlideChart,AssetDonut,SleeveChart,SplitBars,Tabs,ProductCard,AssumptionsDialog,WhyWeAsk,fields}.tsx, src/components/Placeholder.tsx (deleted, unused), src/store/hooks.ts, src/pages/*.tsx, src/pages/pages.test.tsx, docs/Application-Description.md, docs/screenshots/*, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (193/193) · lint ✔ · build ✔ · browser check ✔ (43 states) · Lighthouse a11y 100
+**Human check:** (to fill in by Joachim)
+**Lesson:** The mockups' copy and the spec's copy disagreed (landing headline, CTA labels). Keeping the spec text that tests already check, and taking only layout and tone from the mockups, avoided a silent change to the source of truth.

@@ -24,6 +24,7 @@ async function renderPage(
   page: Page,
   state: { active: ActiveId; answers: Partial<Profile> } = { active: 'mine', answers: {} },
   quick: Partial<QuickValues> = {},
+  url = '/',
 ) {
   const { useProfileStore } = await import('../store/profileStore')
   const { usePortfolioStore, EMPTY_QUICK } = await import('../store/portfolioStore')
@@ -32,12 +33,12 @@ async function renderPage(
   const mod = (await import(`./${page}.tsx`)) as { default: () => ReactElement }
   const Comp = mod.default
   const html = renderToString(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[url]}>
       <Comp />
     </MemoryRouter>,
   )
   // Strip tags so text split across elements can be matched.
-  return html.replace(/<!-- -->/g, '').replace(/<[^>]+>/g, ' ').replace(/&#x27;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ')
+  return html.replace(/<!-- -->/g, '').replace(/<[^>]+>/g, ' ').replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/\s+/g, ' ')
 }
 
 beforeEach(() => {
@@ -123,11 +124,33 @@ describe('Onboarding', () => {
     expect(t).toContain('1.50×')
   })
 
-  it('every question has a "Why we ask" panel with the 4 parts and the method link', async () => {
+  it('one question per screen, each with its own 4-part "Why we ask" card and the method link', async () => {
+    const { WHY_WE_ASK } = await import('../content/whyWeAsk')
     const t = await renderPage('Onboarding')
-    expect(t.match(/Why we ask/g)).toHaveLength(4)
+    expect(t.match(/Why we ask/g)).toHaveLength(1)
+    expect(t).toContain('QUESTION 1 OF 16')
+    expect(t).not.toContain('When do you expect to retire?')
     for (const part of ['Why it matters', 'How we use it', "Your answer's effect", 'Research', 'Read the full method']) expect(t).toContain(part)
     expect(t).toContain('Bodie, Merton & Samuelson (1992); Cocco, Gomes & Maenhout (2005)')
+    for (let q = 1 as keyof typeof WHY_WE_ASK; q <= 16; q++) {
+      const s = await renderPage('Onboarding', { active: 'mine', answers: {} }, {}, `/onboarding?q=${q}`)
+      expect(s).toContain(`QUESTION ${q} OF 16`)
+      expect(s).toContain(WHY_WE_ASK[q].research)
+    }
+  })
+
+  it('?q=7 shows the sector question in step 2', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: {} }, {}, '/onboarding?q=7')
+    expect(t).toContain('Step 2 of 4 · Your income')
+    expect(t).toContain('Which sector do you work in, or plan to?')
+    expect(t).toContain('Salaried private job')
+  })
+
+  it('the review screen lists all 16 answers with edit links', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: { age: 30 } }, {}, '/onboarding?q=17')
+    expect(t).toContain('Your answers')
+    expect(t.match(/ Edit /g)).toHaveLength(16)
+    expect(t).toContain('See my result')
   })
 })
 

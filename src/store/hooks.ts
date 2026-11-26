@@ -1,8 +1,9 @@
 /** React hooks on top of the stores. Selectors return stable values so components don't re-render in a loop. */
 import { useMemo } from 'react'
-import { pendingCaps, targetEEE, type Profile } from '../engine'
+import { exposures, netWorth, pendingCaps, portfolioEEE, riskFit, targetEEE, type Holding, type Profile, type RiskFit } from '../engine'
+import { PRODUCTS } from '../data/products'
 import type { PersonaId } from '../data/personas'
-import { usePortfolioStore } from './portfolioStore'
+import { selectPortfolio, usePortfolioStore } from './portfolioStore'
 import { selectProfile, useProfileStore, type ActiveId } from './profileStore'
 
 /** The active profile (persona or "My answers" with defaults) and whether the user has answered anything. */
@@ -34,4 +35,19 @@ export function usePersonaLoader() {
     loadPersona(id)
     setSource('demo')
   }
+}
+
+/** Actual portfolio risk (engine portfolioEEE) and its fit against a target; null for an empty portfolio. */
+export function portfolioRisk(holdings: Holding[], target: number): { actual: number; fit: RiskFit } | null {
+  if (netWorth(holdings) <= 0) return null
+  const actual = portfolioEEE(exposures(holdings, PRODUCTS))
+  return { actual, fit: riskFit(actual, target) }
+}
+
+/** The active profile's portfolio risk vs a target (demo portfolio for personas, quick entry for "My answers"). */
+export function useActivePortfolioRisk(target: number) {
+  const active = useProfileStore((s) => s.active)
+  const source = usePortfolioStore((s) => s.source)
+  const quick = usePortfolioStore((s) => s.quick)
+  return useMemo(() => portfolioRisk(selectPortfolio(active, { source, quick }).holdings, target), [active, source, quick, target])
 }

@@ -1,14 +1,12 @@
 import { ArrowRight, Info } from 'lucide-react'
-import { useId } from 'react'
 import { Link } from 'react-router-dom'
 import type { WhyWeAskContent } from '../content/whyWeAsk'
+import { textLink } from './ui'
 
 interface WhyWeAskProps {
   content: WhyWeAskContent
-  /** Live "Your answer's effect" line from the engine (only computed while open). */
-  effect: () => string
-  open: boolean
-  onToggle: () => void
+  /** Live "Your answer's effect" line from the engine. */
+  effect: string
 }
 
 const PARTS: [string, keyof WhyWeAskContent | 'effect'][] = [
@@ -18,42 +16,32 @@ const PARTS: [string, keyof WhyWeAskContent | 'effect'][] = [
   ['Research', 'research'],
 ]
 
-/** "Why we ask" text button and its 4-part panel (BUILD_SPEC 15 + 16). Height animates in 150ms. */
-export default function WhyWeAsk({ content, effect, open, onToggle }: WhyWeAskProps) {
-  const id = useId()
+/** "Why we ask" as a <details> card with the four labelled parts in a responsive grid (BUILD_SPEC 15 + 16). */
+export default function WhyWeAsk({ content, effect }: WhyWeAskProps) {
   return (
-    <div>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={onToggle}
-        className="inline-flex items-center gap-1 rounded text-[13px] font-medium text-accent-700 hover:text-accent-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700"
-      >
-        <Info size={16} strokeWidth={1.75} aria-hidden />
+    <details className="group rounded-[18px] border border-line bg-surface px-[22px] py-5">
+      <summary className="flex cursor-pointer items-center gap-2 rounded text-sm font-semibold text-lime hover:text-lime-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-lime">
+        <Info size={16} strokeWidth={2} aria-hidden />
         Why we ask
-      </button>
-      <div
-        id={id}
-        className={`grid transition-[grid-template-rows] duration-150 ease-out motion-reduce:transition-none ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
-        inert={!open}
-      >
-        <div className="overflow-hidden">
-          <div className="mt-3 space-y-3 rounded-lg border-l-[3px] border-accent-700 bg-slate-50 p-4">
-            {PARTS.map(([title, key]) => (
-              <div key={key}>
-                <p className="text-caption text-slate-500">{title}</p>
-                <p className={`mt-0.5 text-help ${key === 'effect' ? 'font-medium text-slate-900' : 'text-slate-700'}`} aria-live={key === 'effect' ? 'polite' : undefined}>
-                  {key === 'effect' ? (open ? effect() : '') : content[key]}
-                </p>
-              </div>
-            ))}
-            <Link to="/method" className="inline-flex items-center gap-1 text-[13px] font-medium text-accent-700 hover:text-accent-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700">
-              Read the full method <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
-            </Link>
+      </summary>
+      <div className="mt-[18px] grid gap-x-7 gap-y-5 sm:grid-cols-[repeat(auto-fit,minmax(230px,1fr))]">
+        {PARTS.map(([title, key]) => (
+          <div key={key} className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{title}</span>
+            <span className={`text-help ${key === 'effect' ? 'text-ink' : 'text-panel'}`} aria-live={key === 'effect' ? 'polite' : undefined}>
+              {key === 'effect' ? effect : content[key]}
+              {key === 'research' && (
+                <>
+                  {' '}
+                  <Link to="/method" className={`inline-flex items-center gap-1 ${textLink}`}>
+                    Read the full method <ArrowRight size={14} strokeWidth={2} aria-hidden />
+                  </Link>
+                </>
+              )}
+            </span>
           </div>
-        </div>
+        ))}
       </div>
-    </div>
+    </details>
   )
 }

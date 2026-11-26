@@ -61,3 +61,9 @@
 ## 2026-11-26 · Spec v1.3 imported
 - BUILD_SPEC.md v1.3 (dark redesign, one question per screen, Phase 3c prompt) and reference mockups in docs/design/ (never served by the app).
 - Added @fontsource-variable/space-grotesk (self-hosted) for Phase 3c; not used yet.
+
+## 2026-11-26 · Phase 3c · Dark redesign (spec v1.3)
+- New dark design tokens (lime accent, sky, amber; Space Grotesk + Inter, self-hosted), shared `components/ui.ts`, new header with logo tile, Method in the nav and the persona control (Sofie · Mads · Lea · Jonas · Me) in the header.
+- Onboarding is now one question per screen (`#/onboarding?q=1…17`), with Enter to continue, a `<details>` "Why we ask" card, a step progress bar and a phone bottom bar that opens the panel as a sheet. The pending-gates estimate logic is unchanged.
+- Landing, Results (hero card, glide-path markers, balance sheet with the portfolio's actual risk), Portfolio, Plan and Method restyled; the gauge is now a progress arc (lime ≥ 1.0×, sky below).
+- No engine or data changes. 193 tests; browser check at 375/1280 px clean; Lighthouse accessibility 100. Screenshots refreshed.

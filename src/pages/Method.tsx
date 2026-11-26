@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import Card from '../components/Card'
+import { pageWrap, textLink } from '../components/ui'
 import { assumptionRows } from '../content/assumptionNotes'
 import { REFERENCES } from '../content/references'
 import { PERSONAS } from '../data/personas'
@@ -15,14 +15,13 @@ const SECTIONS = [
   ['references', 'References'],
 ] as const
 
-
 const n2 = (x: number) => roundHalfAway(x, 2).toFixed(2)
 const n4 = (x: number) => roundHalfAway(x, 4).toFixed(4)
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-6 space-y-3">
-      <h2 id={`${id}-title`} className="text-section text-slate-900">
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-6 space-y-4 border-t border-line pt-8">
+      <h2 id={`${id}-title`} className="font-display text-2xl font-semibold tracking-[-0.01em] text-ink">
         {title}
       </h2>
       {children}
@@ -31,7 +30,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
 }
 
 function Formula({ children }: { children: ReactNode }) {
-  return <p className="overflow-x-auto rounded-lg bg-slate-50 px-3 py-2 font-mono text-[13px] text-slate-800">{children}</p>
+  return <p className="overflow-x-auto rounded-control border border-line bg-surface-2 px-4 py-3 font-mono text-[13px] leading-relaxed text-ink">{children}</p>
 }
 
 /** Method page for the examiner (BUILD_SPEC 17). Every number is read from the engine. */
@@ -49,7 +48,7 @@ export default function Method() {
       'Future savings (human capital, H)',
       'The present value of what you will invest each year until retirement, in today’s money. Income grows at your expected rate until age 45, then slowly; riskier income is discounted more.',
       <>H = Σ savingsRate · income(a) / (1 + {A.rfReal} + spread)^(a − age), for every year to retirement</>,
-      `Sofie: growth ${formatPct(t.growth)} a year → H = ${formatEUR(t.pvfs)} (${formatPct(t.hcRatio)} of her lifetime investable wealth)`,
+      `Sofie: growth ${formatPct(t.growth)} a year → H = ${formatEUR(t.pvfs)} (${formatPct(t.hcRatio)} of Sofie's lifetime investable wealth)`,
     ],
     [
       'How stock-like your income is (βH)',
@@ -72,21 +71,21 @@ export default function Method() {
   ]
 
   return (
-    <div className="mx-auto max-w-[760px] space-y-8">
-      <header className="space-y-2">
-        <p className="text-caption text-slate-500">Method</p>
-        <h1 className="text-page-title">How Human Capital Copilot works</h1>
-        <p className="text-help text-slate-600">The model, the assumptions behind it and the research it rests on.</p>
-        <nav aria-label="On this page" className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-[13px] font-medium">
+    <div className={`${pageWrap} pt-10 pb-20 sm:pt-14`}>
+      <article className="mx-auto max-w-[760px] space-y-10 text-base leading-[1.7] text-panel">
+      <header className="space-y-3">
+        <p className="text-[13px] font-semibold tracking-[0.04em] text-lime">METHOD</p>
+        <h1 className="font-display text-[32px] leading-[1.12] font-semibold tracking-[-0.02em] text-ink sm:text-h1">How Human Capital Copilot works</h1>
+        <p className="text-[17px] text-ink-2">The model, the assumptions behind it and the research it rests on.</p>
+        <nav aria-label="On this page" className="flex flex-wrap gap-x-4 gap-y-1.5 pt-2 text-[13px] leading-normal">
           {SECTIONS.map(([id, title]) => (
-            <a key={id} href={`#${id}`} onClick={(e) => { e.preventDefault(); document.getElementById(id)?.scrollIntoView() }} className="text-accent-700 hover:text-accent-800">
+            <a key={id} href={`#${id}`} onClick={(e) => { e.preventDefault(); document.getElementById(id)?.scrollIntoView() }} className={textLink}>
               {title}
             </a>
           ))}
         </nav>
       </header>
 
-      <Card className="space-y-8">
         <Section id="idea" title="1. The idea">
           <p>
             Your future savings ("human capital") are usually your biggest asset when you are young. If your income is safe and bond-like, your portfolio can carry more stock-market risk. If your income
@@ -96,42 +95,42 @@ export default function Method() {
         </Section>
 
         <Section id="calculation" title="2. How your Risk Capacity is calculated">
-          <p className="text-help text-slate-600">Five steps. The worked example uses the demo person Sofie (24, starting as a consultant, €10,000 invested, saves 15%).</p>
-          <ol className="space-y-5">
+          <p className="text-ink-2">Five steps. The worked example uses the demo person Sofie (24, starting as a consultant, €10,000 invested, saves 15%).</p>
+          <ol className="space-y-7">
             {steps.map(([title, text, formula, example], i) => (
-              <li key={title} className="space-y-1.5">
-                <p className="text-question">
-                  <span className="mr-1.5 text-slate-400">{i + 1}.</span>
+              <li key={title} className="space-y-2">
+                <p className="font-display text-lg font-semibold text-ink">
+                  <span className="mr-2 text-lime">{i + 1}.</span>
                   {title}
                 </p>
-                <p className="text-help text-slate-700">{text}</p>
+                <p>{text}</p>
                 <Formula>{formula}</Formula>
-                <p className="text-help text-slate-600">{example}</p>
+                <p className="text-help text-ink-2">{example}</p>
               </li>
             ))}
           </ol>
         </Section>
 
         <Section id="assumptions" title="3. Assumptions">
-          <p className="text-help text-slate-600">Every value is an assumption and editable in src/engine/assumptions.ts. Rates are real (after inflation) unless marked nominal.</p>
+          <p className="text-ink-2">Every value is an assumption and editable in src/engine/assumptions.ts. Rates are real (after inflation) unless marked nominal.</p>
           <div className="overflow-x-auto">
             <table className="w-full text-help">
               <thead>
-                <tr className="border-b border-slate-200 text-left">
-                  <th scope="col" className="py-2 pr-3 text-caption text-slate-500">Assumption</th>
-                  <th scope="col" className="py-2 pr-3 text-caption text-slate-500">Value</th>
-                  <th scope="col" className="py-2 text-caption text-slate-500">Why</th>
+                <tr className="border-b border-line text-left">
+                  <th scope="col" className="py-2 pr-3 text-label">Assumption</th>
+                  <th scope="col" className="py-2 pr-3 text-label">Value</th>
+                  <th scope="col" className="py-2 text-label">Why</th>
                 </tr>
               </thead>
               <tbody>
                 {assumptionRows().map((r) => (
-                  <tr key={r.key} className="border-b border-slate-100 align-top last:border-0">
-                    <th scope="row" className="py-2 pr-3 text-left font-medium text-slate-800">
+                  <tr key={r.key} className="border-b border-line align-top last:border-0">
+                    <th scope="row" className="py-2 pr-3 text-left font-medium text-ink">
                       {r.label}
-                      <span className="block text-xs font-normal text-slate-400">assumption, editable</span>
+                      <span className="block text-xs font-normal text-muted">assumption, editable</span>
                     </th>
-                    <td className="max-w-[14rem] py-2 pr-3 font-mono text-xs break-words text-slate-900">{r.value}</td>
-                    <td className="py-2 text-slate-600">{r.why}</td>
+                    <td className="max-w-[14rem] py-2 pr-3 font-mono text-xs break-words text-ink">{r.value}</td>
+                    <td className="py-2 text-ink-2">{r.why}</td>
                   </tr>
                 ))}
               </tbody>
@@ -140,7 +139,7 @@ export default function Method() {
         </Section>
 
         <Section id="limits" title="4. Limits and gates">
-          <ul className="space-y-2 text-help text-slate-700">
+          <ul className="space-y-3 [&_strong]:text-ink">
             <li><strong>Safety cap {formatRatio(A.policyCap)}.</strong> Never more than {A.policyCap} times the stock market’s risk, below the 2:1 limit Ayres &amp; Nalebuff use, because borrowing can force sales in a crash.</li>
             <li><strong>G1 Emergency buffer.</strong> Under {A.minBufferMonths} months of expenses saved caps the target at 1.00×, so a job loss never forces you to sell at the bottom.</li>
             <li><strong>G2 Expensive debt.</strong> Debt above {roundHalfAway(A.expensiveDebtRate * 100, 1)}% interest caps the target at 1.00×: repaying it is a guaranteed return close to what stocks are expected to earn.</li>
@@ -151,7 +150,7 @@ export default function Method() {
         </Section>
 
         <Section id="limitations" title="5. What this model does not do">
-          <ul className="list-disc space-y-1 pl-5 text-help text-slate-700">
+          <ul className="list-disc space-y-1 pl-5 marker:text-lime">
             <li>No taxes.</li>
             <li>The glide path is deterministic (average returns), not a Monte Carlo simulation.</li>
             <li>Sector betas (βH) are judgement-based, not estimated from data.</li>
@@ -162,19 +161,19 @@ export default function Method() {
         </Section>
 
         <Section id="not-advice" title="6. Not investment advice">
-          <p className="text-help text-slate-700">
+          <p>
             This is an educational demo. It shows examples, not recommendations. A personal recommendation of specific products would be regulated investment advice (for example under MiFID II in the EU).
           </p>
         </Section>
 
         <Section id="references" title="7. References">
-          <ul className="space-y-1.5 text-help text-slate-700">
+          <ul className="space-y-2 text-help">
             {REFERENCES.map((r) => (
               <li key={r}>{r}</li>
             ))}
           </ul>
         </Section>
-      </Card>
+      </article>
     </div>
   )
 }

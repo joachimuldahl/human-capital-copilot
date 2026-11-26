@@ -88,3 +88,6 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 ### 2026-11-26 16:50:13 +02:00 · session feec8825
 > please commit the bug fix and then move onto the next thing before we run this new design then
 
+### 2026-11-26 17:00:37 +02:00 · session 8e6a053f
+> Read BUILD_SPEC.md section 15 (v1.3) and the three mockups in docs/design/. Restyle the whole app to this design: tokens, fonts and header first, then Landing, Onboarding (convert to one question per screen, keep the pending-gates fix and the Why-we-ask content), Results, Portfolio, Plan and Method. Don't change the engine or data; all tests must still pass. Then rerun the 375px/1280px browser check, retake the screenshots in docs/Application-Description.md, update its design paragraph, commit, push and run npm run zip.
+

@@ -4,11 +4,11 @@ import AssumptionsDialog from '../components/AssumptionsDialog'
 import { IllustrativeBadge } from '../components/Badge'
 import Card from '../components/Card'
 import Explain from '../components/Explain'
-import PersonaSwitcher from '../components/PersonaSwitcher'
 import ProductCard from '../components/ProductCard'
 import SleeveChart from '../components/SleeveChart'
 import Tabs from '../components/Tabs'
 import { SliderField } from '../components/fields'
+import { pageWrap, textLink } from '../components/ui'
 import {
   SLEEVE_LABEL,
   assetClassValues,
@@ -53,23 +53,20 @@ export default function Plan() {
   const isPersona = active !== 'mine'
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-page-title">{isPersona ? `${PERSONAS[active].name}'s plan` : 'Your plan'}</h1>
-          <AssumptionsDialog />
-        </div>
-        <PersonaSwitcher />
+    <div className={`${pageWrap} flex flex-col gap-6 pt-8 pb-20 sm:pt-12`}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-[32px] font-semibold tracking-[-0.02em] sm:text-h1">{isPersona ? `${PERSONAS[active].name}'s plan` : 'Your plan'}</h1>
+        <AssumptionsDialog />
       </div>
 
       {!isPersona && !hasAnswers ? (
         <Card className="space-y-2">
-          <p className="text-slate-700">
+          <p className="text-ink-2">
             Your plan is built from your answers.{' '}
-            <Link to="/onboarding" className="font-medium text-accent-700 underline">
+            <Link to="/onboarding" className={`underline underline-offset-2 ${textLink}`}>
               Answer the 16 questions
             </Link>{' '}
-            first, or pick a demo person above.
+            first, or pick a demo person in the menu above.
           </p>
         </Card>
       ) : (
@@ -108,10 +105,10 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
           {gates.map((g) => {
             const c = gateCard(g, p)
             return (
-              <div key={g} className="rounded-xl border border-amber-200 bg-warning-bg p-4 lg:p-6">
-                <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">Do this first</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-900">{c.title}</h2>
-                <p className="mt-1 text-sm text-slate-700">{c.text}</p>
+              <div key={g} className="rounded-card border border-warn-line bg-warn-bg p-5 sm:p-6">
+                <p className="text-xs font-semibold tracking-[0.08em] text-warn uppercase">Do this first</p>
+                <h2 className="mt-1.5 text-h2 text-ink">{c.title}</h2>
+                <p className="mt-1.5 text-help text-panel">{c.text}</p>
               </div>
             )
           })}
@@ -119,41 +116,41 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
       )}
 
       <Card className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-slate-700">
-          Target Risk Capacity: <strong className="text-xl tabular-nums text-slate-900">{formatRatio(t.finalEEE)}</strong>
+        <p className="flex items-baseline gap-3 text-ink-2">
+          Target Risk Capacity <strong className={`text-card-num ${t.finalEEE >= 1 ? 'text-lime' : 'text-sky'}`}>{formatRatio(t.finalEEE)}</strong>
         </p>
-        <Link to="/results" className="text-sm font-medium text-accent-700 underline">
+        <Link to="/results" className={`text-sm ${textLink}`}>
           Why this number?
         </Link>
       </Card>
 
       {/* 2. Satellites */}
-      <section aria-labelledby="sat" className="space-y-3">
-        <h2 id="sat" className="text-lg font-semibold">
+      <section aria-labelledby="sat" className="flex flex-col gap-4">
+        <h2 id="sat" className="text-h2">
           Optional satellites
         </h2>
         <Card className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="sat-gold" className="text-sm font-medium">
+            <label htmlFor="sat-gold" className="text-help font-medium">
               Gold
             </label>
             <SliderField id="sat-gold" min={0} max={10} step={1} value={Math.round(sat.gold * 100)} onChange={(v) => setSat({ ...sat, gold: v / 100 })} display={formatPct(sat.gold)} />
           </div>
           <div className="space-y-2">
-            <label htmlFor="sat-btc" className="text-sm font-medium">
+            <label htmlFor="sat-btc" className="text-help font-medium">
               Crypto (Bitcoin)
             </label>
             <SliderField id="sat-btc" min={0} max={10} step={1} value={Math.round(sat.btc * 100)} onChange={(v) => setSat({ ...sat, btc: v / 100 })} display={formatPct(sat.btc)} />
           </div>
-          <p className="text-sm text-slate-700 sm:col-span-2">
+          <p className="text-help text-ink-2 sm:col-span-2">
             {sat.btc > 0 ? `${explainCrypto(t.finalEEE, sat.btc, sat.gold)}, because the plan keeps your total risk at ${formatRatio(t.finalEEE)}.` : 'Adding a satellite keeps your total risk the same, so the stock share goes down to make room.'}
           </p>
         </Card>
       </section>
 
       {/* 3. Target vs current */}
-      <section aria-labelledby="tvc" className="space-y-3">
-        <h2 id="tvc" className="text-lg font-semibold">
+      <section aria-labelledby="tvc" className="flex flex-col gap-4">
+        <h2 id="tvc" className="text-h2">
           Target vs current
         </h2>
         <Card className="space-y-4">
@@ -162,7 +159,7 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
             <table className="w-full text-xs sm:text-sm">
               <caption className="sr-only">Target and current weight per sleeve</caption>
               <thead>
-                <tr className="border-b border-slate-200 text-left text-xs text-slate-500">
+                <tr className="border-b border-line text-left text-xs text-muted">
                   <th scope="col" className="py-2 font-medium">
                     Sleeve
                   </th>
@@ -180,26 +177,26 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.sleeve} className="border-b border-slate-100 last:border-0">
-                    <th scope="row" className="py-2 text-left font-normal text-slate-800">
+                  <tr key={r.sleeve} className="border-b border-line last:border-0">
+                    <th scope="row" className="py-2 text-left font-normal text-ink">
                       {SLEEVE_LABEL[r.sleeve]}
                     </th>
-                    <td className="py-2 pl-3 text-right tabular-nums text-slate-600">{formatPct(r.currentShare)}</td>
-                    <td className="py-2 pl-3 text-right tabular-nums font-semibold">{formatPct(r.targetShare)}</td>
+                    <td className="py-2 pl-3 text-right tabular-nums text-ink-2">{formatPct(r.currentShare)}</td>
+                    <td className="py-2 pl-3 text-right tabular-nums font-semibold text-lime">{formatPct(r.targetShare)}</td>
                     <td className="py-2 pl-3 text-right tabular-nums">{formatEUR(r.targetEUR)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-slate-500">Target weights are a share of your invested amount ({formatEUR(F)}). A negative loan means borrowed money.</p>
+          <p className="text-xs text-muted">Target weights are a share of your invested amount ({formatEUR(F)}). A negative loan means borrowed money.</p>
         </Card>
       </section>
 
       {/* 4. Example products */}
-      <section aria-labelledby="ex" className="space-y-3">
+      <section aria-labelledby="ex" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-3">
-          <h2 id="ex" className="text-lg font-semibold">
+          <h2 id="ex" className="text-h2">
             Example products
           </h2>
           <IllustrativeBadge />
@@ -207,7 +204,7 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
         <div className="space-y-5">
           {shownSleeves.map((r) => (
             <div key={r.sleeve} className="space-y-2">
-              <h3 className="text-sm font-medium text-slate-700">
+              <h3 className="text-label">
                 {SLEEVE_LABEL[r.sleeve]} · {formatPct(r.targetShare)}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -221,8 +218,8 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
       </section>
 
       {/* 5. Stress test */}
-      <section aria-labelledby="stress" className="space-y-3">
-        <h2 id="stress" className="text-lg font-semibold">
+      <section aria-labelledby="stress" className="flex flex-col gap-4">
+        <h2 id="stress" className="text-h2">
           Crash test: a 2008-style fall
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -233,8 +230,8 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
 
       {/* 6. Leverage panel */}
       {t.finalEEE > 1 && (
-        <section aria-labelledby="lev" className="space-y-3">
-          <h2 id="lev" className="text-lg font-semibold">
+        <section aria-labelledby="lev" className="flex flex-col gap-4">
+          <h2 id="lev" className="text-h2">
             Borrowing to invest
           </h2>
           <Card className="space-y-4">
@@ -250,7 +247,7 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
                   id: 'loan',
                   label: 'Broker loan (recommended)',
                   content: (
-                    <p className="text-sm text-slate-700">
+                    <p className="text-help text-panel">
                       Borrow {formatEUR(loan.amount)} from your broker against your portfolio and invest it in the same global stock fund. You pay interest of about {formatEUR(loan.costPerYear)} a year. If stocks fall a lot, the broker can ask for more collateral or sell your holdings (a margin call): {buffer === null ? '' : explainMarginBuffer(buffer).toLowerCase()}
                     </p>
                   ),
@@ -260,8 +257,8 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
                   label: 'Leveraged ETF (alternative)',
                   content: (
                     <div className="space-y-3">
-                      <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900">
-                        <strong>Warning: </strong>
+                      <div className="rounded-control border border-alert-line bg-alert-bg p-3.5 text-help text-panel">
+                        <strong className="text-alert">Warning: </strong>
                         {explainLetfDrag(letfDrag(2, assumptions.sigmaEq))}
                       </div>
                       <div className="max-w-sm">
@@ -277,24 +274,24 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
       )}
 
       {/* 7. How to get there */}
-      <section aria-labelledby="how" className="space-y-3">
-        <h2 id="how" className="text-lg font-semibold">
+      <section aria-labelledby="how" className="flex flex-col gap-4">
+        <h2 id="how" className="text-h2">
           How to get there
         </h2>
         <Card className="space-y-4">
           <Explain>{explainNextSavings(monthlySavings(p), mostUnderweight(rows))}</Explain>
           <div>
-            <h3 className="font-medium">Changes to make at your own broker</h3>
+            <h3 className="font-semibold text-ink">Changes to make at your own broker</h3>
             {changes.length === 0 ? (
-              <p className="mt-1 text-sm text-slate-600">No change is larger than 2% of your invested amount.</p>
+              <p className="mt-1 text-help text-ink-2">No change is larger than 2% of your invested amount.</p>
             ) : (
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-help text-panel marker:text-lime">
                 {changes.map((c) => (
                   <li key={c.sleeve}>{describeChange(c)}</li>
                 ))}
               </ul>
             )}
-            <p className="mt-3 text-xs text-slate-500">Educational example, not advice. This app never places orders.</p>
+            <p className="mt-3 text-xs text-muted">Educational example, not advice. This app never places orders.</p>
           </div>
         </Card>
       </section>
@@ -305,9 +302,9 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <div>
-      <p className="text-sm text-slate-600">{label}</p>
-      <p className="text-2xl font-semibold tabular-nums">{value}</p>
-      {note && <p className="text-xs text-slate-500">{note}</p>}
+      <p className="text-[13px] text-ink-2">{label}</p>
+      <p className="text-card-num">{value}</p>
+      {note && <p className="text-xs text-muted">{note}</p>}
     </div>
   )
 }
@@ -316,10 +313,10 @@ function StressTile({ title, s, limit }: { title: string; s: StressResult | null
   if (!s)
     return (
       <Card>
-        <h3 className="text-sm font-medium text-slate-600">{title}</h3>
-        <p className="mt-2 text-sm text-slate-600">
+        <h3 className="text-[13px] font-medium text-ink-2">{title}</h3>
+        <p className="mt-2 text-help text-ink-2">
           Add your holdings on the{' '}
-          <Link to="/portfolio" className="text-accent-700 underline">
+          <Link to="/portfolio" className={`underline underline-offset-2 ${textLink}`}>
             Portfolio
           </Link>{' '}
           page to compare.
@@ -329,10 +326,10 @@ function StressTile({ title, s, limit }: { title: string; s: StressResult | null
   const ok = stressWithinLimit(s, limit)
   return (
     <Card className="space-y-1">
-      <h3 className="text-sm font-medium text-slate-600">{title}</h3>
-      <p className="text-[28px] font-semibold leading-tight text-alert">−{formatEUR(Math.max(-s.money, 0))}</p>
-      <p className="text-sm text-slate-600">{formatPct(Math.max(-s.pct, 0))} of the portfolio</p>
-      <p className={`text-sm font-medium ${ok ? 'text-emerald-800' : 'text-red-800'}`}>
+      <h3 className="text-[13px] font-medium text-ink-2">{title}</h3>
+      <p className="text-card-num text-alert">−{formatEUR(Math.max(-s.money, 0))}</p>
+      <p className="text-help text-ink-2">{formatPct(Math.max(-s.pct, 0))} of the portfolio</p>
+      <p className={`text-help font-medium ${ok ? 'text-lime' : 'text-alert'}`}>
         {ok ? '✔ Within' : '✘ Above'} your limit of {formatEUR(limit)}
       </p>
     </Card>

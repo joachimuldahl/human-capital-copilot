@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { assumptions as A } from '../engine'
+import { btnSecondary, btnSmall } from './ui'
 
 const fmt = (v: number) => String(Number(v.toFixed(4)))
 const rec = (r: Record<string, number>) =>
@@ -30,7 +31,7 @@ export default function AssumptionsDialog() {
       <button
         type="button"
         onClick={() => ref.current?.showModal()}
-        className="inline-flex h-10 items-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700"
+        className={btnSecondary}
       >
         Assumptions
       </button>
@@ -38,26 +39,26 @@ export default function AssumptionsDialog() {
         ref={ref}
         aria-labelledby="assumptions-title"
         onClick={(e) => e.target === ref.current && ref.current?.close()}
-        className="m-auto max-h-[85vh] w-[min(42rem,calc(100vw-2rem))] rounded-xl p-0 shadow-xl backdrop:bg-slate-900/40"
+        className="m-auto max-h-[85vh] w-[min(42rem,calc(100vw-2rem))] rounded-card border border-line bg-surface p-0 text-ink backdrop:bg-black/60"
       >
-        <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
-          <h2 id="assumptions-title" className="font-semibold">
+        <div className="sticky top-0 flex items-center justify-between border-b border-line bg-surface px-5 py-3">
+          <h2 id="assumptions-title" className="text-h2">
             Assumptions
           </h2>
-          <button type="button" onClick={() => ref.current?.close()} className="rounded-lg px-2 py-1 text-sm font-medium text-accent-700 focus-visible:outline-2 focus-visible:outline-accent-700" aria-label="Close assumptions">
+          <button type="button" onClick={() => ref.current?.close()} className={btnSmall} aria-label="Close assumptions">
             Close
           </button>
         </div>
         <div className="px-5 py-4">
-          <p className="mb-3 text-sm text-slate-600">Every number the app uses. All are assumptions and can be changed in src/engine/assumptions.ts. Rates are real (after inflation) unless marked nominal.</p>
+          <p className="mb-3 text-help text-ink-2">Every number the app uses. All are assumptions and can be changed in src/engine/assumptions.ts. Rates are real (after inflation) unless marked nominal.</p>
           <table className="w-full text-sm">
             <tbody>
               {rows().map(([k, v]) => (
-                <tr key={k} className="border-b border-slate-100 align-top last:border-0">
-                  <th scope="row" className="py-1.5 pr-4 text-left font-normal text-slate-600">
+                <tr key={k} className="border-b border-line align-top last:border-0">
+                  <th scope="row" className="py-1.5 pr-4 text-left font-normal text-ink-2">
                     {k}
                   </th>
-                  <td className="py-1.5 font-mono text-xs text-slate-900">{v}</td>
+                  <td className="py-1.5 font-mono text-xs text-ink">{v}</td>
                 </tr>
               ))}
             </tbody>

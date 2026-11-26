@@ -1,36 +1,42 @@
-import { Link, NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { NAV_ROUTES } from '../routes'
+import Logo from './Logo'
+import PersonaSwitcher from './PersonaSwitcher'
+import { focusRing } from './ui'
 
-const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700'
+/** Pages that show the persona segmented control in the header (BUILD_SPEC 7, 15). */
+const PERSONA_PAGES = ['/results', '/portfolio', '/plan']
 
-/** 64px header: wordmark with a teal dot, nav links with a 2px teal underline on the active page. */
+/** Header: lime logo tile + wordmark, nav with a 2px lime underline, persona control on Results/Portfolio/Plan. */
 export default function Nav() {
+  const { pathname } = useLocation()
+  const showPersonas = PERSONA_PAGES.includes(pathname)
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <nav aria-label="Main" className="mx-auto flex h-16 max-w-[1120px] items-center justify-between gap-3 px-4 sm:gap-6 sm:px-6">
-        <Link to="/" className={`flex shrink-0 items-center gap-2 rounded py-2 text-base font-semibold text-slate-900 ${focusRing}`}>
-          <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full bg-accent-700" />
-          {/* Short wordmark on phones so the header stays one 64px row (BUILD_SPEC 15). */}
-          <span className="sm:hidden" aria-label="Human Capital Copilot">HC Copilot</span>
-          <span className="hidden sm:inline">Human Capital Copilot</span>
-        </Link>
-        <ul className="-mb-px flex gap-3 self-stretch text-[13px] font-medium sm:gap-6 sm:text-sm">
-          {NAV_ROUTES.map((r) => (
-            <li key={r.path} className="flex">
-              <NavLink
-                to={r.path}
-                className={({ isActive }) =>
-                  `flex items-center border-b-2 ${focusRing} ${
-                    isActive ? 'border-accent-700 text-accent-700' : 'border-transparent text-slate-600 hover:text-slate-900'
-                  }`
-                }
-              >
-                {r.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
+    <header className="border-b border-line">
+      <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 sm:gap-x-6 py-3.5 sm:px-8 sm:py-[18px]">
+        <Logo compact />
+        <nav aria-label="Main" className="min-w-0">
+          <ul className="flex gap-3 text-[13px] font-medium sm:gap-7 sm:text-sm">
+            {NAV_ROUTES.map((r) => (
+              <li key={r.path} className="flex">
+                <NavLink
+                  to={r.path}
+                  className={({ isActive }) =>
+                    `rounded-sm border-b-2 pb-1 pt-1 ${focusRing} ${isActive ? 'border-lime text-ink' : 'border-transparent text-ink-2 hover:text-ink'}`
+                  }
+                >
+                  {r.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        {showPersonas && (
+          <div className="w-full lg:w-auto">
+            <PersonaSwitcher />
+          </div>
+        )}
+      </div>
     </header>
   )
 }

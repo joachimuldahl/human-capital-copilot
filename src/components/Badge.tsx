@@ -1,18 +1,21 @@
 import type { ReactNode } from 'react'
 
-export type BadgeTone = 'neutral' | 'accent' | 'warning' | 'alert' | 'success'
+export type BadgeTone = 'neutral' | 'accent' | 'warning' | 'alert' | 'success' | 'sky' | 'solid'
 
 const TONES: Record<BadgeTone, string> = {
-  neutral: 'bg-slate-100 text-slate-700',
-  accent: 'bg-accent-50 text-accent-800',
-  warning: 'bg-warning-bg text-warning',
-  alert: 'bg-alert-bg text-alert',
-  success: 'bg-success-bg text-success',
+  neutral: 'border-line bg-surface-2 text-ink-2',
+  accent: 'border-lime-line bg-lime-tint text-lime',
+  success: 'border-lime-line bg-lime-tint text-lime',
+  warning: 'border-warn-line bg-warn-bg text-warn',
+  alert: 'border-alert-line bg-alert-bg text-alert',
+  sky: 'border-sky-line bg-sky-tint text-sky',
+  solid: 'border-lime bg-lime text-on-lime',
 }
 
-export default function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: BadgeTone }) {
+/** Status chip: 999px radius, 12px/600. */
+export default function Badge({ children, tone = 'neutral', className = '' }: { children: ReactNode; tone?: BadgeTone; className?: string }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${TONES[tone]}`}>
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs leading-none font-semibold ${TONES[tone]} ${className}`}>
       {children}
     </span>
   )

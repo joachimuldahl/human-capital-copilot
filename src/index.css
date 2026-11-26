@@ -1,51 +1,94 @@
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/space-grotesk";
 @import "tailwindcss";
 
-/* Design tokens (BUILD_SPEC section 15). */
+/* Design tokens (BUILD_SPEC section 15, v1.3 dark direction). */
 @theme {
   --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk Variable", "Space Grotesk", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
 
-  /* Primary teal: #0F766E, hover #115E59, tint #F0FDFA */
-  --color-accent-50: #f0fdfa;
-  --color-accent-100: #ccfbf1;
-  --color-accent-200: #99f6e4;
-  --color-accent-500: #14b8a6;
-  --color-accent-600: #0d9488;
-  --color-accent-700: #0f766e;
-  --color-accent-800: #115e59;
+  --color-bg: #070b14;
+  --color-surface: #0e1422;
+  --color-surface-2: #141b2d;
+  --color-line: #1e293b;
+  --color-line-strong: #334155;
+  --color-ink: #f1f5f9;
+  --color-ink-2: #a3aec2;
+  --color-muted: #7d8aa3;
+  --color-panel: #d5dce8;
 
-  --color-warning: #b45309;
-  --color-warning-bg: #fffbeb;
-  --color-alert: #b91c1c;
-  --color-alert-bg: #fef2f2;
-  --color-success: #15803d;
-  --color-success-bg: #f0fdf4;
+  --color-lime: #c8f560;
+  --color-lime-hover: #e3fb9f;
+  --color-on-lime: #0b1220;
+  --color-lime-tint: #141f08;
+  --color-lime-line: #3a4a1a;
 
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04);
+  --color-sky: #7dd3fc;
+  --color-sky-tint: #0b1d2a;
+  --color-sky-line: #164059;
+
+  --color-warn: #fbbf24;
+  --color-warn-bg: #2a1f05;
+  --color-warn-line: #4a3608;
+  --color-alert: #f87171;
+  --color-alert-bg: #2a0f0f;
+  --color-alert-line: #4a1a1a;
+
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --radius-hero: 28px;
 }
 
 /* Type scale. */
-@utility text-page-title {
-  font-size: 28px;
-  line-height: 1.25;
+@utility text-label {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+@utility text-display-xl {
+  font-family: var(--font-display);
+  font-size: 88px;
+  line-height: 0.95;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+@utility text-display-lg {
+  font-family: var(--font-display);
+  font-size: 56px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+@utility text-display-md {
+  font-family: var(--font-display);
+  font-size: 52px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+@utility text-h1 {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+@utility text-card-num {
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1.1;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
-@utility text-step-title {
-  font-size: 22px;
+@utility text-h2 {
+  font-family: var(--font-display);
+  font-size: 20px;
   line-height: 1.3;
   font-weight: 600;
   letter-spacing: -0.01em;
-}
-@utility text-section {
-  font-size: 18px;
-  line-height: 1.4;
-  font-weight: 600;
-}
-@utility text-question {
-  font-size: 16px;
-  line-height: 1.45;
-  font-weight: 600;
 }
 @utility text-body {
   font-size: 15px;
@@ -53,40 +96,58 @@
 }
 @utility text-help {
   font-size: 14px;
-  line-height: 1.5;
-}
-@utility text-caption {
-  font-size: 12px;
-  line-height: 1.4;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-@utility text-hero {
-  font-size: 40px;
-  line-height: 1.1;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  line-height: 1.55;
 }
 
 html {
   font-size: 16px;
+  color-scheme: dark;
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
   font-size: 15px;
   line-height: 1.55;
   /* Tabular figures on every number. */
   font-feature-settings: "tnum";
 }
 
-/* Slider: thin 4px track, 18px thumb (BUILD_SPEC 15). --fill is set inline as a percentage. */
+/* Onboarding: 200ms fade and slide between questions. */
+@keyframes q-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.q-enter {
+  animation: q-in 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .q-enter {
+    animation: none;
+  }
+}
+
+/* "Why we ask" <details>: hide the default marker. */
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Slider: 4px track, 20px lime thumb. --fill is set inline as a percentage. */
 .range {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 18px;
+  height: 20px;
   background: transparent;
   cursor: pointer;
 }
@@ -96,39 +157,38 @@ body {
 .range::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 999px;
-  background: linear-gradient(to right, var(--color-accent-700) var(--fill, 0%), var(--color-slate-200) var(--fill, 0%));
+  background: linear-gradient(to right, var(--color-lime) var(--fill, 0%), var(--color-line) var(--fill, 0%));
 }
 .range::-moz-range-track {
   height: 4px;
   border-radius: 999px;
-  background: var(--color-slate-200);
+  background: var(--color-line);
 }
 .range::-moz-range-progress {
   height: 4px;
   border-radius: 999px;
-  background: var(--color-accent-700);
+  background: var(--color-lime);
 }
 .range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
-  margin-top: -7px;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
   border-radius: 999px;
-  background: #fff;
-  border: 2px solid var(--color-accent-700);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+  background: var(--color-lime);
+  border: 3px solid var(--color-bg);
 }
 .range::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 999px;
-  background: #fff;
-  border: 2px solid var(--color-accent-700);
+  background: var(--color-lime);
+  border: 3px solid var(--color-bg);
 }
 .range:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 4px var(--color-accent-200);
+  box-shadow: 0 0 0 2px var(--color-lime);
 }
 .range:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 4px var(--color-accent-200);
+  box-shadow: 0 0 0 2px var(--color-lime);
 }

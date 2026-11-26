@@ -6,7 +6,7 @@ describe('routes', () => {
     expect(ROUTES.map((r) => r.path)).toEqual(['/', '/onboarding', '/results', '/portfolio', '/plan', '/method'])
   })
 
-  it('shows Onboarding · Results · Portfolio · Plan in the nav', () => {
-    expect(NAV_ROUTES.map((r) => r.label)).toEqual(['Onboarding', 'Results', 'Portfolio', 'Plan'])
+  it('shows Onboarding · Results · Portfolio · Plan · Method in the nav', () => {
+    expect(NAV_ROUTES.map((r) => r.label)).toEqual(['Onboarding', 'Results', 'Portfolio', 'Plan', 'Method'])
   })
 })

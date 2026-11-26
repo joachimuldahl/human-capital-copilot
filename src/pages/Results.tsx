@@ -13,7 +13,7 @@ import {
   BAND_LABEL,
   BINDING_LABEL,
   CAP_LABEL,
-  betaLabel,
+  incomeTypeTitle,
   explainBinding,
   explainHumanCapital,
   explainIncomeType,
@@ -111,7 +111,7 @@ export default function Results() {
           <StatTile title="Human capital" value={formatPct(t.hcRatio)} footnote={`Present value of all future earnings: ${formatEUR(t.pvEarnings)}`}>
             {explainHumanCapital(t)}
           </StatTile>
-          <StatTile title="Income type" value={betaLabel(t.betaH)}>
+          <StatTile title="Income type" value={incomeTypeTitle(t.betaH)}>
             {explainIncomeType(t.betaH)}
           </StatTile>
           <Card className="flex flex-col gap-2">

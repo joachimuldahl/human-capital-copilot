@@ -50,6 +50,12 @@ export function formatPct(x: number): string {
 
 export type IncomeType = 'bond-like' | 'mixed' | 'stock-like'
 
+/** Title for the income-type card: "Mixed". */
+export function incomeTypeTitle(betaH: number): string {
+  const t = incomeType(betaH)
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+
 /** βH ≤ 0.15 bond-like · ≤ 0.40 mixed · > 0.40 stock-like. */
 export function incomeType(betaH: number): IncomeType {
   return betaH <= 0.15 ? 'bond-like' : betaH <= 0.4 ? 'mixed' : 'stock-like'
@@ -172,6 +178,8 @@ export const ASSET_CLASS_LABEL: Record<AssetClass, string> = {
   cash: 'Cash',
 }
 
+const ASSET_CLASS_IN_SENTENCE: Record<AssetClass, string> = { equity: 'stocks', bonds: 'bonds', gold: 'gold', btc: 'Bitcoin', cash: 'cash' }
+
 /** "Your portfolio carries 1.01× against a target of 1.50×." */
 export function explainRiskFit(actualEEE: number, targetEEE: number, fit: RiskFit): string {
   const base = `Your portfolio carries ${formatRatio(actualEEE)} against a target of ${formatRatio(targetEEE)}`
@@ -202,7 +210,7 @@ export function explainStressLimit(s: StressResult, maxLossMoney: number): strin
 export function explainAssetClasses(values: ClassValue[]): string {
   if (values.length === 0) return 'Add holdings to see how your money is split.'
   const top = [...values].sort((a, b) => b.share - a.share)[0]
-  const parts = [`${ASSET_CLASS_LABEL[top.assetClass]} make up the largest part of your portfolio: ${formatPct(top.share)}.`]
+  const parts = [`The largest part of your portfolio is ${ASSET_CLASS_IN_SENTENCE[top.assetClass]}: ${formatPct(top.share)}.`]
   const cash = values.find((v) => v.assetClass === 'cash')
   if (cash && cash.share >= 0.3) parts.push(`Cash (${formatPct(cash.share)}) is safe but barely grows after inflation.`)
   const btc = values.find((v) => v.assetClass === 'btc')

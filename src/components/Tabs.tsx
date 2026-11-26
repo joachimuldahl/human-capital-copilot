@@ -26,7 +26,7 @@ export default function Tabs({ tabs, label }: { tabs: Tab[]; label: string }) {
 
   return (
     <div>
-      <div role="tablist" aria-label={label} className="-mx-4 flex gap-1 overflow-x-auto border-b border-slate-200 px-4 sm:mx-0 sm:px-0">
+      <div role="tablist" aria-label={label} className="flex flex-wrap gap-x-1 border-b border-slate-200">
         {tabs.map((t, i) => {
           const on = t.id === active
           return (

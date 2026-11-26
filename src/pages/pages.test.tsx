@@ -64,7 +64,7 @@ describe('Results presets (Phase 3 acceptance)', () => {
     expect(t).toContain('You can carry about 1.5 times the risk of the global stock market.')
     expect(t).toContain('95.6% of your lifetime investable wealth is still in your future salary (future savings worth €219,484).')
     expect(t).toContain('hold 87.9% of your total wealth in stocks')
-    expect(t).toContain('mixed, βH 0.20')
+    expect(t).toContain('Your income is mixed (βH 0.20)')
   })
 
   it('empty state when there are no answers', async () => {

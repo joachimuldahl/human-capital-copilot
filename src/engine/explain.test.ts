@@ -10,6 +10,7 @@ import {
   formatPct,
   formatRatio,
   incomeType,
+  incomeTypeTitle,
   roundHalfAway,
 } from './explain'
 import { targetEEE } from './target'
@@ -48,6 +49,7 @@ describe('income type', () => {
     expect(incomeType(0.4)).toBe('mixed')
     expect(incomeType(0.61)).toBe('stock-like')
     expect(betaLabel(0.61)).toBe('stock-like, βH 0.61')
+    expect(incomeTypeTitle(0.2)).toBe('Mixed')
   })
   it('explains each type', () => {
     expect(explainIncomeType(0.05)).toContain('bond-like')

@@ -38,3 +38,8 @@
 - Plan page: gate cards (G1 buffer, G2 debt), gold/crypto satellite sliders with the crypto explanation, target vs current (grouped bars + table in % and €), example products per sleeve ("Example, not advice"), crash test now vs target, leverage panel only above 1× (loan, interest, margin buffer, broker loan vs leveraged ETF with volatility-drag warning), "How to get there", Assumptions dialog generated from assumptions.ts.
 - Engine: plan.ts (planSleeves, planLoan, planChanges, mostUnderweight, monthlySavings) and plan text templates.
 - Page tests reproduce the section 9 target allocations and crash losses, the leverage panel rule and the gate cards. 163 tests.
+
+## 2026-11-26 · Phase 6 · Polish + ship
+- Headless-Chrome QA of 16 page states at 375 px and 1280 px: no console errors, no horizontal overflow. Fixed: Plan table wider than a phone screen, tab rows cut off (now wrap), donut chart warning in hidden tabs.
+- Wording: income-type card title ("Mixed"), asset-class caption grammar.
+- README rewritten for submission (live link, pitch, features, how to run, team, disclaimer); draft docs/Application-Description.md with screenshots in docs/screenshots/.

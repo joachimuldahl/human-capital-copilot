@@ -158,22 +158,23 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
         </h2>
         <Card className="space-y-4">
           <SleeveChart rows={rows} />
-          <div className="-mx-5 overflow-x-auto px-5">
-            <table className="w-full min-w-[28rem] text-sm">
+          <div>
+            <table className="w-full text-xs sm:text-sm">
               <caption className="sr-only">Target and current weight per sleeve</caption>
               <thead>
                 <tr className="border-b border-slate-200 text-left text-xs text-slate-500">
                   <th scope="col" className="py-2 font-medium">
                     Sleeve
                   </th>
-                  <th scope="col" className="py-2 text-right font-medium">
+                  <th scope="col" className="py-2 pl-3 text-right font-medium">
                     Current
                   </th>
-                  <th scope="col" className="py-2 text-right font-medium">
+                  <th scope="col" className="py-2 pl-3 text-right font-medium">
                     Target
                   </th>
-                  <th scope="col" className="py-2 text-right font-medium">
-                    Target €
+                  <th scope="col" className="py-2 pl-3 text-right font-medium">
+                    <span className="sr-only">Target in euro</span>
+                    <span aria-hidden>€</span>
                   </th>
                 </tr>
               </thead>
@@ -183,9 +184,9 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
                     <th scope="row" className="py-2 text-left font-normal text-slate-800">
                       {SLEEVE_LABEL[r.sleeve]}
                     </th>
-                    <td className="py-2 text-right tabular-nums text-slate-600">{formatPct(r.currentShare)}</td>
-                    <td className="py-2 text-right tabular-nums font-semibold">{formatPct(r.targetShare)}</td>
-                    <td className="py-2 text-right tabular-nums">{formatEUR(r.targetEUR)}</td>
+                    <td className="py-2 pl-3 text-right tabular-nums text-slate-600">{formatPct(r.currentShare)}</td>
+                    <td className="py-2 pl-3 text-right tabular-nums font-semibold">{formatPct(r.targetShare)}</td>
+                    <td className="py-2 pl-3 text-right tabular-nums">{formatEUR(r.targetEUR)}</td>
                   </tr>
                 ))}
               </tbody>

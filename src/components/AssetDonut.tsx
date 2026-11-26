@@ -1,4 +1,4 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 import { ASSET_CLASS_LABEL, formatEUR, formatPct, type AssetClass, type ClassValue } from '../engine'
 
 const CLASS_COLOR: Record<AssetClass, string> = {
@@ -13,17 +13,17 @@ const CLASS_COLOR: Record<AssetClass, string> = {
 export default function AssetDonut({ values }: { values: ClassValue[] }) {
   return (
     <div className="grid items-center gap-6 sm:grid-cols-[220px_1fr]">
+      {/* Fixed size (not ResponsiveContainer): the chart sits in a tab panel that can be hidden, and a hidden
+          responsive chart measures 0×0 and logs a warning. */}
       <div className="mx-auto h-52 w-52" aria-hidden>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+        <PieChart width={208} height={208}>
             <Pie data={values} dataKey="valueEUR" nameKey="assetClass" innerRadius="58%" outerRadius="95%" paddingAngle={1} isAnimationActive={false}>
               {values.map((v) => (
                 <Cell key={v.assetClass} fill={CLASS_COLOR[v.assetClass]} />
               ))}
             </Pie>
             <Tooltip formatter={(value, _name, item) => [formatEUR(Number(value)), ASSET_CLASS_LABEL[(item.payload as ClassValue).assetClass]]} />
-          </PieChart>
-        </ResponsiveContainer>
+        </PieChart>
       </div>
       <table className="w-full text-sm">
         <caption className="sr-only">Portfolio by asset class</caption>

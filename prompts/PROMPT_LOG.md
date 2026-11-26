@@ -64,3 +64,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ (163/163) · lint ✔ · build ✔
 **Human check:** (to fill in by Joachim)
 **Lesson:** Reading the full rendered page text in a failing test exposed two wording bugs that unit tests missed ("risks below" pointing to a panel above; "bitcoin" lowercased).
+
+### C-008 · 2026-11-26 · Joachim · Claude Code · Phase 6
+**Prompt:** "Push 5, start 6" chosen in a question dialog (no typed prompt).
+**What the AI did:** Committed and pushed Phase 5. Wrote a headless-Chrome check (scratchpad, not committed) that loads 16 page states at phone and desktop width, records console errors and elements wider than the screen, and saves screenshots; reviewed the screenshots and fixed what they showed. Rewrote the README and drafted docs/Application-Description.md.
+**Files changed:** src/pages/{Plan,Results}.tsx, src/components/{Tabs,AssetDonut}.tsx, src/engine/explain.ts (+tests), src/pages/pages.test.tsx, src/engine/portfolioPage.test.ts, README.md, docs/Application-Description.md, docs/screenshots/*.png, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (163/163) · lint ✔ · build ✔ · browser check ✔ (32/32 page states clean)
+**Human check:** (to fill in by Joachim: walkthrough on phone and desktop; live link in a private window)
+**Lesson:** Looking at real screenshots found layout problems no unit test could (a table hiding its most important column off-screen on phones). The automated overflow check had first been told to ignore tables and tabs, so it reported "clean" too early; it was tightened before trusting it.

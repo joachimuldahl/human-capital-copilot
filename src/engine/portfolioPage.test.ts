@@ -83,7 +83,7 @@ describe('portfolio captions', () => {
   })
   it('asset classes: largest, cash and bitcoin notes', () => {
     expect(explainAssetClasses(assetClassValues(PORTFOLIOS.mads, PRODUCTS))).toBe(
-      'Cash make up the largest part of your portfolio: 80.0%. Cash (80.0%) is safe but barely grows after inflation.',
+      'The largest part of your portfolio is cash: 80.0%. Cash (80.0%) is safe but barely grows after inflation.',
     )
     expect(explainAssetClasses(assetClassValues(PORTFOLIOS.jonas, PRODUCTS))).toContain('Bitcoin (60.0%) is very volatile')
     expect(explainAssetClasses([])).toBe('Add holdings to see how your money is split.')

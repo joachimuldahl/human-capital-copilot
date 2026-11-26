@@ -96,3 +96,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ (191/191, section 9 unchanged) · lint ✔ · build ✔ · browser check ✔ (26 page states)
 **Human check:** (to fill in by Joachim)
 **Lesson:** Root cause: a default answer was treated as a real one inside the engine. Hiding the wording (the earlier "starting loss limit" text) did not fix the number; making "not answered yet" a real input to the engine did.
+
+### C-012 · 2026-11-26 · Joachim · Claude Code · Spec v1.3 import
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entries 2026-11-26 16:47:46 (cd), 16:47:58 (unzip hcc-design-update.zip) and 16:50:13 +02:00 (commit the fix, then prepare); plus two answers in a question dialog (prep for Phase 3c; self-host Space Grotesk).
+**What the AI did:** Listed and unpacked the ZIP in a scratch folder before touching the project. It replaces BUILD_SPEC.md with v1.3 (dark redesign, one question per screen, Phase 3c prompt) and adds three reference mockups in docs/design/. The mockups only load a local support.js (not included) and Google Fonts; they are reference only and never served by the app. Then unzipped into the project, committed the bug fix separately, and installed @fontsource-variable/space-grotesk (approved), so the new heading font is bundled instead of loaded from Google. Not imported yet: Phase 3c will use it.
+**Files changed:** BUILD_SPEC.md, docs/design/*, package.json, package-lock.json, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ · lint ✔ · build ✔ (see below)
+**Human check:** (to fill in by Joachim)
+**Lesson:** Inspect a downloaded archive before running "unzip -o" on a project: this one silently replaced the source-of-truth spec, which is fine here but should be a conscious, separate commit.

@@ -57,3 +57,7 @@
 ## 2026-11-26 · Bug fix · Onboarding estimate before step 4
 - targetEEE gets a `pending` option that skips the loss limit (G4) and leverage gate (G3) until Q14/Q16 are answered; section 9 results unchanged.
 - The onboarding panel shows "Estimate" with "Estimate from your answers so far. Your loss limit and the leverage check come in step 4 and can lower this." and never names an unanswered limit; effect lines follow the same rule. 191 tests.
+
+## 2026-11-26 · Spec v1.3 imported
+- BUILD_SPEC.md v1.3 (dark redesign, one question per screen, Phase 3c prompt) and reference mockups in docs/design/ (never served by the app).
+- Added @fontsource-variable/space-grotesk (self-hosted) for Phase 3c; not used yet.

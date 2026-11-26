@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Human Capital Copilot – Onboarding question</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#070B14}
+a{color:#C8F560}a:hover{color:#E3FB9F}
+</style>
+</helmet>
+<div style="min-height: 1180px; background: #070B14; color: #F1F5F9; font-family: Inter, system-ui, sans-serif; font-feature-settings: 'tnum'">
+  <header style="border-bottom: 1px solid #1E293B">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+      <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F1F5F9">
+        <span style="width: 28px; height: 28px; border-radius: 8px; background: #C8F560; display: flex; align-items: center; justify-content: center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1220" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M4 18 L10 11 L14 14 L20 6"></path></svg>
+        </span>
+        <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 17px">Human Capital Copilot</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px; flex: 1 1 320px; max-width: 520px">
+        <span style="font-size: 13px; color: #A3AEC2; white-space: nowrap">Step 2 of 4 · Your income</span>
+        <div style="flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+          <div style="height: 4px; border-radius: 4px; background: #C8F560"></div>
+          <div style="height: 4px; border-radius: 4px; background: linear-gradient(90deg, #C8F560 60%, #1E293B 60%)"></div>
+          <div style="height: 4px; border-radius: 4px; background: #1E293B"></div>
+          <div style="height: 4px; border-radius: 4px; background: #1E293B"></div>
+        </div>
+      </div>
+      <button type="button" style="background: none; border: 1px solid #1E293B; color: #A3AEC2; font: inherit; font-size: 13px; padding: 8px 14px; border-radius: 10px; cursor: pointer">Save and finish later</button>
+    </div>
+  </header>
+
+  <main style="max-width: 1240px; margin: 0 auto; padding: 56px 32px 80px; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start">
+    <section style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <span style="font-size: 13px; font-weight: 600; color: #C8F560; letter-spacing: 0.04em">QUESTION 7 OF 16</span>
+        <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 40px; line-height: 1.12; font-weight: 600; letter-spacing: -0.02em">Which sector do you work in, or plan to?</h1>
+        <p style="margin: 0; font-size: 17px; line-height: 1.55; color: #A3AEC2; max-width: 620px">This tells us whether your salary behaves more like a bond (stable) or a stock (moves with the market).</p>
+      </div>
+
+      <fieldset style="border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px">
+        <legend style="position: absolute; width: 1px; height: 1px; overflow: hidden">Sector</legend>
+        <label style="background: #0E1422; border: 1px solid #1E293B; border-radius: 16px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; cursor: pointer">
+          <input type="radio" name="sector" style="margin-top: 3px; accent-color: #C8F560">
+          <span style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 15px">Public sector</span><span style="font-size: 13px; color: #A3AEC2">Civil servant, municipality, tenured</span></span>
+        </label>
+        <label style="background: #0E1422; border: 1px solid #1E293B; border-radius: 16px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; cursor: pointer">
+          <input type="radio" name="sector" style="margin-top: 3px; accent-color: #C8F560">
+          <span style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 15px">Health care or education</span><span style="font-size: 13px; color: #A3AEC2">Doctor, nurse, teacher, researcher</span></span>
+        </label>
+        <label style="background: #141F08; border: 1.5px solid #C8F560; border-radius: 16px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; cursor: pointer">
+          <input type="radio" name="sector" checked style="margin-top: 3px; accent-color: #C8F560">
+          <span style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 15px">Salaried professional</span><span style="font-size: 13px; color: #A3AEC2">Consulting, engineering, law, marketing</span></span>
+        </label>
+        <label style="background: #0E1422; border: 1px solid #1E293B; border-radius: 16px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; cursor: pointer">
+          <input type="radio" name="sector" style="margin-top: 3px; accent-color: #C8F560">
+          <span style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 15px">Tech or scale-up</span><span style="font-size: 13px; color: #A3AEC2">Software, product, start-up employee</span></span>
+        </label>
+        <label style="background: #0E1422; border: 1px solid #1E293B; border-radius: 16px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; cursor: pointer">
+          <input type="radio" name="sector" style="margin-top: 3px; accent-color: #C8F560">
+          <span style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 15px">Sales, real estate, construction</span><span style="font-size: 13px; color: #A3AEC2">Commission-driven or cyclical work</span></span>
+        </label>
+        <label style="background: #0E1422; border: 1px solid #1E293B; border-radius: 16px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; cursor: pointer">
+          <input type="radio" name="sector" style="margin-top: 3px; accent-color: #C8F560">
+          <span style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 15px">Finance or banking</span><span style="font-size: 13px; color: #A3AEC2">Trading, investment banking, asset management</span></span>
+        </label>
+        <label style="background: #0E1422; border: 1px solid #1E293B; border-radius: 16px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; cursor: pointer">
+          <input type="radio" name="sector" style="margin-top: 3px; accent-color: #C8F560">
+          <span style="display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 15px">Founder or self-employed</span><span style="font-size: 13px; color: #A3AEC2">Your income is your company's result</span></span>
+        </label>
+      </fieldset>
+
+      <details open style="background: #0E1422; border: 1px solid #1E293B; border-radius: 18px; padding: 20px 22px">
+        <summary style="cursor: pointer; font-size: 14px; font-weight: 600; color: #C8F560; list-style: none; display: flex; align-items: center; gap: 8px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8F560" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+          Why we ask
+        </summary>
+        <div style="margin-top: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px 28px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #7D8AA3">WHY IT MATTERS</span>
+            <span style="font-size: 14px; line-height: 1.55; color: #D5DCE8">A stable salary works like a bond in your wealth, so your portfolio can carry more stock risk. A market-linked salary means you're already exposed to stocks.</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #7D8AA3">HOW WE USE IT</span>
+            <span style="font-size: 14px; line-height: 1.55; color: #D5DCE8">Sets βH, the stock-like share of your future savings: from 0.05 (public sector) to 0.65 (founder). Yours: <strong style="color: #F1F5F9">0.20</strong>.</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #7D8AA3">YOUR ANSWER'S EFFECT</span>
+            <span style="font-size: 14px; line-height: 1.55; color: #D5DCE8">For you, every option lands at the 1.50× cap: your future savings are 22× what you've invested. Sector starts to matter as your portfolio grows.</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #7D8AA3">RESEARCH</span>
+            <span style="font-size: 14px; line-height: 1.55; color: #D5DCE8">Ibbotson, Milevsky, Chen &amp; Zhu (2007); Benzoni, Collin-Dufresne &amp; Goldstein (2007). <a href="Main.dc.html">Read the full method</a></span>
+          </div>
+        </div>
+      </details>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 8px">
+        <button type="button" style="background: none; border: 1px solid #1E293B; color: #F1F5F9; font: inherit; font-size: 15px; font-weight: 500; padding: 13px 20px; border-radius: 12px; cursor: pointer">Back</button>
+        <div style="display: flex; align-items: center; gap: 16px">
+          <span style="font-size: 13px; color: #7D8AA3">or press <kbd style="font-family: inherit; border: 1px solid #1E293B; border-radius: 6px; padding: 2px 7px; color: #A3AEC2">Enter ↵</kbd></span>
+          <button type="button" style="background: #C8F560; border: 0; color: #0B1220; font: inherit; font-size: 15px; font-weight: 600; padding: 14px 24px; border-radius: 12px; cursor: pointer">Continue</button>
+        </div>
+      </div>
+    </section>
+
+    <aside style="flex: 1 1 340px; max-width: 400px; background: #0E1422; border: 1px solid #1E293B; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #7D8AA3">YOUR RISK CAPACITY</span>
+        <span style="font-size: 12px; font-weight: 600; color: #FBBF24; background: #2A1F05; border: 1px solid #4A3608; padding: 4px 10px; border-radius: 999px">Estimate</span>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px">
+        <svg width="260" height="146" viewBox="0 0 300 168" role="img" aria-label="Estimate gauge at 1.50 times">
+          <path d="M30 150 A120 120 0 0 1 112.92 35.87" fill="none" stroke="#1E293B" stroke-width="16"></path>
+          <path d="M115.5 35.0 A120 120 0 0 1 207.4 44.6" fill="none" stroke="#1E293B" stroke-width="16"></path>
+          <path d="M210 46.08 A120 120 0 0 1 270 150" fill="none" stroke="#1E293B" stroke-width="16"></path>
+          <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="#C8F560" stroke-width="16" stroke-dasharray="377" stroke-dashoffset="0"></path>
+          <text x="22" y="168" fill="#7D8AA3" font-size="12" font-family="Inter">0×</text>
+          <text x="196" y="30" fill="#7D8AA3" font-size="12" font-family="Inter">1.0×</text>
+          <text x="258" y="168" fill="#7D8AA3" font-size="12" font-family="Inter">1.5×</text>
+        </svg>
+        <span style="font-family: 'Space Grotesk', sans-serif; font-size: 52px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; margin-top: -48px">1.50×</span>
+      </div>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #A3AEC2">Estimate from your answers so far. Your loss limit and the leverage check come in step 4 and can lower this.</p>
+      <div style="height: 1px; background: #1E293B"></div>
+      <div style="display: flex; flex-direction: column; gap: 14px">
+        <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: #7D8AA3">WHAT DRIVES THIS</span>
+        <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px"><span style="color: #A3AEC2">Risk attitude</span><span style="font-weight: 500">not answered yet</span></div>
+        <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px"><span style="color: #A3AEC2">Future savings</span><span style="font-weight: 500">€219k · 96% of wealth</span></div>
+        <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px"><span style="color: #A3AEC2">Income type</span><span style="font-weight: 500">Mixed · βH 0.20</span></div>
+      </div>
+      <div style="background: #141B2D; border-radius: 14px; padding: 14px 16px; display: flex; gap: 10px; align-items: flex-start">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A3AEC2" stroke-width="2" stroke-linecap="round" style="flex: none; margin-top: 2px" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+        <span style="font-size: 13px; line-height: 1.5; color: #A3AEC2">Your answers stay in your browser. Nothing is sent anywhere.</span>
+      </div>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

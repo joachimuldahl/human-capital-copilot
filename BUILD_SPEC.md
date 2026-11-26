@@ -1,6 +1,6 @@
 # Human Capital Copilot: demo build spec (for Claude Code)
 
-*v1.2 · 26 Nov 2026 · Single source of truth for building the demo. Replaces the staged S0–S11 plan (project docs 04/06) for this deadline. Financial maths matches project doc 03 (reference engine v2) exactly.*
+*v1.3 · 26 Nov 2026 · Single source of truth for building the demo. Replaces the staged S0–S11 plan (project docs 04/06) for this deadline. Financial maths matches project doc 03 (reference engine v2) exactly.*
 
 ---
 
@@ -527,6 +527,7 @@ Static Vite + React + TS demo. Full spec: @BUILD_SPEC.md (source of truth).
 - **Phase 5:** `Read BUILD_SPEC.md section 7.5. Do Phase 5: the Plan page.`
 - **Phase 6:** `Read BUILD_SPEC.md sections 8 and 14. Do Phase 6: responsive and accessibility pass, empty states, Assumptions dialog, README with the live link, and a draft docs/Application-Description.md. Then commit, push and confirm the Vercel deploy.`
 - **Phase 3b (design + help content, v1.2):** `Read BUILD_SPEC.md sections 7.2, 15, 16 and 17. Redesign the global layout and the Onboarding page to match section 15 exactly (Inter, tokens, header, two-column layout, question blocks, inputs, sliders, radio cards, semicircle gauge with the Preliminary state). Replace every "Why we ask" with the 4-part panel and the section 16 text, including the live effect line computed with the engine. Add the Method page (section 17) and link it from the footer and every panel. Don't change engine maths. When done, check the result at 375px and 1280px (take screenshots with Playwright if available) and list anything that still deviates from section 15.`
+- **Phase 3c (dark redesign, v1.3):** `Read BUILD_SPEC.md section 15 (v1.3) and the three mockups in docs/design/. Restyle the whole app to this design: tokens, fonts and header first, then Landing, Onboarding (convert to one question per screen, keep the pending-gates fix and the Why-we-ask content), Results, Portfolio, Plan and Method. Don't change the engine or data; all tests must still pass. Then rerun the 375px/1280px browser check, retake the screenshots in docs/Application-Description.md, update its design paragraph, commit, push and run npm run zip.`
 - **Bug fix (any time):** `Bug on <page>: when I <steps>, I expected <x> but got <y>. Find the root cause first, explain it in 2–3 sentences, fix it, add a test if it is in src/engine, and run tests/lint/build.`
 
 ---
@@ -566,41 +567,36 @@ After every task Claude Code appends:
 
 ---
 
-## 15. Design system (v1.2: the first build looked unpolished; follow this exactly)
+## 15. Design system (v1.3: dark, modern direction; reference mockups in `docs/design/`)
 
-**Feel:** calm, modern fintech in the style of Stripe or Linear. Lots of white space, small and precise type, one accent colour, numbers that stand out. Nothing oversized.
+**Reference:** `docs/design/Landing.html`, `docs/design/Onboarding.html` and `docs/design/Results.html` are exported from the approved design canvas. Match them closely: layout, spacing, colours, type, copy tone. They are static mockups with inline styles and a canvas runtime (`<x-dc>`, `support.js`). **Rebuild them with Tailwind and our own components; never copy the runtime or load these files in the app.**
 
-**Tokens** (in `src/styles/tokens.css` or the Tailwind theme):
-- Font: **Inter** (Google Fonts or `@fontsource/inter`), `font-feature-settings: "tnum"` on every number (tabular figures).
-- Colours: text `slate-900` / secondary `slate-600` / muted `slate-400`; page background `slate-50`; cards white with a 1px `slate-200` border, radius 12px, shadow `0 1px 2px rgb(0 0 0 / 0.04)`; **primary teal `#0F766E`** (hover `#115E59`, tint `#F0FDFA`); warning amber `#B45309` on `#FFFBEB`; alert red `#B91C1C` on `#FEF2F2`; success green `#15803D`.
-- Type scale: page title 28px/600 · section title 18px/600 · question 16px/600 · body 15px/400 · help text 14px/400 slate-600 · captions 12px/500 uppercase tracking-wide slate-500 · hero numbers 40px/600 tabular.
-- Spacing on a 4px grid: 24px between questions, 32px between sections, 16px card padding on mobile and 24px on desktop. Max content width 1120px.
-
-**Layout:**
-- Header 64px high: wordmark 16px/600 in slate-900 with a small teal dot or icon before it; nav links 14px/500 slate-600; the active link is teal with a 2px underline (no filled pill). Persona switcher as a compact segmented control on the right of the page header, not in the nav.
-- Onboarding, desktop: two columns. Left, the question card (max 640px). Right, a sticky 320px summary panel. Mobile: a single column plus a 56px sticky bottom bar showing the number and a chip.
-- Step header: a small caption ("STEP 1 OF 4"), a 22px title ("About you"), a one-line subtitle ("4 quick questions about your situation"), and a thin 4px progress bar with 4 segments.
+**Tokens** (Tailwind theme + CSS variables):
+- Fonts: **Space Grotesk** 500/600 for headings and big numbers; **Inter** 400/500/600 for everything else. Use `font-feature-settings: "tnum"` on all numbers.
+- Colours: background `#070B14` · surface `#0E1422` · surface-2 `#141B2D` · border `#1E293B` · text `#F1F5F9` · text-2 `#A3AEC2` · muted `#7D8AA3` · panel body `#D5DCE8` · **accent lime `#C8F560`** (hover `#E3FB9F`, text on lime `#0B1220`, tint background `#141F08` with border `#3A4A1A`) · secondary data colour sky `#7DD3FC` (future savings, targets below 1.0×) · warning amber `#FBBF24` on `#2A1F05` with border `#4A3608` · alert red `#F87171` on `#2A0F0F`.
+- Radius: buttons and inputs 12px · cards 20px · hero card 28px · chips 999px. No drop shadows: depth comes from surface colours and 1px borders.
+- Type: hero numbers in Space Grotesk 600 with tracking −0.03em (Results 88px, side panel 52px, landing card 56px) · page H1 40px (onboarding question) to 60px (landing) · card numbers 30px · body 15–17px · labels 12px/600, uppercase, tracking 0.08em, muted colour.
+- Layout: content max 1240px, page padding 32px (16px on phones), 4px spacing grid.
 
 **Components:**
-- **Question block:** number + question (16px/600), an optional one-line hint under it (14px slate-500), then the input. Divider lines between questions inside the card, not separate cards.
-- **Inputs:** 44px high, 1px slate-300 border, radius 8px, teal focus ring. Money inputs format live with thousands separators (10,000) and show the € prefix inside the field. Units ("years", "%") as a muted suffix inside the field.
-- **Sliders:** thin 4px track, 18px thumb, value shown in a small pill **above the thumb**, min/max labels underneath in 12px slate-400. Never a large detached value to the right.
-- **Radio cards** (sector, security, risk questions): 2-column grid on desktop, 1 on mobile; each card has a title (15px/600) + example line (13px slate-500); the selected card has a teal border and a tint background.
-- **"Why we ask" button:** a small text button with an ⓘ icon, "Why we ask", teal 13px/500. It expands an inline panel (animated height, 150ms) with a slate-50 background, a 3px teal left border, radius 8px and 16px padding. The panel has 4 labelled parts, each with a 12px uppercase caption: **WHY IT MATTERS**, **HOW WE USE IT**, **YOUR ANSWER'S EFFECT** (live), **RESEARCH**. It closes with "Read the full method →" linking to `/#/method`. Only one panel is open at a time.
-- **Live effect line:** for numeric questions, compute with the engine how the result changes if the answer moves one step (e.g. +2 years of retirement age, +5 pp savings rate, +€5,000 loss limit): "Retiring 2 years later would add €6,200 to your future savings and move your target from 0.95× to 1.02×." For choice questions, show what the alternative answers would give ("Public sector → 1.50× · Finance → 0.62×"). This is the app's strongest "show, don't tell" feature, so make it accurate and short.
-- **Summary panel (needle):** caption "YOUR RISK CAPACITY", hero number "1.50×", a "Preliminary" chip while unanswered questions remain, then a **semicircle gauge** from 0× to 1.5× with three subtle zones (0–0.6 "cautious", 0.6–1.0 "market-like", 1.0–1.5 "uses borrowing") and an animated needle (300ms, respects `prefers-reduced-motion`). Under it, the top explanation line and a small "What drives this" list showing the 3 drivers (risk attitude · future savings · income type) with mini values.
-- **Buttons:** primary teal filled, 40px, radius 8px, 14px/600; secondary white with a slate-300 border. "Back" is secondary on the left, "Next" primary on the right, in a sticky footer row inside the card on mobile.
-- **Badges/chips:** 12px/500, radius 999px, tinted background (teal / amber / red / slate).
-- Icons: `lucide-react` (approved dependency), 16px, stroke 1.75.
-- Charts (Recharts): no gridline clutter, slate-200 axes, teal primary series, slate-400 secondary series, tooltips styled as cards, tabular numbers.
+- **Header:** a 28px lime logo tile with a line-chart icon, the wordmark in Space Grotesk 17px/600, nav at 14px. The active link is white with a 2px lime underline. On Results, Portfolio and Plan, a **persona segmented control** (Sofie · Mads · Lea · Jonas · Me) with the active item filled lime.
+- **Buttons:** primary lime with dark text and 600 weight; secondary transparent with a 1px border. Focus ring: 2px lime with a 2px offset.
+- **Onboarding = ONE question per screen** (16 screens in 4 steps), as in `Onboarding.html`:
+  - Top bar: "Step 2 of 4 · Your income" plus 4 progress segments, the current one partly filled. A "Save and finish later" button (answers are already saved).
+  - "QUESTION 7 OF 16" label in lime, the question at 40px, a one-line subline in text-2.
+  - Answers as radio cards (real `<input type=radio>`; the selected card gets a lime border and tint background), big inputs or sliders.
+  - "Why we ask" is a `<details>` card with the four labelled parts (WHY IT MATTERS · HOW WE USE IT · YOUR ANSWER'S EFFECT · RESEARCH) in a responsive grid. No coloured left border.
+  - Back (secondary) and Continue (primary), plus "or press Enter ↵". Transitions between questions: 200ms fade and slide, turned off under `prefers-reduced-motion`.
+  - Side panel: "YOUR RISK CAPACITY", an amber **Estimate** chip while any gate is pending, the arc gauge, the big number, the explanation, "WHAT DRIVES THIS" rows ("not answered yet" where relevant) and the privacy box with a lock icon. On phones it becomes a 56px sticky bottom bar (number + chip) that opens the full panel as a sheet.
+- **Gauge:** a semicircle progress arc (track `#1E293B`, value lime when ≥ 1.0× and sky when < 1.0×), with labels 0× / 1.0× / 1.5× placed outside the arc so the value never hides them.
+- **Results:** as `Results.html`. A hero card (gauge, 88px number, the binding-constraint chip with a shield icon, a one-paragraph explanation that includes the unconstrained model value and the loan in euros) · four driver cards (Risk attitude · Human capital · Income type · Limits checked, the binding one in lime) · a glide path card (lime line, dashed 1.0× line labelled "no borrowing", a current-age dot, a marker where it reaches 1.0×) · a lifetime balance sheet card (lime = invested today, sky = future savings, then the portfolio's actual risk with a status chip and two CTAs).
+- **Portfolio and Plan:** the same card language. Charts use lime, sky and slate only. The risk-fit gauge shows two markers (target in lime, actual in amber or sky). Status chips as above.
+- **Method page:** a reading layout with max width 760px, 16px/1.7 body, Space Grotesk headings, formulas in a surface-2 box.
+- **Accessibility:** these colour pairs pass WCAG AA on `#070B14`. Keep real buttons, links and inputs, `aria-label` on icon-only buttons and the gauge as `role="img"` with a label.
 
-**Customer service touches:**
-- A privacy line under the step header: "Your answers stay in your browser. Nothing is sent anywhere."
-- Friendly validation ("Retirement age needs to be after your current age"), never red-screaming.
-- Each step ends with "You can change any answer later."
-- The landing hero and onboarding say how long it takes ("about 3 minutes").
+**Customer-service touches** (unchanged): the privacy line, friendly validation, "You can change any answer later", and time estimates ("about 3 minutes").
 
-**Acceptance:** a side-by-side check at 375px and 1280px; nothing larger than 28px except the hero numbers; no element touching the screen edge on mobile; Lighthouse accessibility ≥ 95.
+**Acceptance:** side by side with the three mockups at 1280px they look like the same product. Nothing scrolls sideways at 375px. Lighthouse accessibility ≥ 95.
 
 ---
 

@@ -58,3 +58,9 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 ### 2026-11-26 14:20:02 +02:00 · session 87554b23
 > All right, let's move on to phase 2, please.
 
+### 2026-11-26 15:34:44 +02:00 · session 87554b23
+> mv ~/Downloads/BUILD_SPEC.md ~/Projects/human-capital-copilot/BUILD_SPEC.md
+
+### 2026-11-26 15:36:40 +02:00 · session 87554b23
+> no let's go with your recommendation, continue please
+

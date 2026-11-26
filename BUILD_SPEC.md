@@ -1,6 +1,6 @@
 # Human Capital Copilot: demo build spec (for Claude Code)
 
-*v1.1 · 26 Nov 2026 · Single source of truth for building the demo. Replaces the staged S0–S11 plan (project docs 04/06) for this deadline. Financial maths matches project doc 03 (reference engine v2) exactly.*
+*v1.2 · 26 Nov 2026 · Single source of truth for building the demo. Replaces the staged S0–S11 plan (project docs 04/06) for this deadline. Financial maths matches project doc 03 (reference engine v2) exactly.*
 
 ---
 
@@ -94,9 +94,10 @@ npm run dev
 ### Part E: Vercel, for the live demo link (10 min, once)
 
 1. Go to **vercel.com** → **Sign Up** → choose **Hobby** (personal, free) → **Continue with GitHub** → sign in as *joachimuldahl* and authorise.
-2. If Vercel asks to install its GitHub app, choose **Only select repositories** → `human-capital-copilot` → **Install**.
+2. If Vercel asks to install its GitHub app, choose **Only select repositories** → `human-capital-copilot` → **Install**. If the app is already installed for other repositories (e.g. a business project), **add** `human-capital-copilot` to the selected list; don't remove the others.
+   *Already use Vercel for another project?* Log in with the same account, but check that the account/team selector in the top-left corner shows your **personal Hobby** account, not a business team, before you continue.
 3. On the Vercel dashboard click **Add New… → Project** (some screens show a **New Project** button instead).
-4. Under **Import Git Repository**, find `human-capital-copilot` → **Import**. If it isn't listed, click the link to adjust the GitHub app's permissions and give it access to this repository.
+4. Under **Import Git Repository**, find `human-capital-copilot` (and only this one) → **Import**. If it isn't listed, click the link to adjust the GitHub app's permissions and give it access to this repository.
 5. On **Configure Project**:
    - **Project Name:** `human-capital-copilot`
    - **Framework Preset:** should say **Vite**. If not, pick Vite from the list.
@@ -158,7 +159,7 @@ The app turns 16 questions into one number, **Risk Capacity**: risk as a multipl
 | D-12 | **Static web app** (Vite + React + TypeScript), no backend, no login, state in the browser (localStorage). |
 | D-13 | Hosted on **Vercel** from a public GitHub repo under the personal account `joachimuldahl`. The live link is the demo link for the submission. |
 | D-14 | **No in-app AI chat.** "Explain" boxes use pre-written templates filled with engine numbers. |
-| D-15 | Scope = Landing, Onboarding, Results, Portfolio, Plan. Out of scope: AI chat, alerts page, CSV import, performance/benchmarks, dividends, star investors, bank connections. |
+| D-15 | Scope = Landing, Onboarding, Results, Portfolio, Plan, **Method** (section 17). Out of scope: AI chat, alerts page, CSV import, performance/benchmarks, dividends, star investors, bank connections. |
 | D-16 | Demo data (products, ETF look-through) is **illustrative** until Damien's verified factsheet data arrives. It is isolated in `src/data/` so swapping it changes no other code. Show a small "Illustrative data" badge wherever it is used. |
 
 ---
@@ -385,7 +386,7 @@ Global: top nav (logo text "Human Capital Copilot" + links Onboarding · Results
 - A small "Built on research" line citing Ayres & Nalebuff (2010) and Ibbotson et al. (2007).
 
 ### 7.2 Onboarding (`/onboarding`): 16 questions in 4 steps
-Progress bar, Back/Next, one step per screen on mobile. **Live needle**: a sticky panel (desktop right side, mobile bottom bar) showing the current finalEEE on a 0–1.5× scale with explanation line 1. It updates on every answer (missing answers use the defaults below). Each question has a one-sentence "Why we ask" tooltip.
+Progress bar, Back/Next, one step per screen on mobile. **Live needle**: a sticky panel (desktop right side, mobile bottom bar) showing the current finalEEE on a 0–1.5× scale with explanation line 1. It updates on every answer. Unanswered questions use the defaults below, but the needle must say so: a **"Preliminary"** chip and "Based on defaults for N questions you haven't answered yet" until the user has passed step 4. Never show an explanation that quotes a default as if the user had said it (e.g. "the most you said you could lose" before Q14 is answered). Each question has an expandable **"Why we ask"** panel with the content from section 16, styled as in section 15. Q6, Q8 and Q14 also offer an **"I'm not sure"** option that uses the default and says so.
 
 | Step | # | Question | Input | Default |
 |---|---|---|---|---|
@@ -525,6 +526,7 @@ Static Vite + React + TS demo. Full spec: @BUILD_SPEC.md (source of truth).
 - **Phase 4:** `Read BUILD_SPEC.md sections 5.4 and 7.4. Do Phase 4: the Portfolio page with look-through, concentration, overlap, risk-fit gauge and stress test.`
 - **Phase 5:** `Read BUILD_SPEC.md section 7.5. Do Phase 5: the Plan page.`
 - **Phase 6:** `Read BUILD_SPEC.md sections 8 and 14. Do Phase 6: responsive and accessibility pass, empty states, Assumptions dialog, README with the live link, and a draft docs/Application-Description.md. Then commit, push and confirm the Vercel deploy.`
+- **Phase 3b (design + help content, v1.2):** `Read BUILD_SPEC.md sections 7.2, 15, 16 and 17. Redesign the global layout and the Onboarding page to match section 15 exactly (Inter, tokens, header, two-column layout, question blocks, inputs, sliders, radio cards, semicircle gauge with the Preliminary state). Replace every "Why we ask" with the 4-part panel and the section 16 text, including the live effect line computed with the engine. Add the Method page (section 17) and link it from the footer and every panel. Don't change engine maths. When done, check the result at 375px and 1280px (take screenshots with Playwright if available) and list anything that still deviates from section 15.`
 - **Bug fix (any time):** `Bug on <page>: when I <steps>, I expected <x> but got <y>. Find the root cause first, explain it in 2–3 sentences, fix it, add a test if it is in src/engine, and run tests/lint/build.`
 
 ---
@@ -561,3 +563,92 @@ After every task Claude Code appends:
 - [ ] `docs/Application-Description.md` (→ PDF): problem, solution, innovation, users and personas, features with screenshots, method (formulas and assumptions), how AI was used in development, limitations
 - [ ] `prompts/PROMPT_LOG.md` complete + `prompts/design-phase-log.md` + any prompts from Jens and Damien
 - [ ] ZIP: README, docs/, prompts/, source (without node_modules, dist, .git)
+
+---
+
+## 15. Design system (v1.2: the first build looked unpolished; follow this exactly)
+
+**Feel:** calm, modern fintech in the style of Stripe or Linear. Lots of white space, small and precise type, one accent colour, numbers that stand out. Nothing oversized.
+
+**Tokens** (in `src/styles/tokens.css` or the Tailwind theme):
+- Font: **Inter** (Google Fonts or `@fontsource/inter`), `font-feature-settings: "tnum"` on every number (tabular figures).
+- Colours: text `slate-900` / secondary `slate-600` / muted `slate-400`; page background `slate-50`; cards white with a 1px `slate-200` border, radius 12px, shadow `0 1px 2px rgb(0 0 0 / 0.04)`; **primary teal `#0F766E`** (hover `#115E59`, tint `#F0FDFA`); warning amber `#B45309` on `#FFFBEB`; alert red `#B91C1C` on `#FEF2F2`; success green `#15803D`.
+- Type scale: page title 28px/600 · section title 18px/600 · question 16px/600 · body 15px/400 · help text 14px/400 slate-600 · captions 12px/500 uppercase tracking-wide slate-500 · hero numbers 40px/600 tabular.
+- Spacing on a 4px grid: 24px between questions, 32px between sections, 16px card padding on mobile and 24px on desktop. Max content width 1120px.
+
+**Layout:**
+- Header 64px high: wordmark 16px/600 in slate-900 with a small teal dot or icon before it; nav links 14px/500 slate-600; the active link is teal with a 2px underline (no filled pill). Persona switcher as a compact segmented control on the right of the page header, not in the nav.
+- Onboarding, desktop: two columns. Left, the question card (max 640px). Right, a sticky 320px summary panel. Mobile: a single column plus a 56px sticky bottom bar showing the number and a chip.
+- Step header: a small caption ("STEP 1 OF 4"), a 22px title ("About you"), a one-line subtitle ("4 quick questions about your situation"), and a thin 4px progress bar with 4 segments.
+
+**Components:**
+- **Question block:** number + question (16px/600), an optional one-line hint under it (14px slate-500), then the input. Divider lines between questions inside the card, not separate cards.
+- **Inputs:** 44px high, 1px slate-300 border, radius 8px, teal focus ring. Money inputs format live with thousands separators (10,000) and show the € prefix inside the field. Units ("years", "%") as a muted suffix inside the field.
+- **Sliders:** thin 4px track, 18px thumb, value shown in a small pill **above the thumb**, min/max labels underneath in 12px slate-400. Never a large detached value to the right.
+- **Radio cards** (sector, security, risk questions): 2-column grid on desktop, 1 on mobile; each card has a title (15px/600) + example line (13px slate-500); the selected card has a teal border and a tint background.
+- **"Why we ask" button:** a small text button with an ⓘ icon, "Why we ask", teal 13px/500. It expands an inline panel (animated height, 150ms) with a slate-50 background, a 3px teal left border, radius 8px and 16px padding. The panel has 4 labelled parts, each with a 12px uppercase caption: **WHY IT MATTERS**, **HOW WE USE IT**, **YOUR ANSWER'S EFFECT** (live), **RESEARCH**. It closes with "Read the full method →" linking to `/#/method`. Only one panel is open at a time.
+- **Live effect line:** for numeric questions, compute with the engine how the result changes if the answer moves one step (e.g. +2 years of retirement age, +5 pp savings rate, +€5,000 loss limit): "Retiring 2 years later would add €6,200 to your future savings and move your target from 0.95× to 1.02×." For choice questions, show what the alternative answers would give ("Public sector → 1.50× · Finance → 0.62×"). This is the app's strongest "show, don't tell" feature, so make it accurate and short.
+- **Summary panel (needle):** caption "YOUR RISK CAPACITY", hero number "1.50×", a "Preliminary" chip while unanswered questions remain, then a **semicircle gauge** from 0× to 1.5× with three subtle zones (0–0.6 "cautious", 0.6–1.0 "market-like", 1.0–1.5 "uses borrowing") and an animated needle (300ms, respects `prefers-reduced-motion`). Under it, the top explanation line and a small "What drives this" list showing the 3 drivers (risk attitude · future savings · income type) with mini values.
+- **Buttons:** primary teal filled, 40px, radius 8px, 14px/600; secondary white with a slate-300 border. "Back" is secondary on the left, "Next" primary on the right, in a sticky footer row inside the card on mobile.
+- **Badges/chips:** 12px/500, radius 999px, tinted background (teal / amber / red / slate).
+- Icons: `lucide-react` (approved dependency), 16px, stroke 1.75.
+- Charts (Recharts): no gridline clutter, slate-200 axes, teal primary series, slate-400 secondary series, tooltips styled as cards, tabular numbers.
+
+**Customer service touches:**
+- A privacy line under the step header: "Your answers stay in your browser. Nothing is sent anywhere."
+- Friendly validation ("Retirement age needs to be after your current age"), never red-screaming.
+- Each step ends with "You can change any answer later."
+- The landing hero and onboarding say how long it takes ("about 3 minutes").
+
+**Acceptance:** a side-by-side check at 375px and 1280px; nothing larger than 28px except the hero numbers; no element touching the screen edge on mobile; Lighthouse accessibility ≥ 95.
+
+---
+
+## 16. "Why we ask" content (use this text; keep the citations)
+
+Format per question: **Why it matters** · **How we use it** · **Your answer's effect** (live, per section 15) · **Research**. Short references in the panel, full references on the Method page (section 17).
+
+| # | Why it matters | How we use it | Research |
+|---|---|---|---|
+| 1 Age | Your future salary is usually your largest asset when you're young, and it shrinks each year you work. That is the core of lifecycle investing. | Sets how many working years are left in your future-savings calculation (human capital, H) and where you start on the glide path. | Bodie, Merton & Samuelson (1992); Cocco, Gomes & Maenhout (2005) |
+| 2 Retirement age | More working years mean more future savings. The option to work longer is itself a buffer against bad markets. | Sets the last year of savings in H, and the 15-year minimum horizon for using a loan. | Bodie, Merton & Samuelson (1992) |
+| 3 Invested today | Your target depends on the **ratio** between today's money (F) and future savings (H). With little invested, small amounts carry your whole future. | F in the formula raw = (w*·F + (w* − βH)·H) / F. It also sizes the loss-limit check and the €5,000 minimum for borrowing. | Ayres & Nalebuff (2010, 2013) |
+| 4 Share invested | Only what you actually invest reaches your portfolio. Ayres & Nalebuff measure human capital as the present value of future **contributions**, not total salary. | Multiplies every future salary in H. | Ayres & Nalebuff (2013), "Diversification Across Time" |
+| 5 Income now | The starting point of your earnings path. | Year-1 income in H (net, after tax, in today's money). | Ibbotson, Milevsky, Chen & Zhu (2007) |
+| 6 Income in 10 years | Earnings typically rise steeply early in a career and flatten around mid-career. | Your implied yearly growth (capped at 8%) until age 45, then 0.5% a year. | Cocco, Gomes & Maenhout (2005) |
+| 7 Sector | Whether your salary moves with the stock market decides whether it acts like a **bond** (stable) or a **stock** (market-linked). A bond-like income lets your portfolio carry more stock risk; a stock-like one means you're already exposed. | Sets βH, the stock-like share of your future savings: public 0.05 … founder 0.65. These are our model assumptions, set conservatively; average empirical correlations are low. | Ibbotson et al. (2007); Benzoni, Collin-Dufresne & Goldstein (2007) |
+| 8 Variable pay | Bonuses, commission and share options usually fall exactly when markets fall. | Adds 0.3 × your variable share to βH (max 0.9). | Ibbotson et al. (2007) |
+| 9 Income security | Riskier income is worth less today, just as a risky bond is priced lower than a safe one. | Sets the discount rate for H: real risk-free rate 1% + a spread of 1–4.5%. | Ibbotson et al. (2007); Viceira (2001) |
+| 10 Emergency buffer | Without a cash buffer, a job loss could force you to sell investments at the worst moment. | Gate G1: under 3 months caps your target at 1.0× and makes "build a buffer" step 1 of your plan. | Common financial-planning guideline (3–6 months of expenses) |
+| 11 Debt rate | Repaying debt that costs more than investments are expected to earn is a guaranteed, risk-free return. | Gate G2: any debt above 7% caps your target at 1.0×. Our expected stock return assumption is 7.5% a year. | Standard debt-vs-invest comparison; our assumptions are on the Method page |
+| 12 Reaction to a fall | What you'd actually do in a crash matters more than how brave you feel. Selling after a fall locks in losses. | Half of your risk-attitude score, which sets risk aversion (γ) and your share of total wealth in stocks (w* = premium / (γ·σ²)). | Grable & Lytton (1999); Merton (1969) |
+| 13 Income gamble | A classic economics question that measures risk aversion from choices about your own income. | The other half of your risk-attitude score (γ). | Barsky, Juster, Kimball & Shapiro (1997) |
+| 14 Max loss in a bad year | Willingness (Q12–13) and **capacity** to bear losses are different things. This is your capacity, in money. | Gate G4: your target is capped so that a 50% stock-market fall never costs more than this amount. | ESMA guidelines on MiFID II suitability requirements (ability to bear losses) |
+| 15 Experience | Inexperienced investors overestimate their tolerance until they've lived through a fall. | With no experience and no passed knowledge check, risk attitude is capped at "moderate". | ESMA guidelines on MiFID II suitability (knowledge and experience) |
+| 16 Knowledge check & opt-in | Borrowing to invest amplifies both gains and losses, and leveraged ETFs lose value in volatile markets. You should understand that before using either. | Gate G3: leverage above 1.0× needs all 3 answers right, an explicit opt-in, 15+ years to retirement and €5,000+ invested. Even then we cap at 1.5× (Ayres & Nalebuff use 2.0×). | Ayres & Nalebuff (2010); Cheng & Madhavan (2009) |
+
+---
+
+## 17. Method page (`/#/method`): for the examiner, linked from every "Why we ask" panel and the footer
+
+Sections:
+1. **The idea in one paragraph** (from section 1).
+2. **How your Risk Capacity is calculated:** the 5 steps with the formulas from section 5.3, written as readable maths (w*, H, βH, raw, caps, final), plus a worked example for Sofie with her real numbers.
+3. **Assumptions:** the full table from `assumptions.ts`, each value with a one-line justification and the label "assumption, editable".
+4. **Limits and gates:** G1–G4 + the 1.5× cap + the 0.2× floor, each with why it exists.
+5. **What this model does not do (limitations):** no taxes; deterministic glide path (no Monte Carlo); sector betas are judgement-based; savings rate held constant; no insurance or housing; illustrative product data.
+6. **Not investment advice:** an educational demo; personal recommendations of specific products would be regulated investment advice (e.g. under MiFID II in the EU).
+7. **References** (full):
+   - Ayres, I. & Nalebuff, B. (2010). *Lifecycle Investing*. Basic Books.
+   - Ayres, I. & Nalebuff, B. (2013). Diversification across time. *Journal of Portfolio Management*, 39(2).
+   - Barsky, R., Juster, F. T., Kimball, M. & Shapiro, M. (1997). Preference parameters and behavioral heterogeneity. *Quarterly Journal of Economics*, 112(2).
+   - Benzoni, L., Collin-Dufresne, P. & Goldstein, R. (2007). Portfolio choice over the life-cycle when the stock and labor markets are cointegrated. *Journal of Finance*, 62(5).
+   - Bodie, Z., Merton, R. C. & Samuelson, W. (1992). Labor supply flexibility and portfolio choice in a life cycle model. *Journal of Economic Dynamics and Control*, 16.
+   - Cheng, M. & Madhavan, A. (2009). The dynamics of leveraged and inverse exchange-traded funds. *Journal of Investment Management*, 7(4).
+   - Cocco, J., Gomes, F. & Maenhout, P. (2005). Consumption and portfolio choice over the life cycle. *Review of Financial Studies*, 18(2).
+   - ESMA. Guidelines on certain aspects of the MiFID II suitability requirements.
+   - Grable, J. & Lytton, R. (1999). Financial risk tolerance revisited: the development of a risk assessment instrument. *Financial Services Review*, 8(3).
+   - Ibbotson, R., Milevsky, M., Chen, P. & Zhu, K. (2007). *Lifetime Financial Advice: Human Capital, Asset Allocation, and Insurance*. CFA Institute Research Foundation.
+   - Merton, R. C. (1969). Lifetime portfolio selection under uncertainty: the continuous-time case. *Review of Economics and Statistics*, 51(3).
+   - Samuelson, P. A. (1969). Lifetime portfolio selection by dynamic stochastic programming. *Review of Economics and Statistics*, 51(3).
+   - Viceira, L. (2001). Optimal portfolio choice for long-horizon investors with nontradable labor income. *Journal of Finance*, 56(2).

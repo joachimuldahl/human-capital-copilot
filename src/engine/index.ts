@@ -1,0 +1,11 @@
+/** Public API of the deterministic engine. UI imports numbers only from here (BUILD_SPEC D-4, section 8). */
+export * as assumptions from './assumptions'
+export * from './types'
+export { riskBand, mertonShare } from './riskBand'
+export { growthRate, betaH, pvfs } from './humanCapital'
+export { targetEEE, leverageEligible, type TargetOptions } from './target'
+export { glidePath } from './glidePath'
+export { solveAllocation, portfolioVol } from './allocation'
+export { portfolioEEE, stressLoss, marginBuffer, loanAmount, loanCostPerYear, letfDrag } from './risk'
+export { netWorth, exposures, lookThrough, concentrationFlags, overlap, riskFit, UNKNOWN } from './portfolio'
+export * from './explain'

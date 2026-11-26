@@ -4,7 +4,7 @@ Sizes your investment risk to your whole life, not just today's portfolio. Your 
 
 CBS team assignment (Jens, Damien, Joachim). Educational demo. Not investment advice. Data is illustrative.
 
-**Live demo:** _link added after Vercel deploy_
+**Live demo:** https://building-your-wealth.vercel.app/
 
 ## Run locally
 

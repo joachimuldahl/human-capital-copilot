@@ -4,7 +4,8 @@
  */
 import { minBufferMonths, policyCap, expensiveDebtRate, floor } from './assumptions'
 import { solveAllocation } from './allocation'
-import type { ConcentrationFlag, Profile, TargetResult } from './types'
+import { growthRate } from './humanCapital'
+import type { Band, Binding, CapId, ConcentrationFlag, Profile, TargetResult } from './types'
 
 /** Round half away from zero to `decimals`, tolerant of binary floating-point error (0.1435 → 14.4%). */
 export function roundHalfAway(x: number, decimals: number): number {
@@ -97,4 +98,51 @@ export function explainCrypto(targetEEE: number, btc: number, gold = 0): string 
 /** "Apple 14.4%: direct 10.0% + VWCE 1.8% + CNDX 2.6%" */
 export function explainConcentration(f: ConcentrationFlag): string {
   return `${f.name} ${formatPct(f.share)}: ${f.sources.map((s) => `${s.label} ${formatPct(s.share)}`).join(' + ')}`
+}
+
+/** Ratio without trailing zeros, for sentences: 1.5 → "1.5", 0.3439 → "0.34". */
+export function formatTimes(x: number): string {
+  return String(roundHalfAway(x, 2))
+}
+
+/** Results hero sentence. */
+export function riskSentence(finalEEE: number): string {
+  return `You can carry about ${formatTimes(finalEEE)} times the risk of the global stock market.`
+}
+
+export const BAND_LABEL: Record<Band, string> = {
+  very_high: 'Very high',
+  high: 'High',
+  moderate: 'Moderate',
+  low: 'Low',
+  very_low: 'Very low',
+}
+
+export const CAP_LABEL: Record<CapId, string> = {
+  policy_cap: `Safety cap (${policyCap}×)`,
+  G1_buffer: 'Emergency buffer',
+  G2_debt: 'Expensive debt',
+  G3_leverage: 'Borrowing rules',
+  G4_loss: 'Max loss in a bad year',
+}
+
+export const BINDING_LABEL: Record<Binding, string> = {
+  ...CAP_LABEL,
+  model: 'Set by your profile',
+  floor: 'Minimum level',
+}
+
+/** "Risk attitude" driver line: "hold 87.9% of your total wealth in stocks". */
+export function riskAttitudeLine(t: TargetResult): string {
+  return `hold ${formatPct(t.wStar)} of your total wealth in stocks`
+}
+
+/** Onboarding question 12, with the user's own amount. */
+export function drawdownQuestion(F: number): string {
+  return `Your ${formatEUR(F)} falls to ${formatEUR(0.7 * F)} in three months. What do you do?`
+}
+
+/** Onboarding question 6 helper: "≈ 3.0% per year" (the growth the engine will use). */
+export function impliedGrowthLabel(p: Profile): string {
+  return `≈ ${formatPct(growthRate(p))} per year`
 }

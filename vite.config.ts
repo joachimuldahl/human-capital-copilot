@@ -8,8 +8,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['src/test/setup.ts'],
+    // Inline zustand so page tests can give it a test-only useSyncExternalStore (see src/pages/pages.test.tsx).
+    server: { deps: { inline: ['zustand'] } },
     coverage: {
       provider: 'v8',
       include: ['src/engine/**/*.ts'],

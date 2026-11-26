@@ -22,3 +22,9 @@
 - src/store: profileStore (persisted; persona switching never overwrites "My answers"; setAnswer/loadPersona/reset) and portfolioStore (demo vs quick entry, persisted).
 - Engine: resolveProfile + onboarding defaults (income10y = +3%/yr, max loss = 30% of F follow the other answers until set); two new assumptions.
 - Engine tests now run on the real src/data, so section 9 also verifies the data. 110 tests.
+
+## 2026-11-26 · Phase 3 · Landing, Onboarding, Results
+- Landing (hero, CTAs, how it works, persona cards, research line); Onboarding (16 questions in 4 steps + review, "Why we ask", knowledge check + opt-in switch, live needle: sticky panel on desktop, bottom bar on mobile); Results (hero, binding badge + explanation, 4 driver cards, lifetime balance sheet, glide path chart, what-if sliders, CTAs, empty state).
+- Components: Card, Badge/IllustrativeBadge, StatTile, Explain, NeedleBar, PersonaCards, PersonaSwitcher, GlideChart, accessible form fields. All numbers and wording come from src/engine (new text helpers in explain.ts).
+- Server-render page tests check the presets (1.50× / 1.20× / 0.34× / 0.67×), the live needle and the empty state. 122 tests.
+- Pages load lazily: the first page load dropped from 718 kB to 278 kB (Recharts only loads with Results).

@@ -16,7 +16,7 @@ interface ProfileState {
   setAnswer: <K extends keyof Profile>(key: K, value: Profile[K]) => void
   setAnswers: (answers: Partial<Profile>) => void
   loadPersona: (id: PersonaId) => void
-  useMyAnswers: () => void
+  showMyAnswers: () => void
   /** Clears the user's answers and switches back to "My answers". */
   reset: () => void
 }
@@ -29,7 +29,7 @@ export const useProfileStore = create<ProfileState>()(
       setAnswer: (key, value) => set((s) => ({ answers: { ...s.answers, [key]: value } })),
       setAnswers: (answers) => set((s) => ({ answers: { ...s.answers, ...answers } })),
       loadPersona: (id) => set({ active: id }),
-      useMyAnswers: () => set({ active: 'mine' }),
+      showMyAnswers: () => set({ active: 'mine' }),
       reset: () => set({ active: 'mine', answers: {} }),
     }),
     {

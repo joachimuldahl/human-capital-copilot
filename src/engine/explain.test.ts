@@ -102,3 +102,21 @@ describe('human capital and crypto text', () => {
     expect(explainCrypto(1.5, 0.1)).toBe('10.0% in Bitcoin uses 19.0 percentage points of your stock budget')
   })
 })
+
+describe('Phase 3 text helpers', () => {
+  it('formatTimes and riskSentence', async () => {
+    const { formatTimes, riskSentence } = await import('./explain')
+    expect(formatTimes(1.5)).toBe('1.5')
+    expect(formatTimes(0.34389)).toBe('0.34')
+    expect(riskSentence(1.5)).toBe('You can carry about 1.5 times the risk of the global stock market.')
+  })
+  it('labels and question helpers', async () => {
+    const m = await import('./explain')
+    expect(m.BINDING_LABEL.policy_cap).toBe('Safety cap (1.5×)')
+    expect(m.BINDING_LABEL.model).toBe('Set by your profile')
+    expect(m.BAND_LABEL.high).toBe('High')
+    expect(m.riskAttitudeLine(targetEEE(PERSONAS.sofie))).toBe('hold 87.9% of your total wealth in stocks')
+    expect(m.drawdownQuestion(10000)).toBe('Your €10,000 falls to €7,000 in three months. What do you do?')
+    expect(m.impliedGrowthLabel(PERSONAS.sofie)).toBe('≈ 3.5% per year')
+  })
+})

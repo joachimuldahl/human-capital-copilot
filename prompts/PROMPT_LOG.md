@@ -40,3 +40,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ (110/110, engine coverage 100% lines / 99.2% branches) · lint ✔ · build ✔
 **Human check:** (to fill in by Joachim)
 **Lesson:** Zustand's persist saves on every setState, so a "page reload" test has to restore the saved storage copy before rehydrating; otherwise it only tests itself.
+
+### C-005 · 2026-11-26 · Joachim · Claude Code · Phase 3
+**Prompt:** see PROMPT_LOG_AUTO.md, entry 2026-11-26 14:20:02 +02:00 (plus the choice "Commit+push 2, start 3" in a question dialog)
+**What the AI did:** Committed and pushed Phase 2, then built Landing, Onboarding (16 questions, live needle, knowledge check, review) and Results (hero, drivers, balance sheet, glide path, what-if, empty state) per sections 7.1–7.3, with all numbers from src/engine. Added server-render page tests and lazy-loaded pages to split the bundle.
+**Files changed:** src/pages/{Landing,Onboarding,Results}.tsx, src/pages/pages.test.tsx, src/components/{Card,Badge,StatTile,Explain,NeedleBar,PersonaCards,PersonaSwitcher,GlideChart,fields}.tsx, src/store/hooks.ts, src/store/profileStore.ts (action renamed showMyAnswers), src/engine/explain.ts (+tests), src/App.tsx, src/index.css, vite.config.ts, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (122/122) · lint ✔ · build ✔
+**Human check:** (to fill in by Joachim: click through on phone and desktop)
+**Lesson:** zustand persist deliberately serves the default state when rendering on the server, so the first page tests showed the empty state for every persona. A test-only useSyncExternalStore stub fixed the tests without changing app code.

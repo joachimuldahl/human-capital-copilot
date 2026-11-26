@@ -23,7 +23,7 @@ describe('profileStore', () => {
     s.setAnswer('age', 31)
     s.loadPersona('lea')
     expect(selectProfile(useProfileStore.getState())).toEqual(PERSONAS.lea.profile)
-    useProfileStore.getState().useMyAnswers()
+    useProfileStore.getState().showMyAnswers()
     expect(selectProfile(useProfileStore.getState()).age).toBe(31)
   })
 

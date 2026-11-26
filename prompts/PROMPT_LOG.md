@@ -32,3 +32,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ · lint ✔ · build ✔ · hook tested by hand (normal, nolog, missing field, invalid JSON, unwritable folder: stdout empty, exit 0) and live (entry 2026-11-26 14:09:22 +02:00 logged without a restart)
 **Human check:** (to fill in by Joachim: /hooks listing and a live "nolog:" prompt)
 **Lesson:** Hook stdout is added to the model's context on exit 0, so a logging hook must stay silent and must never exit 2 (that blocks the prompt).
+
+### C-004 · 2026-11-26 · Joachim · Claude Code · Phase 2
+**Prompt:** see PROMPT_LOG_AUTO.md, entry 2026-11-26 14:09:22 +02:00
+**What the AI did:** First finished the logging task (C-003 commit, pushed both commits). Then built src/data per section 6 plus a quick-entry mapping, the two persisted Zustand stores, and resolveProfile (onboarding defaults) in the engine. Switched the engine test fixtures to the real data. Added data checks (totals = F, splits sum to 100, product references) and store tests (persona switching, persistence/rehydration).
+**Files changed:** src/data/{personas,products,lookthrough,demoPortfolios,quickEntry}.ts, src/data/data.test.ts, src/store/{profileStore,portfolioStore}.ts, src/store/stores.test.ts, src/engine/{defaults,defaults.test,assumptions,types,index}.ts, src/engine/test/fixtures.ts, src/test/setup.ts, vite.config.ts, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (110/110, engine coverage 100% lines / 99.2% branches) · lint ✔ · build ✔
+**Human check:** (to fill in by Joachim)
+**Lesson:** Zustand's persist saves on every setState, so a "page reload" test has to restore the saved storage copy before rehydrating; otherwise it only tests itself.

@@ -119,3 +119,8 @@ export const riskFitTolerance = 0.15
 export const concentrationWarn = 0.05
 /** Single security above this share of net worth → alert. Assumption, editable. */
 export const concentrationAlert = 0.1
+
+/** Onboarding default for expected income growth (question 6: "+3%/yr"). Assumption, editable. */
+export const defaultIncomeGrowth = 0.03
+/** Onboarding default for max loss in a bad year, as share of F (question 14: "30% of F"). Assumption, editable. */
+export const defaultMaxLossShare = 0.3

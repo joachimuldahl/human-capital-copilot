@@ -16,3 +16,9 @@
 ## 2026-11-26 · Setup · Automatic prompt logging
 - UserPromptSubmit hook (.claude/hooks/log-prompt.mjs) logs every prompt verbatim to prompts/PROMPT_LOG_AUTO.md; "nolog:" prompts are skipped.
 - Backfilled earlier prompts from the session transcript; CLAUDE.md now says C-entries reference auto-log timestamps.
+
+## 2026-11-26 · Phase 2 · Data + stores
+- src/data: personas, products (14, all illustrative, TER pending), look-through, demo portfolios, quick-entry mapping.
+- src/store: profileStore (persisted; persona switching never overwrites "My answers"; setAnswer/loadPersona/reset) and portfolioStore (demo vs quick entry, persisted).
+- Engine: resolveProfile + onboarding defaults (income10y = +3%/yr, max loss = 30% of F follow the other answers until set); two new assumptions.
+- Engine tests now run on the real src/data, so section 9 also verifies the data. 110 tests.

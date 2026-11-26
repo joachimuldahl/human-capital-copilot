@@ -124,6 +124,11 @@ export interface Product {
   illustrative: true
 }
 
+export interface Account {
+  id: string
+  name: string
+}
+
 export interface Holding {
   id: string
   accountId: string
@@ -145,6 +150,8 @@ export interface LookThroughEntry {
   regions: Record<string, number>
   /** Percent per sector; sums to 100. */
   sectors: Record<string, number>
+  /** Demo data until verified factsheets arrive (D-16). */
+  illustrative: true
 }
 
 /** Product id → product. */

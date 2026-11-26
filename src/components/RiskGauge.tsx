@@ -29,14 +29,15 @@ export default function RiskGauge({ value }: { value: number }) {
   const ticks = [0, 1, 1.5]
   return (
     <div role="meter" aria-label="Risk Capacity" aria-valuemin={0} aria-valuemax={MAX} aria-valuenow={Number(value.toFixed(2))} aria-valuetext={formatRatio(value)}>
-      <svg viewBox="0 0 220 124" className="w-full" aria-hidden>
+      <svg viewBox="0 0 220 126" className="w-full" aria-hidden>
         {ZONES.map((z, i) => (
           <path key={z.label} d={arc(z.from + (i ? 0.01 : 0), z.to)} stroke={z.color} strokeWidth={14} fill="none" />
         ))}
         {ticks.map((t) => {
-          const [x, y] = pt(t, R - 20)
+          // End labels sit under the arc ends (clear of the needle); 1.0× sits just inside the arc.
+          const [x, y] = t === 1 ? pt(t, R - 20) : [pt(t)[0], CY + 17]
           return (
-            <text key={t} x={x} y={y + 4} textAnchor={t === 0 ? 'start' : t === MAX ? 'end' : 'middle'} className="fill-slate-400 text-[10px] font-medium">
+            <text key={t} x={x} y={y + 4} textAnchor="middle" className="fill-slate-400 text-[10px] font-medium">
               {t === 0 ? '0×' : `${t.toFixed(1)}×`}
             </text>
           )

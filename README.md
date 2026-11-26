@@ -8,10 +8,11 @@ Your biggest asset is usually your future salary. Human Capital Copilot sizes yo
 
 ## Features
 
-- **Onboarding:** 16 questions in 4 steps, each with a "Why we ask" note and a live needle that updates on every answer. Includes a knowledge check before borrowing can be switched on.
+- **Onboarding:** 16 questions in 4 steps. Each has a "Why we ask" panel with the research behind it and a live line showing how a different answer would change the result. A gauge updates on every answer and stays "Preliminary" until all questions are answered. Includes a knowledge check before borrowing can be switched on.
 - **Results:** Risk Capacity with the limit that applies, four drivers (risk attitude, human capital, income type, limits), lifetime balance sheet, glide path to retirement and what-if sliders.
 - **Portfolio:** demo portfolio or quick entry; risk fit (actual vs target), 2008-style crash test against your own loss limit, and ETF look-through by asset class, region, sector, single-company concentration and ETF overlap.
 - **Plan:** safety gates (emergency buffer, expensive debt), gold and crypto satellites, target vs current allocation, example products ("Example, not advice"), crash test now vs target, borrowing panel with margin buffer and leveraged-ETF warning, and the steps to get there.
+- **Method page:** the formulas with a worked example, every assumption with its justification, the limits, limitations and references.
 - **Four demo people** (Sofie, Mads, Lea, Jonas) to explore without typing anything.
 - Every number comes from a deterministic, unit-tested engine (`src/engine`). No AI-generated numbers; explanations are templates filled with engine results.
 
@@ -26,6 +27,7 @@ npm test           # unit and page tests
 npm run coverage   # engine coverage
 npm run lint
 npm run build
+npm run zip        # submission ZIP of the last commit (no node_modules, dist or .git)
 ```
 
 Stack: Vite + React + TypeScript (strict), Tailwind CSS, React Router (HashRouter), Recharts, Zustand (state saved in the browser), Vitest. No backend, no login.

@@ -80,3 +80,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ (181/181) · lint ✔ · build ✔ · browser check ✔ (20 page states at 375/1280 px: no overflow, no console errors, nothing above 28px except hero numbers)
 **Human check:** (to fill in by Joachim)
 **Lesson:** The first screenshot run showed the onboarding ignoring seeded answers. The cause was the QA script, not the app: a hash-only navigation kept the old in-memory store, which then overwrote localStorage. Forcing a full page load fixed it, so checking odd test results before "fixing" the app saved a wrong change.
+
+### C-010 · 2026-11-26 · Joachim · Claude Code · Phase 3b follow-up
+**Prompt:** typed with the "nolog:" prefix, so not in PROMPT_LOG_AUTO.md. Content: push Phase 3b to main and continue finishing the work.
+**What the AI did:** Committed and pushed Phase 3b. Fixed the remaining section 15 gaps: one-row 64px header on phones (short wordmark), semicircle gauge on the Results hero instead of the old needle bar (unused NeedleBar removed), gauge end labels moved clear of the needle. Updated docs/Application-Description.md (live effect lines, Method page, design system, 181 tests, AI-use notes) and refreshed all its screenshots. Added `npm run zip` for the submission archive.
+**Files changed:** src/components/{Nav,RiskGauge}.tsx, src/components/NeedleBar.tsx (deleted), src/pages/Results.tsx, docs/Application-Description.md, docs/screenshots/*, README.md, package.json, .gitignore, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (181/181) · lint ✔ · build ✔ · browser check ✔ (26 page states at 375/1280 px clean)
+**Human check:** (to fill in by Joachim)
+**Lesson:** Screenshot review caught the gauge label hidden under the needle at exactly 1.50×, the most common demo value; it would not have shown at the default 0.60×.

@@ -26,3 +26,4 @@ dist-ssr
 # Claude Code local files
 .claude/settings.local.json
 .claude/hooks/log-prompt.err
+human-capital-copilot-submission.zip

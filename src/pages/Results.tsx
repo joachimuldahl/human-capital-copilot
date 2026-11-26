@@ -4,7 +4,7 @@ import Badge, { IllustrativeBadge } from '../components/Badge'
 import Card from '../components/Card'
 import Explain from '../components/Explain'
 import GlideChart from '../components/GlideChart'
-import NeedleBar from '../components/NeedleBar'
+import RiskGauge from '../components/RiskGauge'
 import PersonaCards from '../components/PersonaCards'
 import PersonaSwitcher from '../components/PersonaSwitcher'
 import StatTile from '../components/StatTile'
@@ -65,7 +65,7 @@ export default function Results() {
         </Card>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold">Try a demo person</h2>
+            <h2 className="text-section">Try a demo person</h2>
             <IllustrativeBadge />
           </div>
           <PersonaCards />
@@ -82,28 +82,30 @@ export default function Results() {
       <Header />
 
       {/* 1. Hero */}
-      <section aria-labelledby="hero" className="space-y-4 rounded-3xl bg-gradient-to-br from-accent-50 to-white p-6 ring-1 ring-accent-100 sm:p-8">
+      <section aria-labelledby="hero" className="grid gap-6 rounded-xl border border-slate-200 bg-white p-4 shadow-card sm:grid-cols-[minmax(0,1fr)_260px] sm:items-center lg:p-6">
+        <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 id="hero" className="text-sm font-medium uppercase tracking-wide text-accent-800">
+          <h2 id="hero" className="text-caption text-slate-500">
             {isPersona ? `${PERSONAS[active].name}'s Risk Capacity` : 'Your Risk Capacity'}
           </h2>
           {isPersona && <IllustrativeBadge />}
           {whatIfOn && <Badge tone="warning">What-if</Badge>}
         </div>
         <p className="text-hero text-slate-900">{formatRatio(t.finalEEE)}</p>
-        <p className="text-lg text-slate-700">{riskSentence(t.finalEEE)}</p>
-        <div className="max-w-md">
-          <NeedleBar value={t.finalEEE} max={1.5} />
-        </div>
+        <p className="text-body text-slate-700">{riskSentence(t.finalEEE)}</p>
         <div className="space-y-2">
           <Badge tone="accent">{BINDING_LABEL[t.binding]}</Badge>
           <Explain>{explainBinding(t, profile, { lossIsDefault })}</Explain>
+        </div>
+        </div>
+        <div className="mx-auto w-full max-w-[260px]">
+          <RiskGauge value={t.finalEEE} />
         </div>
       </section>
 
       {/* 2. Drivers */}
       <section aria-labelledby="drivers" className="space-y-3">
-        <h2 id="drivers" className="text-lg font-semibold">
+        <h2 id="drivers" className="text-section">
           What drives your number
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -139,7 +141,7 @@ export default function Results() {
 
       {/* 3. Lifetime balance sheet */}
       <section aria-labelledby="bs" className="space-y-3">
-        <h2 id="bs" className="text-lg font-semibold">
+        <h2 id="bs" className="text-section">
           Your lifetime balance sheet
         </h2>
         <Card className="space-y-3">
@@ -160,7 +162,7 @@ export default function Results() {
 
       {/* 4. Glide path */}
       <section aria-labelledby="glide" className="space-y-3">
-        <h2 id="glide" className="text-lg font-semibold">
+        <h2 id="glide" className="text-section">
           How your Risk Capacity changes with age
         </h2>
         <Card>
@@ -171,7 +173,7 @@ export default function Results() {
       {/* 5. What-if */}
       <section aria-labelledby="whatif" className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 id="whatif" className="text-lg font-semibold">
+          <h2 id="whatif" className="text-section">
             What if…
           </h2>
           <button

@@ -49,3 +49,7 @@
 - Onboarding rebuilt: step header + 4-segment progress, privacy line, question blocks, 44px inputs with thousands separators, slider value pills, radio cards, "I'm not sure" (Q6/8/14), summary panel with semicircle gauge, Preliminary chip and drivers; 56px bar on mobile.
 - "Why we ask" is a 4-part panel with the section 16 text and a live effect line from the new engine helper answerEffect (one open at a time). The G4 explanation no longer quotes the default loss limit as the user's words.
 - New Method page (/#/method) with Sofie's worked example from the engine, assumption justifications, gates, limitations and references. 181 tests.
+
+## 2026-11-26 · Phase 3b follow-up
+- Header fits one 64px row on phones; Results hero uses the semicircle gauge; gauge labels no longer hide under the needle.
+- Application description updated for the new features, with fresh screenshots. New `npm run zip` builds the submission ZIP from the last commit.

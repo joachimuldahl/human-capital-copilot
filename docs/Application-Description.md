@@ -2,7 +2,7 @@
 
 *Draft · 26 Nov 2026 · Team: Jens, Damien, Joachim · Live demo: https://building-your-wealth.vercel.app/*
 
-> **Draft notes for the team (delete before submission):** check the wording of each section, add Damien's verified product data when it arrives (section 8), and add any prompts from Jens and Damien to `prompts/`, and add the design-phase export as `prompts/design-phase-log.md` (referenced in section 7, not in the repo yet). Screenshots are in `docs/screenshots/`.
+> **Draft notes for the team (delete before submission):** check the wording of each section, export this file to PDF, add Damien's verified product data when it arrives (section 8), and add any prompts from Jens and Damien to `prompts/`, and add the design-phase export as `prompts/design-phase-log.md` (referenced in section 7, not in the repo yet). Screenshots are in `docs/screenshots/`.
 
 ## 1. Problem
 
@@ -25,7 +25,8 @@ Human Capital Copilot turns 16 questions into one number, **Risk Capacity**: how
 
 ## 3. Innovation
 
-- **Whole-life risk sizing for ordinary users.** The lifecycle-investing research (Ayres & Nalebuff 2010; Ibbotson et al. 2007) is turned into a 3-minute questionnaire with a live needle that moves with every answer.
+- **Whole-life risk sizing for ordinary users.** The lifecycle-investing research (Ayres & Nalebuff 2010; Ibbotson et al. 2007) is turned into a 3-minute questionnaire with a live gauge that moves with every answer. It is marked "Preliminary" until every question is answered.
+- **Show, don't tell.** Every question has a "Why we ask" panel with the reason, how the answer is used, the research behind it and a live line computed by the engine, for example "Retiring 2 years later would add €5,274 to your future savings, but your target stays at 1.50× because it is limited by our 1.5× safety cap."
 - **Income type changes the answer.** The same age, savings and risk attitude give very different results for a doctor and a trader, because the app measures how stock-like each income is (βH).
 - **Safety built into the number.** A 1.5× policy cap, gates for missing emergency savings and expensive debt, a knowledge check before borrowing, and a cap based on the user's own maximum loss.
 - **Look-through of ETFs.** The app shows hidden concentration (Sofie owns 14.4% Apple across a stock and two ETFs) and overlap between ETFs (VWCE and CNDX share 15% of their top holdings).
@@ -47,12 +48,13 @@ Students and young professionals (roughly 20–35) who have started investing or
 | Page | What it does | Screenshot |
 |---|---|---|
 | Landing | Hero, "Start (3 minutes)", demo people, how it works, research basis | `screenshots/desktop-landing.png` |
-| Onboarding | 16 questions in 4 steps + review; "Why we ask"; live needle; knowledge check and borrowing opt-in | `screenshots/desktop-onboarding-1.png` |
+| Onboarding | 16 questions in 4 steps + review; "Why we ask" panels with research and a live effect line; live gauge with "Preliminary" state and the three drivers; "I'm not sure" on three questions; knowledge check and borrowing opt-in | `screenshots/desktop-onboarding-1.png`, `screenshots/mobile-onboarding-2.png` |
 | Results | Risk Capacity, the limit that applies, four drivers, lifetime balance sheet, glide path, what-if sliders | `screenshots/desktop-results-sofie.png`, `screenshots/mobile-results-sofie.png` |
 | Portfolio | Demo portfolio or quick entry; risk fit; crash test; look-through by asset class, region, sector, concentration, overlap | `screenshots/desktop-portfolio-sofie-conc.png`, `screenshots/mobile-portfolio-sofie.png` |
 | Plan | Safety gates, satellites, target vs current, example products, crash test, borrowing panel, how to get there, Assumptions | `screenshots/desktop-plan-sofie.png`, `screenshots/mobile-plan-gates.png` |
+| Method | For the examiner: the five calculation steps with Sofie's worked example (computed live by the engine), every assumption with a one-line justification, the limits and gates, limitations and full references | `screenshots/desktop-method.png` |
 
-The app works on phones (375 px) and desktops, saves answers in the browser (no login), and needs no backend.
+The app works on phones (375 px) and desktops, saves answers in the browser (no login), and needs no backend. The design follows a written design system (BUILD_SPEC section 15): Inter, one teal accent, a fixed type scale and calm cards.
 
 ## 6. Method
 
@@ -66,7 +68,7 @@ All human-capital maths is in real (inflation-adjusted) terms. The full specific
 6. **Allocation.** The target is turned into weights for stocks, bonds, gold and Bitcoin with the same volatility (target × 16%), solved by bisection using a fixed correlation matrix. Weights above 100% stocks mean a broker loan.
 7. **Portfolio checks.** Actual risk = portfolio volatility ÷ 16%; crash test = equity −50%, Bitcoin −75%, bonds +3%, gold +5%; look-through via ETF top holdings; risk fit is "on target" within ±0.15×.
 
-**Testing.** 163 automated tests reproduce every expected value in the specification (all four personas, demo portfolios, allocations, crash tests, glide path, gate cases) and check the pages themselves. Engine coverage is 100% of lines.
+**Testing.** 181 automated tests reproduce every expected value in the specification (all four personas, demo portfolios, allocations, crash tests, glide path, gate cases) and check the pages themselves. Engine coverage is 100% of lines.
 
 ## 7. How AI was used in development
 
@@ -76,12 +78,14 @@ The app was built with **Claude Code** (Anthropic's coding agent) working from a
 - **Every prompt is logged.** A small hook in the project (`.claude/hooks/log-prompt.mjs`) automatically saves every prompt verbatim to `prompts/PROMPT_LOG_AUTO.md`. `prompts/PROMPT_LOG.md` records what the AI did, which files changed, test results, what the human checked and the lesson from each task.
 - **Numbers are never trusted, they are tested.** The spec lists exact expected values (for example Sofie 1.50×, Lea 0.34×, Apple 14.4%). The AI wrote tests that reproduce them before any page used them.
 - **The AI found its own mistakes through tests and checks,** for example a floating-point error at the exact ±0.15 risk-fit boundary, a rounding issue that showed Apple at 14.3% instead of 14.4%, a component that would have reset the open tab while typing, and wording that pointed to a panel "below" when it was above.
-- **Automated browser checks.** In the last phase the AI drove a headless Chrome to load every page at phone and desktop width, check for console errors and sideways scrolling, and review screenshots. This found a table that was too wide on phones and a chart warning, which were fixed.
+- **A design system as a spec.** The first build worked but looked unpolished. Instead of asking for "nicer", the team wrote exact design rules (tokens, sizes, components) and research-backed help text into the spec (v1.2), and the AI rebuilt the layout against them, then checked the result at phone and desktop width.
+- **Automated browser checks.** The AI drove a headless Chrome to load every page at phone and desktop width, check for console errors and sideways scrolling, and review screenshots. This found a table that was too wide on phones and a chart warning, which were fixed. Once, the check itself was wrong: it seemed to show onboarding losing saved answers, but the cause was the test script reusing an old page in memory. The AI traced this before changing any app code.
 - **Humans decided.** Joachim approved every plan, every dependency outside the agreed stack, every commit and every push, and checked the result in the browser.
 
 ## 8. Limitations
 
 - **Illustrative data.** Product names, tickers, fees (TER) and ETF holdings are placeholders until verified against factsheets. Only top holdings are used for look-through and overlap.
+- **Judgement-based income betas.** How stock-like each sector's income is (βH) is a conservative model assumption, not an estimate from data.
 - **Simplified model.** Fixed return, volatility and correlation assumptions; no taxes, fees, inflation scenarios or currency risk; the crash test is one historical-style scenario, not a forecast.
 - **Income model.** One growth rate until 45, then 0.5% a year; no career breaks, unemployment or pensions.
 - **Not advice.** The app shows sleeve weights and example products for education. It never gives buy or sell instructions and never places orders.

@@ -146,3 +146,11 @@ Team prompts: Damien → `prompts/team/damien.md` (summary written by Damien wit
 **Result:** tests ✔ (296/296) · lint ✔ · build ✔ · browser check ✔ (no overflow at 375/1280)
 **Human check:** (to fill in by Joachim)
 **Lesson:** Dumping every page's text before and after the data swap turned "did any section 9 value change?" from a judgement into a diff: Results and Landing were byte-identical, so only look-through numbers moved.
+
+### C-018 · 2026-11-26 · Joachim · Claude Code · Design-phase log added
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entries 2026-11-26 22:24:58 (move the file), 22:28:55 (how to handle it) and 22:30:51 +02:00 (OK to commit).
+**What the AI did:** Moved the exported design-phase log into prompts/design-phase-log.md and read it before publishing. Shortened three remarks about teammates' workload with a visible [shortened: …] marker, removed D-005 and D-007 (personal account configuration) with a note under the title, fixed the pointer to the old staged prompt plan and added a pointer from the empty build-phase section to PROMPT_LOG.md and PROMPT_LOG_AUTO.md. Searched prompts/, docs/, README and BUILD_SPEC.md for account-related terms and reported the hits without changing them. Removed the "not in the repo yet" remark from the description's draft box.
+**Files changed:** prompts/design-phase-log.md (new), docs/Application-Description.md, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (296/296, no code changed) · lint ✔ · build ✔
+**Human check:** (to fill in by Joachim)
+**Lesson:** A verbatim log written for one audience (the team) can contain remarks that shouldn't go to another (the public repo and the examiner); read it before publishing and mark every edit so it stays honest.

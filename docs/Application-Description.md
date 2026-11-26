@@ -2,7 +2,7 @@
 
 *Draft · 26 Nov 2026 · Team: Jens, Damien, Joachim · Live demo: https://building-your-wealth.vercel.app/*
 
-> **Draft notes for the team (delete before submission):** check the wording of each section, export this file to PDF, replace `prompts/team/damien.md` with Damien's original prompts when they arrive, add any prompts from Jens to `prompts/`, and add the design-phase export as `prompts/design-phase-log.md` (referenced in section 7, not in the repo yet). Screenshots are in `docs/screenshots/`.
+> **Draft notes for the team (delete before submission):** check the wording of each section, export this file to PDF, replace `prompts/team/damien.md` with Damien's original prompts when they arrive, and add any prompts from Jens to `prompts/`. Screenshots are in `docs/screenshots/`.
 
 ## 1. Problem
 

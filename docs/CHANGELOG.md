@@ -28,3 +28,8 @@
 - Components: Card, Badge/IllustrativeBadge, StatTile, Explain, NeedleBar, PersonaCards, PersonaSwitcher, GlideChart, accessible form fields. All numbers and wording come from src/engine (new text helpers in explain.ts).
 - Server-render page tests check the presets (1.50× / 1.20× / 0.34× / 0.67×), the live needle and the empty state. 122 tests.
 - Pages load lazily: the first page load dropped from 718 kB to 278 kB (Recharts only loads with Results).
+
+## 2026-11-26 · Phase 4 · Portfolio
+- Portfolio page: demo/quick-entry source selector, mismatch banner ("Use €x as my invested amount", > 5%), net worth, risk-fit gauge (0–2.5×), crash test vs the user's limit, accounts list, and tabs for asset class (donut), region, sector, concentration (top 10 with flags and sources) and overlap, each with a "What this means" caption.
+- Engine: assetClassValues, overlapPairs, portfolioMismatch, holdingShares, and caption templates (risk fit, stress, asset classes, regions, sectors incl. job-sector warning, concentration, overlap).
+- Page tests reproduce the section 9 portfolio table, Sofie's Apple 14.4% alert and the 15.0% overlap. 144 tests.

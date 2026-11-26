@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Profile } from '../engine'
 import type { ActiveId } from '../store/profileStore'
+import type { QuickValues } from '../store/portfolioStore'
 
 // Server rendering normally uses the store's *initial* state (zustand persist sets it to the defaults on purpose).
 // For these tests, serve the live state instead, as a browser does after load. zustand is inlined in vite.config.ts
@@ -15,12 +16,18 @@ vi.mock('react', async (importOriginal) => {
   return { ...actual, default: { ...actual, useSyncExternalStore }, useSyncExternalStore }
 })
 
-type Page = 'Landing' | 'Onboarding' | 'Results'
+type Page = 'Landing' | 'Onboarding' | 'Results' | 'Portfolio'
 
 /** Server-render a page with the given profile state. */
-async function renderPage(page: Page, state: { active: ActiveId; answers: Partial<Profile> } = { active: 'mine', answers: {} }) {
+async function renderPage(
+  page: Page,
+  state: { active: ActiveId; answers: Partial<Profile> } = { active: 'mine', answers: {} },
+  quick: Partial<QuickValues> = {},
+) {
   const { useProfileStore } = await import('../store/profileStore')
+  const { usePortfolioStore, EMPTY_QUICK } = await import('../store/portfolioStore')
   useProfileStore.setState(state)
+  usePortfolioStore.setState({ source: 'demo', quick: { ...EMPTY_QUICK, ...quick } })
   const mod = (await import(`./${page}.tsx`)) as { default: () => ReactElement }
   const Comp = mod.default
   const html = renderToString(
@@ -98,5 +105,56 @@ describe('Landing', () => {
     expect(t).toContain('Try a demo person')
     for (const name of ['Sofie', 'Mads', 'Lea', 'Jonas']) expect(t).toContain(name)
     expect(t).toContain('Ayres & Nalebuff (2010)')
+  })
+})
+
+describe('Portfolio (Phase 4 acceptance: section 9 numbers)', () => {
+  it.each([
+    ['sofie', '1.01×', '1.50×', 'Too little risk', '€4,750', '(47.5%)', 'within the €8,000'],
+    ['mads', '0.20×', '1.20×', 'Too little risk', '€2,500', '(10.0%)', 'within the €15,000'],
+    ['lea', '0.81×', '0.34×', 'Too much risk', '€15,880', '(39.7%)', 'within the €20,000'],
+    ['jonas', '2.39×', '0.67×', 'Too much risk', '€9,000', '(60.0%)', 'more than the €5,000'],
+  ] as const)('%s: actual %s vs target %s, %s, crash loss %s', async (id, actual, target, status, loss, pct, limit) => {
+    const t = await renderPage('Portfolio', { active: id, answers: {} })
+    expect(t).toContain(`Now ${actual}`)
+    expect(t).toContain(`Target ${target}`)
+    expect(t).toContain(status)
+    expect(t).toContain(`could lose ${loss} ${pct}`)
+    expect(t).toContain(limit)
+    expect(t).not.toContain('adds up to') // demo totals equal F: no mismatch banner
+  })
+
+  it("Sofie: Apple alert 14.4% with sources, and 15.0% VWCE/CNDX overlap", async () => {
+    const t = await renderPage('Portfolio', { active: 'sofie', answers: {} })
+    expect(t).toContain('Apple 14.4%: direct 10.0% + VWCE 1.8% + CNDX 2.6%')
+    expect(t).toContain('Over 10%')
+    expect(t).toContain('VWCE and CNDX share 15.0% of their top holdings')
+    expect(t).toContain('VWCE + CNDX')
+    expect(t).toContain('Online broker')
+    expect(t).toContain('Crypto exchange')
+  })
+
+  it('Lea: finance job and finance-heavy stocks are flagged', async () => {
+    const t = await renderPage('Portfolio', { active: 'lea', answers: {} })
+    expect(t).toContain('Your salary also depends on financials')
+  })
+
+  it('"My answers" without answers asks for onboarding first', async () => {
+    const t = await renderPage('Portfolio')
+    expect(t).toContain('answer the 16 questions')
+    expect(t).toContain('Quick entry')
+  })
+})
+
+describe('Portfolio quick entry', () => {
+  it('"My answers" + quick entry: analysis and the mismatch banner', async () => {
+    const t = await renderPage('Portfolio', { active: 'mine', answers: { investableAssets: 10000 } }, { globalEquity: 6000, cash: 6000 })
+    expect(t).toContain('€12,000')
+    expect(t).toContain('Use €12,000 as my invested amount')
+    expect(t).toContain('My portfolio (quick entry)')
+  })
+  it('no banner within 5%', async () => {
+    const t = await renderPage('Portfolio', { active: 'mine', answers: { investableAssets: 10000 } }, { globalEquity: 10400 })
+    expect(t).not.toContain('as my invested amount')
   })
 })

@@ -8,5 +8,17 @@ export { DEFAULT_ANSWERS, resolveProfile } from './defaults'
 export { glidePath } from './glidePath'
 export { solveAllocation, portfolioVol } from './allocation'
 export { portfolioEEE, stressLoss, marginBuffer, loanAmount, loanCostPerYear, letfDrag } from './risk'
-export { netWorth, exposures, lookThrough, concentrationFlags, overlap, riskFit, UNKNOWN } from './portfolio'
+export {
+  netWorth,
+  exposures,
+  lookThrough,
+  concentrationFlags,
+  overlap,
+  overlapPairs,
+  assetClassValues,
+  portfolioMismatch,
+  holdingShares,
+  riskFit,
+  UNKNOWN,
+} from './portfolio'
 export * from './explain'

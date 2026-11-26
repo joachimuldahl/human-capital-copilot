@@ -5,7 +5,21 @@
 import { minBufferMonths, policyCap, expensiveDebtRate, floor } from './assumptions'
 import { solveAllocation } from './allocation'
 import { growthRate } from './humanCapital'
-import type { Band, Binding, CapId, ConcentrationFlag, Profile, TargetResult } from './types'
+import type {
+  AssetClass,
+  Band,
+  Binding,
+  CapId,
+  ClassValue,
+  ConcentrationFlag,
+  OverlapPair,
+  Profile,
+  RiskFit,
+  Sector,
+  Split,
+  StressResult,
+  TargetResult,
+} from './types'
 
 /** Round half away from zero to `decimals`, tolerant of binary floating-point error (0.1435 → 14.4%). */
 export function roundHalfAway(x: number, decimals: number): number {
@@ -145,4 +159,89 @@ export function drawdownQuestion(F: number): string {
 /** Onboarding question 6 helper: "≈ 3.0% per year" (the growth the engine will use). */
 export function impliedGrowthLabel(p: Profile): string {
   return `≈ ${formatPct(growthRate(p))} per year`
+}
+
+// ---- Portfolio page (7.4) ----
+
+export const ASSET_CLASS_LABEL: Record<AssetClass, string> = {
+  equity: 'Stocks',
+  bonds: 'Bonds',
+  gold: 'Gold',
+  btc: 'Bitcoin',
+  cash: 'Cash',
+}
+
+/** "Your portfolio carries 1.01× against a target of 1.50×." */
+export function explainRiskFit(actualEEE: number, targetEEE: number, fit: RiskFit): string {
+  const base = `Your portfolio carries ${formatRatio(actualEEE)} against a target of ${formatRatio(targetEEE)}`
+  if (fit.status === 'On target') return `${base}. That is on target.`
+  return fit.status === 'Too much risk'
+    ? `${base}. It takes more risk than your whole-life situation supports.`
+    : `${base}. Your future salary could support more market risk.`
+}
+
+/** Crash-test sentence: "In a crash like 2008 your portfolio could lose €4,750 (47.5%)." */
+export function explainStress(s: StressResult): string {
+  const loss = Math.max(-s.money, 0)
+  return `In a crash like 2008 your portfolio could lose ${formatEUR(loss)} (${formatPct(Math.max(-s.pct, 0))}).`
+}
+
+/** Whether the crash loss stays within the user's own limit. */
+export function stressWithinLimit(s: StressResult, maxLossMoney: number): boolean {
+  return Math.max(-s.money, 0) <= maxLossMoney
+}
+
+export function explainStressLimit(s: StressResult, maxLossMoney: number): string {
+  return stressWithinLimit(s, maxLossMoney)
+    ? `That is within the ${formatEUR(maxLossMoney)} you said you could lose in a bad year.`
+    : `That is more than the ${formatEUR(maxLossMoney)} you said you could lose in a bad year.`
+}
+
+/** "What this means" for the asset-class donut. */
+export function explainAssetClasses(values: ClassValue[]): string {
+  if (values.length === 0) return 'Add holdings to see how your money is split.'
+  const top = [...values].sort((a, b) => b.share - a.share)[0]
+  const parts = [`${ASSET_CLASS_LABEL[top.assetClass]} make up the largest part of your portfolio: ${formatPct(top.share)}.`]
+  const cash = values.find((v) => v.assetClass === 'cash')
+  if (cash && cash.share >= 0.3) parts.push(`Cash (${formatPct(cash.share)}) is safe but barely grows after inflation.`)
+  const btc = values.find((v) => v.assetClass === 'btc')
+  if (btc && btc.share >= 0.2) parts.push(`Bitcoin (${formatPct(btc.share)}) is very volatile: it can fall 75% in a crash.`)
+  return parts.join(' ')
+}
+
+/** "What this means" for the region bars. */
+export function explainRegions(regions: Split[]): string {
+  if (regions.length === 0) return 'You have no stocks, so there is no region split.'
+  const top = regions[0]
+  const base = `${top.name} is ${formatPct(top.share)} of your stocks.`
+  return top.share > 0.7 ? `${base} That is more concentrated than the global stock market.` : base
+}
+
+const SECTOR_OF_JOB: Partial<Record<Sector, string>> = { finance: 'Financials', tech: 'Technology' }
+
+/** "What this means" for the sector bars; flags when the top sector is also the user's job sector. */
+export function explainSectors(sectors: Split[], jobSector: Sector): string {
+  if (sectors.length === 0) return 'You have no stocks, so there is no sector split.'
+  const top = sectors[0]
+  const base = `${top.name} is the largest sector: ${formatPct(top.share)} of your stocks.`
+  const job = SECTOR_OF_JOB[jobSector]
+  const jobSplit = job ? sectors.find((s) => s.name === job) : undefined
+  if (job && jobSplit && jobSplit.share >= 0.25)
+    return `${base} Your salary also depends on ${job.toLowerCase()}: ${formatPct(jobSplit.share)} of your stocks are in the same sector as your job, so a downturn could hit both at once.`
+  return base
+}
+
+/** "What this means" for the concentration list. */
+export function explainConcentrationSummary(flags: ConcentrationFlag[]): string {
+  if (flags.length === 0) return 'No single company is more than 5% of your portfolio, counting what your ETFs hold.'
+  const n = flags.length
+  return `${n} ${n === 1 ? 'company is' : 'companies are'} above 5% of your portfolio once you count what your ETFs hold. Largest: ${explainConcentration(flags[0])}.`
+}
+
+/** "What this means" for the ETF overlap list. */
+export function explainOverlap(pairs: OverlapPair[], label: (productId: string) => string): string {
+  if (pairs.length === 0) return 'You hold fewer than two ETFs, so there is no overlap to check.'
+  const top = pairs[0]
+  if (top.overlap === 0) return 'Your ETFs share none of their top holdings.'
+  return `${label(top.a)} and ${label(top.b)} share ${formatPct(top.overlap)} of their top holdings, so part of your money buys the same companies twice.`
 }

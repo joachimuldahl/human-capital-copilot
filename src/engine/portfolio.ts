@@ -1,6 +1,9 @@
-import { concentrationAlert, concentrationWarn, riskFitTolerance } from './assumptions'
+import { concentrationAlert, concentrationWarn, portfolioMismatchTolerance, riskFitTolerance } from './assumptions'
 import type {
+  AssetClass,
+  ClassValue,
   ConcentrationFlag,
+  OverlapPair,
   Exposures,
   Holding,
   LookThroughMap,
@@ -142,4 +145,38 @@ export function riskFit(actualEEE: number, targetEEE: number): RiskFit {
   const tol = riskFitTolerance + 1e-9
   const status = gap > tol ? 'Too much risk' : gap < -tol ? 'Too little risk' : 'On target'
   return { gap, status }
+}
+
+const CLASS_ORDER: AssetClass[] = ['equity', 'bonds', 'gold', 'btc', 'cash']
+
+/** Value per asset class as share of net worth, without leverage (for the asset-class donut). Zero classes left out. */
+export function assetClassValues(holdings: Holding[], products: ProductMap): ClassValue[] {
+  const total = netWorth(holdings)
+  const sums = new Map<AssetClass, number>()
+  for (const h of holdings) addTo(sums as Map<string, number>, productOf(products, h.productId).assetClass, h.valueEUR)
+  return CLASS_ORDER.filter((c) => (sums.get(c) ?? 0) > 0).map((c) => {
+    const valueEUR = sums.get(c) ?? 0
+    return { assetClass: c, valueEUR, share: total > 0 ? valueEUR / total : 0 }
+  })
+}
+
+/** Overlap for every pair of ETFs held that have look-through data, largest first. */
+export function overlapPairs(holdings: Holding[], lt: LookThroughMap): OverlapPair[] {
+  const ids = [...new Set(holdings.map((h) => h.productId))].filter((id) => lt[id])
+  const pairs: OverlapPair[] = []
+  for (let i = 0; i < ids.length; i++)
+    for (let j = i + 1; j < ids.length; j++) pairs.push({ a: ids[i], b: ids[j], overlap: overlap(lt[ids[i]], lt[ids[j]]) })
+  return pairs.sort((x, y) => y.overlap - x.overlap)
+}
+
+/** True if the portfolio total differs from the profile's invested amount F by more than 5%. */
+export function portfolioMismatch(total: number, F: number): boolean {
+  if (F <= 0) return total > 0
+  return Math.abs(total - F) / F > portfolioMismatchTolerance
+}
+
+/** Each holding's share of net worth, by holding id (0 for an empty portfolio). */
+export function holdingShares(holdings: Holding[]): Record<string, number> {
+  const total = netWorth(holdings)
+  return Object.fromEntries(holdings.map((h) => [h.id, total > 0 ? h.valueEUR / total : 0]))
 }

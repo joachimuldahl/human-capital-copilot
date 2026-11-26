@@ -124,3 +124,6 @@ export const concentrationAlert = 0.1
 export const defaultIncomeGrowth = 0.03
 /** Onboarding default for max loss in a bad year, as share of F (question 14: "30% of F"). Assumption, editable. */
 export const defaultMaxLossShare = 0.3
+
+/** Portfolio total differing from F by more than this share triggers the "use as invested amount" banner. Assumption, editable. */
+export const portfolioMismatchTolerance = 0.05

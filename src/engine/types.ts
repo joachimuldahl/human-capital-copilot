@@ -201,3 +201,17 @@ export interface RiskFit {
   gap: number
   status: RiskFitStatus
 }
+
+export interface ClassValue {
+  assetClass: AssetClass
+  valueEUR: number
+  /** Share of net worth (not leverage-adjusted). */
+  share: number
+}
+
+export interface OverlapPair {
+  a: string
+  b: string
+  /** Fraction of top holdings shared, e.g. 0.15. */
+  overlap: number
+}

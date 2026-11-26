@@ -48,3 +48,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ (122/122) · lint ✔ · build ✔
 **Human check:** (to fill in by Joachim: click through on phone and desktop)
 **Lesson:** zustand persist deliberately serves the default state when rendering on the server, so the first page tests showed the empty state for every persona. A test-only useSyncExternalStore stub fixed the tests without changing app code.
+
+### C-006 · 2026-11-26 · Joachim · Claude Code · Phase 4
+**Prompt:** none in PROMPT_LOG_AUTO.md. Joachim asked whether to debug now or later and asked for that question not to be logged; he then chose "Push 3, start 4" in a question dialog.
+**What the AI did:** Committed and pushed Phase 3 so it can be reviewed on a phone at the live URL. Built the Portfolio page per sections 5.4 and 7.4 with new engine helpers and caption templates. Page tests check the section 9 portfolio numbers.
+**Files changed:** src/pages/Portfolio.tsx, src/pages/pages.test.tsx, src/components/{Tabs,RiskFitGauge,SplitBars,AssetDonut}.tsx, src/engine/{portfolio,explain,types,assumptions,index}.ts, src/engine/portfolioPage.test.ts, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (144/144) · lint ✔ · build ✔
+**Human check:** (to fill in by Joachim)
+**Lesson:** A component defined inside another component is a new component on every render, so its state (the open tab) resets while typing. Self-review caught it before it shipped.

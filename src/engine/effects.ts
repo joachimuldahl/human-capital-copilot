@@ -6,7 +6,7 @@
 import { expensiveDebtRate, minAssetsForLeverage, minBufferMonths, minYearsForLeverage, policyCap } from './assumptions'
 import { formatEUR, formatRatio, roundHalfAway } from './explain'
 import { growthRate } from './humanCapital'
-import { targetEEE } from './target'
+import { targetEEE, type PendingCap } from './target'
 import type { Binding, Experience, IncomeSecurity, Likert, Profile, Sector, TargetResult } from './types'
 
 /** Question numbers that have a "Why we ask" panel (all 16). */
@@ -55,8 +55,8 @@ function move(change: string, now: TargetResult, alt: TargetResult, showH: boole
 }
 
 /** Result for every option of a choice question, with neighbouring options that give the same result merged. */
-function alternatives(p: Profile, options: Option[], unit = ''): string {
-  const vals = options.map((o) => targetEEE({ ...p, ...o.patch }).finalEEE)
+function alternatives(p: Profile, options: Option[], tgt: (x: Profile) => TargetResult, unit = ''): string {
+  const vals = options.map((o) => tgt({ ...p, ...o.patch }).finalEEE)
   const groups: { from: number; to: number }[] = []
   vals.forEach((v, i) => {
     const g = groups[groups.length - 1]
@@ -64,7 +64,7 @@ function alternatives(p: Profile, options: Option[], unit = ''): string {
     else groups.push({ from: i, to: i })
   })
   if (groups.length === 1) {
-    const now = targetEEE(p)
+    const now = tgt(p)
     const why = now.binding === 'model' ? '' : `, because it is limited by ${heldBy(now.binding)}`
     return `Every answer here gives ${formatRatio(vals[0])} for you right now${why}.`
   }
@@ -119,9 +119,13 @@ const likert = (labels: string[], key: 'drawdownReaction' | 'incomeGamble', p: P
  * Live effect line for one onboarding question: what happens to the target if this answer moves one step
  * (numeric questions) or takes each other value (choice questions).
  */
-export function answerEffect(q: QuestionNo, p: Profile): string {
-  const now = targetEEE(p)
-  const at = (patch: Partial<Profile>) => targetEEE({ ...p, ...patch })
+export function answerEffect(q: QuestionNo, p: Profile, opts: { pending?: readonly PendingCap[] } = {}): string {
+  // A question's own limit is always shown in its own panel (Q14 → G4, Q16 → G3); other unanswered limits stay out.
+  const own: PendingCap | null = q === 14 ? 'G4_loss' : q === 16 ? 'G3_leverage' : null
+  const pending = (opts.pending ?? []).filter((c) => c !== own)
+  const tgt = (x: Profile) => targetEEE(x, { pending })
+  const now = tgt(p)
+  const at = (patch: Partial<Profile>) => tgt({ ...p, ...patch })
   switch (q) {
     case 1:
       return p.age + 1 < p.retireAge
@@ -148,18 +152,19 @@ export function answerEffect(q: QuestionNo, p: Profile): string {
       return move('Pay growing 1 percentage point faster each year', now, at({ income10y: p.incomeNow * Math.pow(1 + g, 10) }), true)
     }
     case 7:
-      return alternatives(p, SECTOR_SHORT.map(([s, label]) => ({ label, patch: { sector: s }, current: p.sector === s })))
+      return alternatives(p, SECTOR_SHORT.map(([s, label]) => ({ label, patch: { sector: s }, current: p.sector === s })), tgt)
     case 8: {
       const up = p.variablePayShare + 0.1 <= 1 + 1e-9
       const variablePayShare = up ? p.variablePayShare + 0.1 : p.variablePayShare - 0.1
       return move(`${up ? '10 percentage points more' : '10 percentage points less'} of your pay as bonus or shares`, now, at({ variablePayShare }), false)
     }
     case 9:
-      return alternatives(p, SECURITY_SHORT.map(([s, label]) => ({ label, patch: { incomeSecurity: s }, current: p.incomeSecurity === s })))
+      return alternatives(p, SECURITY_SHORT.map(([s, label]) => ({ label, patch: { incomeSecurity: s }, current: p.incomeSecurity === s })), tgt)
     case 10:
       return alternatives(
         p,
         BUFFER_SHORT.map(([m, label]) => ({ label, patch: { bufferMonths: m }, current: bufferBucket(p.bufferMonths) === m })),
+        tgt,
         ' months',
       )
     case 11:
@@ -167,13 +172,13 @@ export function answerEffect(q: QuestionNo, p: Profile): string {
         ? move('Paying off your expensive debt', now, at({ maxDebtRate: 0 }), false)
         : move(`Debt above ${roundHalfAway(expensiveDebtRate * 100, 1)}% interest`, now, at({ maxDebtRate: expensiveDebtRate + 0.02 }), false)
     case 12:
-      return alternatives(p, likert(DRAWDOWN_SHORT, 'drawdownReaction', p))
+      return alternatives(p, likert(DRAWDOWN_SHORT, 'drawdownReaction', p), tgt)
     case 13:
-      return alternatives(p, likert(GAMBLE_SHORT, 'incomeGamble', p))
+      return alternatives(p, likert(GAMBLE_SHORT, 'incomeGamble', p), tgt)
     case 14:
       return move(`A loss limit ${formatEUR(5000)} higher`, now, at({ maxLossMoney: p.maxLossMoney + 5000 }), false)
     case 15:
-      return alternatives(p, EXPERIENCE_SHORT.map(([e, label]) => ({ label, patch: { experience: e }, current: p.experience === e })))
+      return alternatives(p, EXPERIENCE_SHORT.map(([e, label]) => ({ label, patch: { experience: e }, current: p.experience === e })), tgt)
     case 16:
       return p.knowledgeCheckPassed && p.leverageOptIn
         ? move('Switching borrowing off', now, at({ leverageOptIn: false }), false)

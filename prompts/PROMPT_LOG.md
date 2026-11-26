@@ -88,3 +88,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ (181/181) · lint ✔ · build ✔ · browser check ✔ (26 page states at 375/1280 px clean)
 **Human check:** (to fill in by Joachim)
 **Lesson:** Screenshot review caught the gauge label hidden under the needle at exactly 1.50×, the most common demo value; it would not have shown at the default 0.60×.
+
+### C-011 · 2026-11-26 · Joachim · Claude Code · Bug fix (onboarding panel)
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entries 2026-11-26 16:22:31 +02:00 (bug report) and 16:43:44 +02:00 ("go on").
+**What the AI did:** Added `pending` to targetEEE: listed caps (G3_leverage, G4_loss) are skipped instead of applied from defaults; without it results are identical, so section 9 is unchanged. New `pendingCaps(answers)` marks G4 pending until Q14 and G3 until Q16. The onboarding panel and every "Why we ask" effect line use it. Q14 and Q16 still show their own limit in their own panel. While anything is pending the panel says "Estimate" with the exact note from the bug report; afterwards "Preliminary" while other defaults remain. With no answers the panel now shows 1.50× (safety cap) instead of 0.60× from a default loss limit.
+**Files changed:** src/engine/{target,defaults,effects,explain,index}.ts, src/engine/{target,effects}.test.ts, src/store/hooks.ts, src/pages/Onboarding.tsx, src/pages/pages.test.tsx, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (191/191, section 9 unchanged) · lint ✔ · build ✔ · browser check ✔ (26 page states)
+**Human check:** (to fill in by Joachim)
+**Lesson:** Root cause: a default answer was treated as a real one inside the engine. Hiding the wording (the earlier "starting loss limit" text) did not fix the number; making "not answered yet" a real input to the engine did.

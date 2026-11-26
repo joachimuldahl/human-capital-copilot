@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { QUESTION_KEYS, resolveProfile, unansweredCount } from './defaults'
+import { QUESTION_KEYS, pendingCaps, resolveProfile, unansweredCount } from './defaults'
 import { answerEffect, type QuestionNo } from './effects'
 import { driverLines, explainBinding } from './explain'
 import { targetEEE } from './target'
@@ -45,6 +45,28 @@ describe('answerEffect (live "Your answer\'s effect" line)', () => {
 
   it('Q11 with expensive debt shows the payoff', () => {
     expect(answerEffect(11, { ...PERSONAS.sofie, maxDebtRate: 0.09 })).toBe('Paying off your expensive debt would move your target from 1.00× to 1.50×.')
+  })
+})
+
+describe('pendingCaps and effect lines with pending limits', () => {
+  it('G3 waits for Q16, G4 for Q14', () => {
+    expect(pendingCaps({})).toEqual(['G3_leverage', 'G4_loss'])
+    expect(pendingCaps({ maxLossMoney: 0 })).toEqual(['G3_leverage'])
+    expect(pendingCaps({ knowledgeCheckPassed: false })).toEqual(['G4_loss'])
+    expect(pendingCaps(PERSONAS.sofie)).toEqual([])
+  })
+  it('effect lines never name a pending limit', () => {
+    const p = resolveProfile({})
+    const pending = pendingCaps({})
+    for (let q = 1; q <= 13; q++) {
+      const line = answerEffect(q as QuestionNo, p, { pending })
+      expect(line).not.toMatch(/loss limit|borrowing rules/)
+    }
+    expect(answerEffect(2, p, { pending })).toMatch(/stays at 1\.50× because it is limited by our 1\.5× safety cap\.$/)
+  })
+  it("a question's own panel still shows its own limit (Q14)", () => {
+    const p = resolveProfile({})
+    expect(answerEffect(14, p, { pending: pendingCaps({}) })).toBe('A loss limit €5,000 higher would move your target from 0.60× to 1.50×.')
   })
 })
 

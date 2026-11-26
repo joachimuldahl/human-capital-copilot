@@ -53,3 +53,7 @@
 ## 2026-11-26 · Phase 3b follow-up
 - Header fits one 64px row on phones; Results hero uses the semicircle gauge; gauge labels no longer hide under the needle.
 - Application description updated for the new features, with fresh screenshots. New `npm run zip` builds the submission ZIP from the last commit.
+
+## 2026-11-26 · Bug fix · Onboarding estimate before step 4
+- targetEEE gets a `pending` option that skips the loss limit (G4) and leverage gate (G3) until Q14/Q16 are answered; section 9 results unchanged.
+- The onboarding panel shows "Estimate" with "Estimate from your answers so far. Your loss limit and the leverage check come in step 4 and can lower this." and never names an unanswered limit; effect lines follow the same rule. 191 tests.

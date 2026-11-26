@@ -1,6 +1,6 @@
 /** React hooks on top of the stores. Selectors return stable values so components don't re-render in a loop. */
 import { useMemo } from 'react'
-import { targetEEE, type Profile } from '../engine'
+import { pendingCaps, targetEEE, type Profile } from '../engine'
 import type { PersonaId } from '../data/personas'
 import { usePortfolioStore } from './portfolioStore'
 import { selectProfile, useProfileStore, type ActiveId } from './profileStore'
@@ -13,12 +13,16 @@ export function useActiveProfile(): { active: ActiveId; profile: Profile; hasAns
   return { active, profile, hasAnswers: Object.keys(answers).length > 0 }
 }
 
-/** Engine result for "My answers" (used by the onboarding live needle). */
+/**
+ * Engine result for "My answers" (onboarding panel). Limits whose question is unanswered (Q14 → G4, Q16 → G3)
+ * are pending: skipped rather than applied from defaults.
+ */
 export function useMyTarget() {
   const answers = useProfileStore((s) => s.answers)
   return useMemo(() => {
     const profile = selectProfile({ active: 'mine', answers })
-    return { profile, target: targetEEE(profile) }
+    const pending = pendingCaps(answers)
+    return { profile, pending, target: targetEEE(profile, { pending }) }
   }, [answers])
 }
 

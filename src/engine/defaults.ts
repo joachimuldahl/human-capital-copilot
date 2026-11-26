@@ -1,4 +1,5 @@
 import { defaultIncomeGrowth, defaultMaxLossShare, defaultRetireAge } from './assumptions'
+import type { PendingCap } from './target'
 import type { Profile } from './types'
 
 /** Onboarding defaults (BUILD_SPEC 7.2), except the two that depend on other answers. */
@@ -56,4 +57,15 @@ export const QUESTION_KEYS: Record<number, keyof Profile> = {
 /** Number of onboarding questions that still use a default (drives the "Preliminary" chip). */
 export function unansweredCount(answers: Partial<Profile>): number {
   return Object.values(QUESTION_KEYS).filter((k) => answers[k] === undefined).length
+}
+
+/**
+ * Limits whose question is still unanswered: G4 waits for Q14 (max loss), G3 for Q16 (knowledge check).
+ * The onboarding panel passes these to targetEEE so defaults never set a limit the user hasn't chosen.
+ */
+export function pendingCaps(answers: Partial<Profile>): PendingCap[] {
+  const out: PendingCap[] = []
+  if (answers[QUESTION_KEYS[16]] === undefined) out.push('G3_leverage')
+  if (answers[QUESTION_KEYS[14]] === undefined) out.push('G4_loss')
+  return out
 }

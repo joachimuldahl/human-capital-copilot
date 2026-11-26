@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { betaH, growthRate, pvfs } from './humanCapital'
 import { mertonShare, riskBand } from './riskBand'
+import { resolveProfile } from './defaults'
 import { leverageEligible, targetEEE } from './target'
 import { PERSONAS } from './test/fixtures'
 import type { Profile } from './types'
@@ -94,6 +95,47 @@ describe('targetEEE edge cases', () => {
     expect(leverageEligible(PERSONAS.sofie, 10000, 52)).toBe(true)
     expect(leverageEligible(PERSONAS.sofie, 10000, 53)).toBe(false)
     expect(leverageEligible(PERSONAS.sofie, 4999, 24)).toBe(false)
+  })
+})
+
+describe('targetEEE pending option (limits whose question is unanswered)', () => {
+  it('default: nothing pending, section 9 results unchanged', () => {
+    for (const [id, e] of Object.entries(EXPECTED)) {
+      const p = PERSONAS[id as keyof typeof PERSONAS]
+      expect(targetEEE(p, { pending: [] })).toEqual(targetEEE(p))
+      expect(targetEEE(p).finalEEE).toBeCloseTo(e.final, R)
+      expect(targetEEE(p).binding).toBe(e.binding)
+    }
+  })
+  it('G4 pending: the loss cap is skipped (Mads 1.20× → 1.50×, binding policy_cap)', () => {
+    const t = targetEEE(PERSONAS.mads, { pending: ['G4_loss'] })
+    expect(t.caps.map((c) => c.id)).toEqual(['policy_cap'])
+    expect(t.finalEEE).toBe(1.5)
+    expect(t.binding).toBe('policy_cap')
+    expect(t.rawEEE).toBeCloseTo(EXPECTED.mads.raw, R) // raw is not affected
+  })
+  it('G3 pending: the leverage gate is skipped and not listed as a gate', () => {
+    const p = { ...PERSONAS.sofie, leverageOptIn: false }
+    expect(targetEEE(p).binding).toBe('G3_leverage')
+    const t = targetEEE(p, { pending: ['G3_leverage'] })
+    expect(t.gates).not.toContain('G3_leverage')
+    expect(t.caps.map((c) => c.id)).toEqual(['policy_cap', 'G4_loss'])
+    expect(t.finalEEE).toBe(1.5)
+  })
+  it('G1 and G2 still apply while G3/G4 are pending', () => {
+    const t = targetEEE({ ...PERSONAS.sofie, bufferMonths: 2 }, { pending: ['G3_leverage', 'G4_loss'] })
+    expect(t.finalEEE).toBe(1.0)
+    expect(t.binding).toBe('G1_buffer')
+  })
+  it('onboarding defaults: 1.50× (safety cap) instead of 0.60× from a default loss limit', () => {
+    const p = resolveProfile({})
+    expect(targetEEE(p).finalEEE).toBeCloseTo(0.6, R)
+    const t = targetEEE(p, { pending: ['G3_leverage', 'G4_loss'] })
+    expect(t.finalEEE).toBe(1.5)
+    expect(t.binding).toBe('policy_cap')
+  })
+  it('works together with applyLossCap false', () => {
+    expect(targetEEE(PERSONAS.jonas, { applyLossCap: false, pending: ['G3_leverage'] }).caps.map((c) => c.id)).toEqual(['policy_cap'])
   })
 })
 

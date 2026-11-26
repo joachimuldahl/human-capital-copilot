@@ -91,6 +91,9 @@ export function explainBinding(t: TargetResult, p: Profile, opts: { lossIsDefaul
   }
 }
 
+/** Shown on the onboarding panel while the loss limit (Q14) or the leverage check (Q16) is still unanswered. */
+export const ESTIMATE_NOTE = 'Estimate from your answers so far. Your loss limit and the leverage check come in step 4 and can lower this.'
+
 /** The three drivers in the onboarding summary panel ("What drives this"). */
 export function driverLines(t: TargetResult): { label: string; value: string }[] {
   return [

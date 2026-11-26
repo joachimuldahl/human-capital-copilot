@@ -10,6 +10,7 @@ import {
   answerEffect,
   assumptions,
   driverLines,
+  ESTIMATE_NOTE,
   drawdownQuestion,
   explainBinding,
   unansweredCount,
@@ -122,7 +123,7 @@ export default function Onboarding() {
   const setAnswer = useProfileStore((s) => s.setAnswer)
   const clearAnswer = useProfileStore((s) => s.clearAnswer)
   const showMyAnswers = useProfileStore((s) => s.showMyAnswers)
-  const { profile: p, target } = useMyTarget()
+  const { profile: p, target, pending } = useMyTarget()
 
   // Onboarding always edits "My answers", never a persona.
   useEffect(() => showMyAnswers(), [showMyAnswers])
@@ -135,11 +136,12 @@ export default function Onboarding() {
   }
   /** "Why we ask" panel for question q; only one is open at a time. */
   const why = (q: Q) => (
-    <WhyWeAsk content={WHY_WE_ASK[q]} effect={() => answerEffect(q, p)} open={openWhy === q} onToggle={() => setOpenWhy((o) => (o === q ? null : q))} />
+    <WhyWeAsk content={WHY_WE_ASK[q]} effect={() => answerEffect(q, p, { pending })} open={openWhy === q} onToggle={() => setOpenWhy((o) => (o === q ? null : q))} />
   )
   const retireMsg = p.age >= p.retireAge ? 'Retirement age needs to be after your current age.' : undefined
   const unanswered = unansweredCount(answers)
-  const explanation = explainBinding(target, p, { lossIsDefault: answers.maxLossMoney === undefined })
+  // G3/G4 are skipped while pending, so the explanation never names a limit the user hasn't answered.
+  const explanation = explainBinding(target, p)
   const isReview = step === QUESTION_STEPS
 
   return (
@@ -284,7 +286,7 @@ export default function Onboarding() {
         </section>
       </div>
 
-      <SummaryPanel value={target.finalEEE} unanswered={unanswered} text={explanation} drivers={driverLines(target)} />
+      <SummaryPanel value={target.finalEEE} estimate={pending.length > 0} unanswered={unanswered} text={explanation} drivers={driverLines(target)} />
     </div>
   )
 }
@@ -295,13 +297,14 @@ const BTN_SECONDARY = `${BTN_BASE} border border-slate-300 bg-white text-slate-8
 
 const roundPct = (x: number) => Math.round(x * 1000) / 10
 
-function PreliminaryChip() {
-  return <Badge tone="warning">Preliminary</Badge>
+/** "Estimate" while step-4 limits are pending; otherwise "Preliminary" while any default is in use. */
+function StatusChip({ estimate }: { estimate: boolean }) {
+  return <Badge tone="warning">{estimate ? 'Estimate' : 'Preliminary'}</Badge>
 }
 
 /** Desktop: sticky 320px panel with gauge and drivers. Mobile: 56px bottom bar with the number and chip. */
-function SummaryPanel({ value, unanswered, text, drivers }: { value: number; unanswered: number; text: string; drivers: { label: string; value: string }[] }) {
-  const prelim = unanswered > 0
+function SummaryPanel({ value, estimate, unanswered, text, drivers }: { value: number; estimate: boolean; unanswered: number; text: string; drivers: { label: string; value: string }[] }) {
+  const prelim = estimate || unanswered > 0
   return (
     <>
       <aside aria-label="Your Risk Capacity so far" className="hidden lg:sticky lg:top-6 lg:block">
@@ -312,12 +315,16 @@ function SummaryPanel({ value, unanswered, text, drivers }: { value: number; una
               <p className="text-hero text-slate-900" aria-live="polite">
                 {formatRatio(value)}
               </p>
-              {prelim && <PreliminaryChip />}
+              {prelim && <StatusChip estimate={estimate} />}
             </div>
-            {prelim && (
-              <p className="mt-1 text-xs text-slate-500">
-                Based on defaults for {unanswered} {unanswered === 1 ? 'question' : 'questions'} you haven't answered yet.
-              </p>
+            {estimate ? (
+              <p className="mt-1 text-xs text-slate-500">{ESTIMATE_NOTE}</p>
+            ) : (
+              prelim && (
+                <p className="mt-1 text-xs text-slate-500">
+                  Based on defaults for {unanswered} {unanswered === 1 ? 'question' : 'questions'} you haven't answered yet.
+                </p>
+              )
             )}
           </div>
           <RiskGauge value={value} />
@@ -338,7 +345,7 @@ function SummaryPanel({ value, unanswered, text, drivers }: { value: number; una
       <aside aria-label="Your Risk Capacity so far" className="fixed inset-x-0 bottom-0 z-20 flex h-14 items-center justify-between gap-3 border-t border-slate-200 bg-white/95 px-4 backdrop-blur lg:hidden">
         <p className="text-caption text-slate-500">Risk capacity</p>
         <div className="flex items-center gap-2">
-          {prelim && <PreliminaryChip />}
+          {prelim && <StatusChip estimate={estimate} />}
           <p className="text-xl font-semibold text-slate-900" aria-live="polite">
             {formatRatio(value)}
           </p>

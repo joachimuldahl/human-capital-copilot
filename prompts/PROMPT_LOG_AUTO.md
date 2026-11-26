@@ -70,3 +70,21 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 ### 2026-11-26 16:06:39 +02:00 · session feec8825
 > so what are we still missing?
 
+### 2026-11-26 16:22:31 +02:00 · session feec8825
+> Bug: before step 4 is answered, the Risk Capacity panel applies the loss limit (G4) and the leverage check (G3) from DEFAULT answers and explains them as if the user had answered ("Limited by our starting loss limit…"). Fix: add an option to targetEEE, e.g. { pending: ['G3_leverage', 'G4_loss'] }, that skips those caps. Use it on the onboarding panel until the user has answered Q14 and Q16. While anything is pending, label the number "Estimate" and show exactly: "Estimate from your answers so far. Your loss limit and the leverage check come in step 4 and can lower this." Never mention a limit the user hasn't answered. Add unit tests for the pending option; section 9 values must not change.
+
+### 2026-11-26 16:43:44 +02:00 · session feec8825
+> go on
+
+### 2026-11-26 16:47:01 +02:00 · session feec8825
+> cd ~/Projects/human-capital-copilot
+
+### 2026-11-26 16:47:46 +02:00 · session feec8825
+> cd ~/hcc/human-capital-copilot
+
+### 2026-11-26 16:47:58 +02:00 · session feec8825
+> unzip -o ~/Downloads/hcc-design-update.zip
+
+### 2026-11-26 16:50:13 +02:00 · session feec8825
+> please commit the bug fix and then move onto the next thing before we run this new design then
+

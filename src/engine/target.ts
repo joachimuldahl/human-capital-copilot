@@ -22,7 +22,15 @@ export interface TargetOptions {
   age?: number
   /** Apply the G4 loss cap; default true (glide path uses false). */
   applyLossCap?: boolean
+  /**
+   * Limits whose question the user has not answered yet (onboarding: Q14 → G4_loss, Q16 → G3_leverage).
+   * These caps are skipped instead of being applied from default answers. Default: none, so results are unchanged.
+   */
+  pending?: readonly PendingCap[]
 }
+
+/** Caps that can wait for their question to be answered. */
+export type PendingCap = 'G3_leverage' | 'G4_loss'
 
 /** True if borrowing to invest is allowed (gate G3 open). */
 export function leverageEligible(p: Profile, F: number, age: number): boolean {
@@ -41,13 +49,15 @@ export function leverageEligible(p: Profile, F: number, age: number): boolean {
  * raw = (w·F + (w − b)·H) / F, with F = max(F, 1)
  * caps in order: policy_cap 1.5 · G1_buffer 1.0 (buffer < 3 months) · G2_debt 1.0 (debt > 7%)
  *   · G3_leverage 1.0 (unless eligible) · G4_loss = maxLossMoney / (equityShock · F)
+ *   (caps listed in opts.pending are skipped)
  * final = max(floor, min(raw, min(caps)))
  * binding = raw ≤ capVal ? (raw ≥ floor ? 'model' : 'floor') : first cap equal to capVal
  * hcRatio = H / (F + H)
  */
 export function targetEEE(p: Profile, opts: TargetOptions = {}): TargetResult {
   const age = opts.age ?? p.age
-  const applyLossCap = opts.applyLossCap ?? true
+  const pending = opts.pending ?? []
+  const applyLossCap = (opts.applyLossCap ?? true) && !pending.includes('G4_loss')
   const F = Math.max(opts.F ?? p.investableAssets, 1)
 
   const { band, gamma } = riskBand(p)
@@ -66,7 +76,7 @@ export function targetEEE(p: Profile, opts: TargetOptions = {}): TargetResult {
     caps.push({ id: 'G2_debt', value: 1.0 })
     gates.push('G2_debt')
   }
-  if (!leverageEligible(p, F, age)) {
+  if (!pending.includes('G3_leverage') && !leverageEligible(p, F, age)) {
     caps.push({ id: 'G3_leverage', value: 1.0 })
     gates.push('G3_leverage')
   }

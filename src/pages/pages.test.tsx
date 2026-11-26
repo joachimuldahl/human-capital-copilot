@@ -82,7 +82,7 @@ describe('Results presets (Phase 3 acceptance)', () => {
 })
 
 describe('Onboarding', () => {
-  it('starts at step 1 with the summary panel on the defaults, marked preliminary', async () => {
+  it('starts at step 1 with an estimate that ignores the unanswered step-4 limits', async () => {
     const t = await renderPage('Onboarding')
     expect(t).toContain('Step 1 of 4')
     expect(t).toContain('About you')
@@ -90,26 +90,36 @@ describe('Onboarding', () => {
     expect(t).toContain('Your answers stay in your browser. Nothing is sent anywhere.')
     expect(t).toContain('You can change any answer later.')
     expect(t).toContain('Your risk capacity')
-    expect(t).toContain('Preliminary')
-    expect(t).toContain("Based on defaults for 16 questions you haven't answered yet.")
-    // Defaults: max loss = 30% of €10,000 → G4 = 3,000 / (0.5 · 10,000) = 0.60×, which binds before the 1.0× borrowing rule.
-    expect(t).toContain('0.60×')
-    // Q14 unanswered: the default is never quoted as the user's own words (7.2).
-    expect(t).toContain('Limited by our starting loss limit of €3,000 (30% of what you invest). Set your own in question 14.')
-    expect(t).not.toContain('the most you said you could lose')
+    expect(t).toContain('Estimate')
+    expect(t).toContain('Estimate from your answers so far. Your loss limit and the leverage check come in step 4 and can lower this.')
+    expect(t).not.toContain('Preliminary')
+    // G3 and G4 are pending, so the default loss limit (€3,000 → 0.60×) is not applied and never mentioned.
+    expect(t).toContain('1.50×')
+    expect(t).not.toContain('0.60×')
+    expect(t).toContain('Limited by our 1.5× safety cap.')
+    expect(t).not.toMatch(/starting loss limit|you said you could lose|borrowing to invest needs/)
     expect(t).toContain('What drives this')
   })
 
-  it('the needle follows saved answers', async () => {
+  it('after Q14 the loss limit applies; still an estimate until Q16', async () => {
     const t = await renderPage('Onboarding', { active: 'mine', answers: { maxLossMoney: 4000 } })
     expect(t).toContain('0.80×')
-    expect(t).toContain("Based on defaults for 15 questions you haven't answered yet.")
     expect(t).toContain('Limited by the most you said you could lose in a bad year (€4,000).')
+    expect(t).toContain('Estimate from your answers so far.')
+  })
+
+  it('after Q14 and Q16: Preliminary (other defaults), no estimate note', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: { maxLossMoney: 4000, knowledgeCheckPassed: false } })
+    expect(t).toContain('0.80×')
+    expect(t).toContain('Preliminary')
+    expect(t).toContain("Based on defaults for 14 questions you haven't answered yet.")
+    expect(t).not.toContain('Estimate from your answers so far.')
   })
 
   it('no Preliminary chip once every question is answered', async () => {
     const t = await renderPage('Onboarding', { active: 'mine', answers: PERSONAS.sofie.profile })
     expect(t).not.toContain('Preliminary')
+    expect(t).not.toContain('Estimate')
     expect(t).toContain('1.50×')
   })
 

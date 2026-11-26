@@ -112,3 +112,29 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 ### 2026-11-26 20:18:05 +02:00 · session 8de8bac7
 > Read BUILD_SPEC.md section 18 (and D-1, 5.1, 16). Add the currency question and FX conversion, change Q3/Q5/Q6/Q14 to typed field + log slider, raise growthCap to 0.12 with the over-12% notice, and fix the side-panel issues in 18.3. Add the currency-invariance tests and update the Method page (FX source/date, growth cap). All section 9 tests must still pass. Commit and push.
 
+### 2026-11-26 21:36:36 +02:00 · session 8de8bac7
+>
+>
+> <pasted_content id="e8ab">
+> Damien (teammate) has delivered his part. His folder "damien" is either inside this repo at team/damien/ or one level up at ../team/damien/. Find it. If it's one level up, move it into this repo at team/damien/ (ask me before moving). It contains 1_Notes, 2_Demo_data, 5_Application_description and AI_prompts. Use macOS textutil to read the .docx files. Do NOT change src/ or the app's behaviour in this task.
+>
+> A. Audit it and write docs/audit-damien.md:
+> 1. Inventory: every file, with a one-line description.
+> 2. ETF data: for each of the 10 ETFs, open its factsheet PDF and check at least 3 figures in the CSVs against it (top-holding weights, region and sector splits, TER, as-of date). Check that splits sum to ~100%, tickers/ISINs match the factsheet, and every row has a source URL and date. Mark each ETF: verified / errors found (list them) / can't verify.
+> 3. Example users: check accounts.csv and holdings.csv for consistency (holdings point to existing accounts and ETFs, totals add up, prices are dated). Compare them with our 4 personas in BUILD_SPEC section 6.
+> 4. Application description PDF: what it adds beyond docs/Application-Description.md, and check every citation (authors, year, title, journal) against BUILD_SPEC section 17.
+> 5. Notes: anything that conflicts with what we built, e.g. the name "Headroom" used in the pitch, or Finary as design reference.
+> 6. Recommendation per item: use as is / use with fixes / don't use, with the effort involved and which section 9 test values would change if this ETF data replaced src/data.
+>
+> B. Damien's prompts:
+> - Create prompts/team/damien.md from the AI_prompts .docx. Put this at the top: "Summary written by Damien with AI assistance. NOT verbatim. His original prompts were requested on 26 Nov 2026 and will replace this file when received."
+> - In docs/Application-Description.md section 7 and in prompts/PROMPT_LOG.md, add a line pointing to prompts/team/damien.md with the same caveat.
+>
+> C. Housekeeping:
+> - Add the factsheet PDFs (team/damien/2_Demo_data/**/*.pdf) to .gitignore, so third-party documents aren't published in the public repo. Their URLs stay in the CSVs. Keep Damien's own description PDF in the repo.
+> - Commit the audit, prompts/team/damien.md, the .gitignore change and team/damien (without the factsheet PDFs), then push.
+>
+> D. Finish by showing me: a short summary of the audit (one line per item with your recommendation), the list of ETFs with errors, and what you'd need from me to decide whether his ETF data replaces our illustrative data.
+> </pasted_content id="e8ab">
+>
+

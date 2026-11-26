@@ -3,6 +3,8 @@ Design phase (Claude, Cowork project): see prompts/design-phase-log.md (export o
 Build phase (Claude Code): entries below. Every prompt verbatim.
 From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md (hook); C-entries reference its timestamps instead of copying the prompt.
 
+Team prompts: Damien → `prompts/team/damien.md` (summary written by Damien with AI assistance, NOT verbatim; his original prompts were requested on 26 Nov 2026 and will replace that file when received).
+
 ### C-001 · 2026-11-26 · Joachim · Claude Code · Phase 0
 **Prompt:**
 > Read BUILD_SPEC.md fully. Do Phase 0 (sections 3, 4, 10, 10.1, 11, 13). Start with the pre-flight and wait for my confirmations. Stop when the Phase 0 acceptance criteria pass, then remind me to do Part E (Vercel).
@@ -128,3 +130,11 @@ From C-003 on, prompts are captured automatically in prompts/PROMPT_LOG_AUTO.md 
 **Result:** tests ✔ (282/282, all section 9 values unchanged) · lint ✔ · build ✔ · browser check ✔ (375/1280, no overflow)
 **Human check:** (to fill in by Joachim)
 **Lesson:** Keeping the engine free of currency names (one `fx` factor on the profile) made invariance easy to prove: the only EUR number in the maths is the borrowing minimum, so one test over 4 personas × 7 currencies covers it. Tests pin the locale to en-IE, because Node reports en-US and would otherwise silently switch every test to dollars.
+
+### C-016 · 2026-11-26 · Joachim · Claude Code · Team delivery audit
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entry 2026-11-26 21:36:36 +02:00 (audit Damien's package, prompts summary, housekeeping).
+**What the AI did:** Found Damien's package already in the repo (`Team/Damien/Headroom_package/`, nothing moved). Read the .docx files with textutil and the PDFs with macOS PDFKit (page images where splits are charts). Checked every ETF's ISIN, TER, ticker, holdings count and date, plus top holdings, regions and sectors against the 10 factsheets (no errors). Checked accounts/holdings consistency, compared with our personas, checked the description's citations against BUILD_SPEC 17, and listed conflicts in the notes. Wrote docs/audit-damien.md, created prompts/team/damien.md with the "not verbatim" caveat, and git-ignored the factsheet PDFs. No change to src/.
+**Files changed:** docs/audit-damien.md (new), prompts/team/damien.md (new), Team/Damien/** (added, factsheet PDFs ignored), .gitignore, docs/Application-Description.md, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (282/282, src unchanged) · lint ✔ · build ✔
+**Human check:** (to fill in by Joachim)
+**Lesson:** Two factsheets keep their numbers only in charts or in a jumbled text layer, so a text-only check reported them as "missing". Rendering those pages and reading them showed the data was right; trusting the first automated pass would have wrongly flagged good work.

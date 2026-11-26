@@ -78,3 +78,8 @@
 - Q3/Q5/Q6/Q14 are a typed field plus a log slider; Q6 spans 0.5×–5× today's income (typed up to 20×) with a notice above 12% a year. growthCap raised to 0.12.
 - Side panel: explanation shown once (estimate note + binding sentence only from answered limits or the 1.5× cap); "≈ 100% of wealth" when nothing is invested.
 - Method page: FX table with date and source, growth-cap note. 87 new tests, including currency invariance for every persona × currency.
+
+## 2026-11-26 · Team delivery · Damien's package audited
+- Added Damien's package (`Team/Damien/Headroom_package/`); the 10 third-party factsheet PDFs are git-ignored (URLs stay in `etfs.csv`).
+- docs/audit-damien.md: inventory, factsheet check of all 10 ETFs (no errors found), example users, description citations, conflicts with the build, recommendations.
+- prompts/team/damien.md: Damien's prompts as a summary (not verbatim, originals requested), linked from the description (section 7) and PROMPT_LOG.md.

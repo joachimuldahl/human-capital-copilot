@@ -1,0 +1,6 @@
+account_id,persona,persona_age,persona_description,account_name,account_type,base_currency,cash_balance,cash_currency
+ACC-S1,STUDENT,22,Working student with a few thousand euros to invest (illustrative persona),Student - Brokerage account,Brokerage,EUR,180.00,EUR
+ACC-Y1,YOUNG_PRO,28,"Young professional (cadre), net income about 3-4k EUR per month (illustrative persona)",Young professional - ETF brokerage account,Brokerage,EUR,800.00,EUR
+ACC-Y2,YOUNG_PRO,28,"Young professional (cadre), net income about 3-4k EUR per month (illustrative persona)",Young professional - US brokerage account,Brokerage,USD,500.00,USD
+ACC-M1,MID_45,45,"Established investor around 45, more cautious (illustrative persona)",45 y.o. - Main brokerage account,Brokerage,EUR,4500.00,EUR
+ACC-M2,MID_45,45,"Established investor around 45, more cautious (illustrative persona)",45 y.o. - Retirement savings account,Retirement savings,EUR,0.00,EUR

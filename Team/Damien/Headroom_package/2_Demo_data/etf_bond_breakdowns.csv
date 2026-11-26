@@ -1,0 +1,19 @@
+isin,etf_ticker,breakdown_type,bucket_as_printed,weight_pct,as_of_date,source_file
+IE00BDBRDM35,AGGH,maturity,Cash and Derivatives,0.53,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,maturity,0 - 1 Years,1.65,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,maturity,1 - 2 Years,11.06,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,maturity,2 - 3 Years,11.51,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,maturity,3 - 5 Years,19.08,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,maturity,5 - 7 Years,15.07,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,maturity,7 - 10 Years,21.08,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,maturity,10 - 15 Years,5.77,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,maturity,15 - 20 Years,4.54,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,maturity,20+ Years,9.70,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,credit rating,Cash and/or Derivatives,0.53,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,credit rating,AAA Rated,11.57,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,credit rating,AA Rated,38.57,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,credit rating,A Rated,31.30,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,credit rating,BBB Rated,14.02,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,credit rating,BB Rated,0.00,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,credit rating,B Rated,0.00,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,credit rating,Not Rated,3.99,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf

@@ -1,0 +1,18 @@
+account_id,isin,instrument_name,ticker,price_exchange,currency,quantity,price,price_date,price_type,market_value,price_source
+ACC-S1,IE00BK5BQT80,Vanguard FTSE All-World UCITS ETF (USD) Accumulating,VWCE,Stuttgart (EUR quote),EUR,20,162.64,2026-11-25,close,3252.80,https://www.finanzen.net/etf/vanguard-ftse-all-world-etf-ie00bk5bqt80
+ACC-S1,IE00B0M63177,iShares MSCI EM UCITS ETF USD (Dist),IQQE,Xetra,EUR,15,54.42,2026-11-13,close,816.30,https://stockanalysis.com/quote/etr/IQQE
+ACC-Y1,IE00B4L5Y983,iShares Core MSCI World UCITS ETF USD (Acc),EUNL,Stuttgart (EUR quote),EUR,70,125.165,2026-11-25,close,8761.55,https://www.easybank.at/markets/etf/tts-75270796/ISHSIII-CORE-MSCI-WLD-DLA
+ACC-Y1,IE00B6YX5C33,State Street SPDR S&P 500 UCITS ETF (Dist),SPY5,Lang & Schwarz (EUR quote),EUR,8,651.88,2026-11-25,close,5215.04,https://markets.bawag.at/etf/tts-52855693/SPDR-S-P-500-UCITS-ETF
+ACC-Y1,LU0908500753,Amundi Core STOXX Europe 600 UCITS ETF Acc,MEUD,Amundi fund NAV (not an exchange price),EUR,20,318.75,2026-10-30,NAV,6375.00,file:06_MEUD_Amundi_STOXX_Europe_600.pdf
+ACC-Y1,IE00B0M63177,iShares MSCI EM UCITS ETF USD (Dist),IQQE,Xetra,EUR,40,54.42,2026-11-13,close,2176.80,https://stockanalysis.com/quote/etr/IQQE
+ACC-Y1,IE00BDBRDM35,iShares Core Global Aggregate Bond UCITS ETF EUR Hedged (Acc),EUNA,Stuttgart (EUR quote),EUR,400,4.89,2026-11-24,close,1956.00,https://www.finanzen.net/etf/ishares-core-global-aggregate-bond-etf-ie00bdbrdm35
+ACC-Y1,JE00B1VS3770,WisdomTree Physical Gold,VZLD,Xetra,EUR,4,299.06,2026-11-20,close,1196.24,https://www.finanzen.net/etc/historisch/wisdomtree-physical-gold-je00b1vs3770
+ACC-Y2,US0378331005,Apple Inc.,AAPL,Nasdaq,USD,12,342.56,2026-11-20,close,4110.72,https://stockanalysis.com/stocks/aapl/history
+ACC-Y2,US5949181045,Microsoft Corporation,MSFT,Nasdaq,USD,8,484.52,2026-11-20,close,3876.16,https://stockanalysis.com/stocks/msft/history/
+ACC-M1,IE00BK5BQT80,Vanguard FTSE All-World UCITS ETF (USD) Accumulating,VWCE,Stuttgart (EUR quote),EUR,450,162.64,2026-11-25,close,73188.00,https://www.finanzen.net/etf/vanguard-ftse-all-world-etf-ie00bk5bqt80
+ACC-M1,IE00B4L5Y983,iShares Core MSCI World UCITS ETF USD (Acc),EUNL,Stuttgart (EUR quote),EUR,250,125.165,2026-11-25,close,31291.25,https://www.easybank.at/markets/etf/tts-75270796/ISHSIII-CORE-MSCI-WLD-DLA
+ACC-M1,LU0908500753,Amundi Core STOXX Europe 600 UCITS ETF Acc,MEUD,Amundi fund NAV (not an exchange price),EUR,120,318.75,2026-10-30,NAV,38250.00,file:06_MEUD_Amundi_STOXX_Europe_600.pdf
+ACC-M1,IE00BDBRDM35,iShares Core Global Aggregate Bond UCITS ETF EUR Hedged (Acc),EUNA,Stuttgart (EUR quote),EUR,8000,4.89,2026-11-24,close,39120.00,https://www.finanzen.net/etf/ishares-core-global-aggregate-bond-etf-ie00bdbrdm35
+ACC-M1,JE00B1VS3770,WisdomTree Physical Gold,VZLD,Xetra,EUR,60,299.06,2026-11-20,close,17943.60,https://www.finanzen.net/etc/historisch/wisdomtree-physical-gold-je00b1vs3770
+ACC-M2,IE00BK5BQT80,Vanguard FTSE All-World UCITS ETF (USD) Accumulating,VWCE,Stuttgart (EUR quote),EUR,150,162.64,2026-11-25,close,24396.00,https://www.finanzen.net/etf/vanguard-ftse-all-world-etf-ie00bk5bqt80
+ACC-M2,IE00BDBRDM35,iShares Core Global Aggregate Bond UCITS ETF EUR Hedged (Acc),EUNA,Stuttgart (EUR quote),EUR,3000,4.89,2026-11-24,close,14670.00,https://www.finanzen.net/etf/ishares-core-global-aggregate-bond-etf-ie00bdbrdm35

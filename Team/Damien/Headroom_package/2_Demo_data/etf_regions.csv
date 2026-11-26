@@ -1,0 +1,80 @@
+isin,etf_ticker,country_or_region_as_printed,weight_pct,coverage,as_of_date,source_file
+IE00B4L5Y983,IWDA,United States,72.44,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Japan,5.70,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Other,4.52,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,United Kingdom,3.49,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Canada,3.42,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Switzerland,2.31,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,France,2.22,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Germany,2.10,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Australia,1.58,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Netherlands,1.32,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Spain,0.90,complete,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00BK5BQT80,VWCE,United States,62.80,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Japan,5.90,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Taiwan,3.30,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,United Kingdom,3.20,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Canada,3.10,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,China,2.30,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Korea,2.30,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Switzerland,2.10,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,France,1.90,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Germany,1.80,top 10 countries only (remaining ~11.3% not printed),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00B6YX5C33,SPY5,United States,100.00,complete,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE0032077012,EQQQ,United States,97.00,complete,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Netherlands,1.10,complete,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Canada,1.10,complete,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Brazil,0.40,complete,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,China,0.20,complete,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,United Kingdom,0.20,complete,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE00B0M63177,IEEM,Taiwan,28.71,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,China,19.90,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Korea (South),19.54,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,India,11.62,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Other,8.45,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,South Africa,3.04,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Brazil,2.45,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Saudi Arabia,1.80,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Mexico,1.77,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Germany,1.44,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,United Arab Emirates,1.27,complete,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+LU0908500753,MEUD,United Kingdom,23.26,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,France,14.40,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Switzerland,14.39,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Germany,13.20,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Netherlands,7.91,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Spain,5.67,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Italy,5.40,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Sweden,4.87,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Denmark,2.69,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Belgium,1.89,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Finland,1.85,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Norway,1.33,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Poland,1.03,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Ireland,0.70,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Austria,0.60,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Others,0.81,complete (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+IE00BCBJG560,ZPRS,United States,62.11,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Japan,12.53,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,United Kingdom,4.35,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Canada,4.15,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Australia,3.58,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Sweden,1.77,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Switzerland,1.51,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Israel,1.41,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Germany,1.34,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,France,1.20,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Norway,0.91,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Italy,0.84,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Singapore,0.74,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Denmark,0.69,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Netherlands,0.53,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Spain,0.48,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Belgium,0.48,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Hong Kong,0.47,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Finland,0.33,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Austria,0.28,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,New Zealand,0.12,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Ireland,0.10,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Portugal,0.07,complete,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BWBXM948,ZPDT,United States,100.00,complete,2026-10-31,10_ZPDT_SPDR_SP_US_Technology_Select.pdf

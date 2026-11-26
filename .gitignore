@@ -27,3 +27,7 @@ dist-ssr
 .claude/settings.local.json
 .claude/hooks/log-prompt.err
 human-capital-copilot-submission.zip
+
+# Third-party factsheets in team deliveries (not ours to publish; URLs are in etfs.csv)
+Team/Damien/Headroom_package/2_Demo_data/factsheets/*.pdf
+team/damien/**/2_Demo_data/**/*.pdf

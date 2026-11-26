@@ -1,0 +1,94 @@
+isin,etf_ticker,sector_as_printed,weight_pct,classification,as_of_date,source_file
+IE00B4L5Y983,IWDA,Information Technology,29.67,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Financials,16.10,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Industrials,10.72,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Health Care,10.13,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Consumer Discretionary,8.68,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Communication,7.15,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Consumer Staples,5.35,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Energy,4.57,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Materials,3.13,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Utilities,2.46,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00B4L5Y983,IWDA,Other,2.03,GICS sector,2026-10-31,01_IWDA_iShares_Core_MSCI_World.pdf
+IE00BK5BQT80,VWCE,Technology,33.50,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Financials,15.10,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Industrials,12.20,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Consumer Discretionary,10.90,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Health Care,8.80,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Energy,4.60,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Consumer Staples,4.20,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Telecommunications,3.20,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Basic Materials,3.10,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Utilities,2.70,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00BK5BQT80,VWCE,Real Estate,1.70,ICB industry (Vanguard 'Weighted exposure'),2026-10-31,02_VWCE_Vanguard_FTSE_All-World.pdf
+IE00B6YX5C33,SPY5,Information Technology,37.44,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Financials,12.20,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Health Care,10.26,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Consumer Discretionary,9.03,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Communication Services,8.41,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Industrials,8.16,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Consumer Staples,4.99,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Energy,3.90,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Utilities,2.08,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Real Estate,1.79,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE00B6YX5C33,SPY5,Materials,1.73,GICS sector,2026-10-31,03_SPY5_SPDR_SP500.pdf
+IE0032077012,EQQQ,Information technology,57.30,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Communication services,13.50,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Consumer discretionary,11.00,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Consumer staples,6.80,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Health care,4.80,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Industrials,3.50,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Utilities,1.20,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Materials,1.10,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Energy,0.50,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE0032077012,EQQQ,Financials,0.20,Invesco sector allocation,2026-10-31,04_EQQQ_Invesco_Nasdaq100.pdf
+IE00B0M63177,IEEM,Information Technology,41.48,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Financials,21.54,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Consumer Discretionary,7.57,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Communication,5.90,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Industrials,5.89,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Materials,5.46,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Energy,3.28,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Health Care,2.75,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Consumer Staples,2.73,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Utilities,1.74,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+IE00B0M63177,IEEM,Other,1.64,GICS sector,2026-10-31,05_IEEM_iShares_MSCI_EM.pdf
+LU0908500753,MEUD,Financials,24.85,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Industrials,18.42,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Health Care,13.11,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Information Technology,8.85,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Consumer Staples,8.20,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Consumer Discretionary,6.32,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Energy,6.20,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Materials,5.47,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Utilities,4.90,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Communication Services,2.68,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+LU0908500753,MEUD,Real Estate,1.00,GICS sector (benchmark index),2026-10-31,06_MEUD_Amundi_STOXX_Europe_600.pdf
+IE00BDBRDM35,AGGH,Treasuries,53.28,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Other,15.00,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Agency Fixed Rate,9.55,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Owned No Guarantee,6.40,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Banking,4.77,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Supranational,2.74,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Mortgage Collateralized,1.85,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Local Government,1.84,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Consumer Cyclical,1.58,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Government Guaranteed,1.52,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BDBRDM35,AGGH,Electric,1.49,BlackRock bond sector,2026-10-31,07_AGGH_iShares_Global_Aggregate_Bond_EUR_Hedged.pdf
+IE00BCBJG560,ZPRS,Industrials,18.99,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Financials,14.48,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Information Technology,12.46,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Health Care,12.04,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Consumer Discretionary,10.64,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Materials,8.01,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Real Estate,7.92,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Energy,5.36,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Consumer Staples,4.22,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Communication Services,3.19,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BCBJG560,ZPRS,Utilities,2.70,GICS sector,2026-10-31,09_ZPRS_SPDR_MSCI_World_Small_Cap.pdf
+IE00BWBXM948,ZPDT,Semiconductors & Semiconductor Equipment,43.79,GICS industry group ('Industry Allocation'),2026-10-31,10_ZPDT_SPDR_SP_US_Technology_Select.pdf
+IE00BWBXM948,ZPDT,Software,25.63,GICS industry group ('Industry Allocation'),2026-10-31,10_ZPDT_SPDR_SP_US_Technology_Select.pdf
+IE00BWBXM948,ZPDT,"Technology Hardware, Storage & Peripherals",22.69,GICS industry group ('Industry Allocation'),2026-10-31,10_ZPDT_SPDR_SP_US_Technology_Select.pdf
+IE00BWBXM948,ZPDT,Communications Equipment,3.29,GICS industry group ('Industry Allocation'),2026-10-31,10_ZPDT_SPDR_SP_US_Technology_Select.pdf
+IE00BWBXM948,ZPDT,"Electronic Equipment, Instruments & Components",2.40,GICS industry group ('Industry Allocation'),2026-10-31,10_ZPDT_SPDR_SP_US_Technology_Select.pdf
+IE00BWBXM948,ZPDT,IT Services,2.21,GICS industry group ('Industry Allocation'),2026-10-31,10_ZPDT_SPDR_SP_US_Technology_Select.pdf

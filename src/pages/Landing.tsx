@@ -16,7 +16,7 @@ export default function Landing() {
   return (
     <div className="space-y-14">
       <section className="space-y-6 pt-4 sm:pt-10">
-        <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+        <h1 className="max-w-3xl text-page-title text-slate-900">
           Your biggest asset is your future salary. Is your portfolio built for it?
         </h1>
         <p className="max-w-2xl text-lg text-slate-600">
@@ -26,14 +26,14 @@ export default function Landing() {
           <Link
             to="/onboarding"
             onClick={showMyAnswers}
-            className="rounded-xl bg-accent-700 px-5 py-3 text-center font-semibold text-white shadow-sm hover:bg-accent-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+            className="inline-flex h-10 items-center justify-center rounded-lg bg-accent-700 px-4 text-sm font-semibold text-white hover:bg-accent-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700"
           >
             Start (3 minutes)
           </Link>
           <button
             type="button"
             onClick={() => personasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+            className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700"
           >
             Try a demo person
           </button>
@@ -46,7 +46,7 @@ export default function Landing() {
         </h2>
         <ol className="grid gap-4 sm:grid-cols-3">
           {STEPS.map((s, i) => (
-            <li key={s.title} className="rounded-2xl border border-slate-200 bg-white p-5">
+            <li key={s.title} className="rounded-xl border border-slate-200 bg-white p-4 shadow-card lg:p-6">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-50 font-semibold text-accent-800">
                 {i + 1}
               </span>

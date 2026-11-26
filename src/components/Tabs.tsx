@@ -43,7 +43,7 @@ export default function Tabs({ tabs, label }: { tabs: Tab[]; label: string }) {
               tabIndex={on ? 0 : -1}
               onClick={() => setActive(t.id)}
               onKeyDown={(e) => onKey(e, i)}
-              className={`-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600 ${
+              className={`-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700 ${
                 on ? 'border-accent-700 text-accent-800' : 'border-transparent text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -60,7 +60,7 @@ export default function Tabs({ tabs, label }: { tabs: Tab[]; label: string }) {
           aria-labelledby={`${base}-tab-${t.id}`}
           hidden={t.id !== active}
           tabIndex={0}
-          className="pt-5 focus-visible:outline-2 focus-visible:outline-accent-600"
+          className="pt-5 focus-visible:outline-2 focus-visible:outline-accent-700"
         >
           {t.content}
         </div>

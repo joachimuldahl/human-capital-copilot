@@ -1,10 +1,19 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import NeedleBar from '../components/NeedleBar'
-import { NumberField, Question, RadioCards, SliderField, type RadioOption } from '../components/fields'
+import { Lock } from 'lucide-react'
+import Badge from '../components/Badge'
+import RiskGauge from '../components/RiskGauge'
+import WhyWeAsk from '../components/WhyWeAsk'
+import { NotSure, NumberField, Question, RadioCards, SliderField, type RadioOption } from '../components/fields'
+import { WHY_WE_ASK } from '../content/whyWeAsk'
 import {
+  answerEffect,
+  assumptions,
+  driverLines,
   drawdownQuestion,
   explainBinding,
+  unansweredCount,
+  type QuestionNo,
   formatEUR,
   formatPct,
   formatRatio,
@@ -95,11 +104,23 @@ const KNOWLEDGE = [
   },
 ]
 
+const STEP_SUBTITLES = [
+  '4 quick questions about your situation. The whole check takes about 3 minutes.',
+  '5 questions about your pay',
+  '2 questions about your safety net',
+  '5 questions about risk and what you know',
+  'Check your answers, then see your result',
+] as const
+
+type Q = QuestionNo
+
 export default function Onboarding() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
+  const [openWhy, setOpenWhy] = useState<Q | null>(null)
   const answers = useProfileStore((s) => s.answers)
   const setAnswer = useProfileStore((s) => s.setAnswer)
+  const clearAnswer = useProfileStore((s) => s.clearAnswer)
   const showMyAnswers = useProfileStore((s) => s.showMyAnswers)
   const { profile: p, target } = useMyTarget()
 
@@ -109,168 +130,221 @@ export default function Onboarding() {
   const set = <K extends keyof Profile>(k: K) => (v: Profile[K]) => setAnswer(k, v)
   const go = (s: number) => {
     setStep(s)
+    setOpenWhy(null)
     window.scrollTo({ top: 0 })
   }
+  /** "Why we ask" panel for question q; only one is open at a time. */
+  const why = (q: Q) => (
+    <WhyWeAsk content={WHY_WE_ASK[q]} effect={() => answerEffect(q, p)} open={openWhy === q} onToggle={() => setOpenWhy((o) => (o === q ? null : q))} />
+  )
+  const retireMsg = p.age >= p.retireAge ? 'Retirement age needs to be after your current age.' : undefined
+  const unanswered = unansweredCount(answers)
+  const explanation = explainBinding(target, p, { lossIsDefault: answers.maxLossMoney === undefined })
+  const isReview = step === QUESTION_STEPS
 
   return (
-    <div className="pb-28 lg:grid lg:grid-cols-[1fr_300px] lg:gap-8 lg:pb-0">
+    <div className="pb-20 lg:grid lg:grid-cols-[minmax(0,640px)_320px] lg:items-start lg:justify-between lg:gap-10 lg:pb-0">
       <div className="space-y-6">
         <header className="space-y-3">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {step < QUESTION_STEPS ? `Step ${step + 1} of ${QUESTION_STEPS}: ${STEP_TITLES[step]}` : 'Review your answers'}
-          </h1>
-          <div
-            className="h-2 w-full overflow-hidden rounded-full bg-slate-100"
-            role="progressbar"
-            aria-label="Onboarding progress"
-            aria-valuemin={0}
-            aria-valuemax={QUESTION_STEPS}
-            aria-valuenow={Math.min(step + 1, QUESTION_STEPS)}
-          >
-            <div className="h-full rounded-full bg-accent-600 transition-all" style={{ width: `${(Math.min(step + 1, QUESTION_STEPS) / QUESTION_STEPS) * 100}%` }} />
+          <p className="text-caption text-slate-500">{isReview ? 'Review' : `Step ${step + 1} of ${QUESTION_STEPS}`}</p>
+          <h1 className="text-step-title text-slate-900">{isReview ? 'Your answers' : STEP_TITLES[step]}</h1>
+          <p className="text-help text-slate-600">{STEP_SUBTITLES[step]}</p>
+          <div className="flex gap-1.5" role="progressbar" aria-label="Onboarding progress" aria-valuemin={0} aria-valuemax={QUESTION_STEPS} aria-valuenow={Math.min(step + 1, QUESTION_STEPS)}>
+            {Array.from({ length: QUESTION_STEPS }, (_, i) => (
+              <span key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? 'bg-accent-700' : 'bg-slate-200'}`} />
+            ))}
           </div>
+          <p className="flex items-center gap-1.5 text-xs text-slate-500">
+            <Lock size={14} strokeWidth={1.75} aria-hidden />
+            Your answers stay in your browser. Nothing is sent anywhere.
+          </p>
         </header>
 
-        <div className="space-y-8 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
-          {step === 0 && (
-            <>
-              <Question number={1} label="How old are you?" htmlFor="q-age" why="Younger people have more future salary ahead, which changes how much risk fits.">
-                <NumberField id="q-age" value={p.age} onChange={set('age')} min={16} max={80} suffix="years" />
-              </Question>
-              <Question number={2} label="When do you expect to retire?" htmlFor="q-retire" why="The years until retirement decide how much future saving you still have.">
-                <SliderField id="q-retire" value={p.retireAge} onChange={set('retireAge')} min={55} max={75} step={1} display={`age ${p.retireAge}`} />
-              </Question>
-              <Question number={3} label="How much do you have invested or saved for investing today?" htmlFor="q-f" why="This is the portfolio we size the risk for.">
-                <NumberField id="q-f" value={p.investableAssets} onChange={set('investableAssets')} min={0} max={100_000_000} step={500} prefix="€" />
-              </Question>
-              <Question number={4} label="What share of your net income do you invest?" htmlFor="q-sav" why="Your future savings are your human capital: the bigger they are, the more risk your portfolio can carry.">
-                <SliderField id="q-sav" value={Math.round(p.savingsRate * 100)} onChange={(v) => setAnswer('savingsRate', v / 100)} min={0} max={40} step={1} display={formatPct(p.savingsRate)} />
-              </Question>
-            </>
-          )}
+        <section aria-label={isReview ? 'Your answers' : STEP_TITLES[step]} className="rounded-xl border border-slate-200 bg-white shadow-card">
+          <div className="divide-y divide-slate-200 p-4 lg:p-6">
+            {step === 0 && (
+              <>
+                <Question number={1} label="How old are you?" htmlFor="q-age" why={why(1)}>
+                  <NumberField id="q-age" value={p.age} onChange={set('age')} min={16} max={80} suffix="years" message={retireMsg} />
+                </Question>
+                <Question number={2} label="When do you expect to retire?" htmlFor="q-retire" why={why(2)}>
+                  <SliderField id="q-retire" value={p.retireAge} onChange={set('retireAge')} min={55} max={75} step={1} display={`age ${p.retireAge}`} minLabel="55" maxLabel="75" />
+                </Question>
+                <Question number={3} label="How much do you have invested or saved for investing today?" hint="Funds, shares, crypto and cash you set aside for investing." htmlFor="q-f" why={why(3)}>
+                  <NumberField id="q-f" value={p.investableAssets} onChange={set('investableAssets')} min={0} max={100_000_000} step={500} prefix="€" />
+                </Question>
+                <Question number={4} label="What share of your net income do you invest?" htmlFor="q-sav" why={why(4)}>
+                  <SliderField id="q-sav" value={Math.round(p.savingsRate * 100)} onChange={(v) => setAnswer('savingsRate', v / 100)} min={0} max={40} step={1} display={formatPct(p.savingsRate)} minLabel="0%" maxLabel="40%" />
+                </Question>
+              </>
+            )}
 
-          {step === 1 && (
-            <>
-              <Question number={5} label="Your net yearly income now (students: expected first salary)" htmlFor="q-inc" why="Your income is what your future savings come from.">
-                <NumberField id="q-inc" value={p.incomeNow} onChange={set('incomeNow')} min={0} max={10_000_000} step={1000} prefix="€" suffix="/ year" />
-              </Question>
-              <Question number={6} label="Where do you expect your income to be in 10 years?" htmlFor="q-inc10" why="Expected pay rises make your future savings worth more today.">
-                <SliderField
-                  id="q-inc10"
-                  value={p.income10y}
-                  onChange={set('income10y')}
-                  min={Math.round(p.incomeNow * 0.8)}
-                  max={Math.max(Math.round(p.incomeNow * 2.2), 1000)}
-                  step={500}
-                  display={formatEUR(p.income10y)}
-                  hint={impliedGrowthLabel(p)}
-                />
-              </Question>
-              <Question number={7} label="Which sector do you work (or plan to work) in?" why="Some jobs pay less or disappear when markets fall, so that income already carries stock-market risk.">
-                <RadioCards name="sector" legend="Sector" options={SECTORS} value={p.sector} onChange={set('sector')} />
-              </Question>
-              <Question number={8} label="How much of your pay is bonus, commission or shares?" htmlFor="q-var" why="Variable pay tends to fall in the same years as the stock market.">
-                <SliderField id="q-var" value={Math.round(p.variablePayShare * 100)} onChange={(v) => setAnswer('variablePayShare', v / 100)} min={0} max={100} step={5} display={formatPct(p.variablePayShare)} />
-              </Question>
-              <Question number={9} label="How secure is your income?" why="Less secure income is worth less today, so we count it more carefully.">
-                <RadioCards name="security" legend="Income security" options={SECURITY} value={p.incomeSecurity} onChange={set('incomeSecurity')} />
-              </Question>
-            </>
-          )}
+            {step === 1 && (
+              <>
+                <Question number={5} label="Your net yearly income now" hint="Students: your expected first salary, after tax." htmlFor="q-inc" why={why(5)}>
+                  <NumberField id="q-inc" value={p.incomeNow} onChange={set('incomeNow')} min={0} max={10_000_000} step={1000} prefix="€" suffix="/ year" />
+                </Question>
+                <Question number={6} label="Where do you expect your income to be in 10 years?" hint="In today's money, after tax." htmlFor="q-inc10" why={why(6)}>
+                  <div className="space-y-2">
+                    <SliderField
+                      id="q-inc10"
+                      value={p.income10y}
+                      onChange={set('income10y')}
+                      min={Math.round(p.incomeNow * 0.8)}
+                      max={Math.max(Math.round(p.incomeNow * 2.2), 1000)}
+                      step={500}
+                      display={formatEUR(p.income10y)}
+                      hint={impliedGrowthLabel(p)}
+                      minLabel={formatEUR(p.incomeNow * 0.8)}
+                      maxLabel={formatEUR(Math.max(p.incomeNow * 2.2, 1000))}
+                    />
+                    <NotSure active={answers.income10y === undefined} onClick={() => clearAnswer('income10y')} defaultText={`+${roundPct(assumptions.defaultIncomeGrowth)}% a year`} />
+                  </div>
+                </Question>
+                <Question number={7} label="Which sector do you work (or plan to work) in?" why={why(7)}>
+                  <RadioCards name="sector" legend="Sector" options={SECTORS} value={p.sector} onChange={set('sector')} />
+                </Question>
+                <Question number={8} label="How much of your pay is bonus, commission or shares?" htmlFor="q-var" why={why(8)}>
+                  <div className="space-y-2">
+                    <SliderField id="q-var" value={Math.round(p.variablePayShare * 100)} onChange={(v) => setAnswer('variablePayShare', v / 100)} min={0} max={100} step={5} display={formatPct(p.variablePayShare)} minLabel="0%" maxLabel="100%" />
+                    <NotSure active={answers.variablePayShare === undefined} onClick={() => clearAnswer('variablePayShare')} defaultText="0%" />
+                  </div>
+                </Question>
+                <Question number={9} label="How secure is your income?" why={why(9)}>
+                  <RadioCards name="security" legend="Income security" options={SECURITY} value={p.incomeSecurity} onChange={set('incomeSecurity')} />
+                </Question>
+              </>
+            )}
 
-          {step === 2 && (
-            <>
-              <Question number={10} label="How many months of expenses could you cover with savings?" why="Without a buffer, a surprise bill could force you to sell at a bad time.">
-                <RadioCards name="buffer" legend="Months of buffer" options={BUFFER} value={p.bufferMonths} onChange={set('bufferMonths')} columns={3} />
-              </Question>
-              <Question number={11} label="Highest interest rate on any debt you have? (0 if none)" htmlFor="q-debt" why="Paying off expensive debt is a guaranteed return that beats investing.">
-                <NumberField id="q-debt" value={roundPct(p.maxDebtRate)} onChange={(v) => setAnswer('maxDebtRate', v / 100)} min={0} max={100} step={0.5} suffix="%" />
-              </Question>
-            </>
-          )}
+            {step === 2 && (
+              <>
+                <Question number={10} label="How many months of expenses could you cover with savings?" why={why(10)}>
+                  <RadioCards name="buffer" legend="Months of buffer" options={BUFFER} value={p.bufferMonths} onChange={set('bufferMonths')} columns={3} />
+                </Question>
+                <Question number={11} label="Highest interest rate on any debt you have?" hint="Enter 0 if you have no debt." htmlFor="q-debt" why={why(11)}>
+                  <NumberField id="q-debt" value={roundPct(p.maxDebtRate)} onChange={(v) => setAnswer('maxDebtRate', v / 100)} min={0} max={100} step={0.5} suffix="%" />
+                </Question>
+              </>
+            )}
 
-          {step === 3 && (
-            <>
-              <Question number={12} label={`“${drawdownQuestion(p.investableAssets)}”`} why="How you reacted (or would react) to a fall is the best guide to the risk you can live with.">
-                <RadioCards name="drawdown" legend="Reaction to a fall" options={DRAWDOWN} value={p.drawdownReaction} onChange={set('drawdownReaction')} columns={1} />
-              </Question>
-              <Question
-                number={13}
-                label="“You're offered a job: 50% chance it doubles your income, 50% chance it cuts it. What's the largest cut you'd accept?”"
-                why="This measures your general attitude to risk, separate from markets."
+            {step === 3 && (
+              <>
+                <Question number={12} label={`“${drawdownQuestion(p.investableAssets)}”`} why={why(12)}>
+                  <RadioCards name="drawdown" legend="Reaction to a fall" options={DRAWDOWN} value={p.drawdownReaction} onChange={set('drawdownReaction')} />
+                </Question>
+                <Question number={13} label="“You're offered a job: 50% chance it doubles your income, 50% chance it cuts it. What's the largest cut you'd accept?”" why={why(13)}>
+                  <RadioCards name="gamble" legend="Largest income cut" options={GAMBLE} value={p.incomeGamble} onChange={set('incomeGamble')} />
+                </Question>
+                <Question number={14} label="What is the most you could lose in a bad year without changing your plans?" htmlFor="q-loss" why={why(14)}>
+                  <div className="space-y-2">
+                    <NumberField id="q-loss" value={p.maxLossMoney} onChange={set('maxLossMoney')} min={0} max={100_000_000} step={500} prefix="€" />
+                    <NotSure
+                      active={answers.maxLossMoney === undefined}
+                      onClick={() => clearAnswer('maxLossMoney')}
+                      defaultText={`${roundPct(assumptions.defaultMaxLossShare)}% of what you invest (${formatEUR(p.maxLossMoney)})`}
+                    />
+                  </div>
+                </Question>
+                <Question number={15} label="Investing experience" why={why(15)}>
+                  <RadioCards name="experience" legend="Investing experience" options={EXPERIENCE} value={p.experience} onChange={set('experience')} columns={3} />
+                </Question>
+                <Question number={16} label="Knowledge check and borrowing opt-in" hint="Three short questions. Borrowing can only be switched on when all three are right." why={why(16)}>
+                  <KnowledgeCheck />
+                </Question>
+              </>
+            )}
+
+            {isReview && <Review profile={p} edited={answers} onEdit={go} />}
+          </div>
+
+          {!isReview && <p className="border-t border-slate-200 px-4 py-3 text-help text-slate-500 lg:px-6">You can change any answer later.</p>}
+
+          <nav aria-label="Onboarding steps" className="sticky bottom-14 z-10 flex items-center justify-between gap-3 rounded-b-xl border-t border-slate-200 bg-white px-4 py-3 lg:static lg:px-6">
+            <button type="button" onClick={() => go(step - 1)} disabled={step === 0} className={`${BTN_SECONDARY} disabled:invisible`}>
+              Back
+            </button>
+            {step < QUESTION_STEPS ? (
+              <button type="button" onClick={() => go(step + 1)} className={BTN_PRIMARY}>
+                {step === QUESTION_STEPS - 1 ? 'Review answers' : 'Next'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  // Store every shown value (defaults included) so "My answers" counts as answered.
+                  useProfileStore.getState().setAnswers(p)
+                  navigate('/results')
+                }}
+                className={BTN_PRIMARY}
               >
-                <RadioCards name="gamble" legend="Largest income cut" options={GAMBLE} value={p.incomeGamble} onChange={set('incomeGamble')} columns={1} />
-              </Question>
-              <Question number={14} label="What is the most you could lose in a bad year without changing your plans?" htmlFor="q-loss" why="We never suggest a risk level whose 2008-style crash loss is above this amount.">
-                <NumberField id="q-loss" value={p.maxLossMoney} onChange={set('maxLossMoney')} min={0} max={100_000_000} step={500} prefix="€" />
-              </Question>
-              <Question number={15} label="Investing experience" why="Borrowing to invest is only offered to people who understand how it works.">
-                <RadioCards name="experience" legend="Investing experience" options={EXPERIENCE} value={p.experience} onChange={set('experience')} columns={3} />
-              </Question>
-              <Question number={16} label="Knowledge check and borrowing opt-in" why="Above 1.0× means borrowing to invest. You need to know how it can go wrong before you can switch it on.">
-                <KnowledgeCheck />
-              </Question>
-            </>
-          )}
-
-          {step === 4 && <Review profile={p} edited={answers} onEdit={go} />}
-        </div>
-
-        <nav aria-label="Onboarding steps" className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => go(step - 1)}
-            disabled={step === 0}
-            className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-800 hover:bg-slate-50 disabled:invisible focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
-          >
-            Back
-          </button>
-          {step < QUESTION_STEPS ? (
-            <button
-              type="button"
-              onClick={() => go(step + 1)}
-              className="rounded-xl bg-accent-700 px-5 py-2.5 font-semibold text-white hover:bg-accent-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
-            >
-              {step === QUESTION_STEPS - 1 ? 'Review' : 'Next'}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                // Store every shown value (defaults included) so "My answers" counts as answered.
-                useProfileStore.getState().setAnswers(p)
-                navigate('/results')
-              }}
-              className="rounded-xl bg-accent-700 px-5 py-2.5 font-semibold text-white hover:bg-accent-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
-            >
-              See my result
-            </button>
-          )}
-        </nav>
+                See my result
+              </button>
+            )}
+          </nav>
+        </section>
       </div>
 
-      <LiveNeedle value={target.finalEEE} text={explainBinding(target, p)} />
+      <SummaryPanel value={target.finalEEE} unanswered={unanswered} text={explanation} drivers={driverLines(target)} />
     </div>
   )
 }
 
+const BTN_BASE = 'inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700'
+const BTN_PRIMARY = `${BTN_BASE} bg-accent-700 text-white hover:bg-accent-800`
+const BTN_SECONDARY = `${BTN_BASE} border border-slate-300 bg-white text-slate-800 hover:bg-slate-50`
+
 const roundPct = (x: number) => Math.round(x * 1000) / 10
 
-/** Sticky panel (desktop: right column, mobile: bottom bar) with the live Risk Capacity. */
-function LiveNeedle({ value, text }: { value: number; text: string }) {
+function PreliminaryChip() {
+  return <Badge tone="warning">Preliminary</Badge>
+}
+
+/** Desktop: sticky 320px panel with gauge and drivers. Mobile: 56px bottom bar with the number and chip. */
+function SummaryPanel({ value, unanswered, text, drivers }: { value: number; unanswered: number; text: string; drivers: { label: string; value: string }[] }) {
+  const prelim = unanswered > 0
   return (
-    <aside aria-label="Your Risk Capacity so far" aria-live="polite" className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-lg backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-      <div className="mx-auto max-w-5xl lg:sticky lg:top-6 lg:rounded-2xl lg:border lg:border-slate-200 lg:bg-white lg:p-5 lg:shadow-sm">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="text-sm font-medium text-slate-600">Risk Capacity so far</p>
-          <p className="text-2xl font-semibold tabular-nums text-slate-900 lg:text-3xl">{formatRatio(value)}</p>
+    <>
+      <aside aria-label="Your Risk Capacity so far" className="hidden lg:sticky lg:top-6 lg:block">
+        <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-card">
+          <div>
+            <p className="text-caption text-slate-500">Your risk capacity</p>
+            <div className="mt-1 flex items-center gap-3">
+              <p className="text-hero text-slate-900" aria-live="polite">
+                {formatRatio(value)}
+              </p>
+              {prelim && <PreliminaryChip />}
+            </div>
+            {prelim && (
+              <p className="mt-1 text-xs text-slate-500">
+                Based on defaults for {unanswered} {unanswered === 1 ? 'question' : 'questions'} you haven't answered yet.
+              </p>
+            )}
+          </div>
+          <RiskGauge value={value} />
+          <p className="text-help text-slate-700">{text}</p>
+          <div className="border-t border-slate-200 pt-4">
+            <p className="text-caption text-slate-500">What drives this</p>
+            <dl className="mt-2 space-y-1.5">
+              {drivers.map((d) => (
+                <div key={d.label} className="flex items-baseline justify-between gap-3 text-[13px]">
+                  <dt className="whitespace-nowrap text-slate-600">{d.label}</dt>
+                  <dd className="text-right font-medium text-slate-900">{d.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
         </div>
-        <div className="mt-2">
-          <NeedleBar value={value} max={1.5} />
+      </aside>
+      <aside aria-label="Your Risk Capacity so far" className="fixed inset-x-0 bottom-0 z-20 flex h-14 items-center justify-between gap-3 border-t border-slate-200 bg-white/95 px-4 backdrop-blur lg:hidden">
+        <p className="text-caption text-slate-500">Risk capacity</p>
+        <div className="flex items-center gap-2">
+          {prelim && <PreliminaryChip />}
+          <p className="text-xl font-semibold text-slate-900" aria-live="polite">
+            {formatRatio(value)}
+          </p>
         </div>
-        <p className="mt-2 hidden text-sm text-slate-700 sm:block">{text}</p>
-      </div>
-    </aside>
+      </aside>
+    </>
   )
 }
 
@@ -301,7 +375,7 @@ function KnowledgeCheck() {
         <ol className="space-y-4">
           {KNOWLEDGE.map((k, i) => (
             <li key={k.q} className="space-y-2">
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-[15px] font-medium text-slate-800">
                 {String.fromCharCode(97 + i)}) {k.q}
               </p>
               <RadioCards
@@ -319,22 +393,22 @@ function KnowledgeCheck() {
 
       <Status>
         {passed ? (
-          <span className="text-emerald-800">
+          <span className="text-success">
             ✔ Knowledge check passed.{' '}
             {!retake && (
-              <button type="button" onClick={() => { setRetake(true); setPicks([null, null, null]) }} className="underline">
+              <button type="button" onClick={() => { setRetake(true); setPicks([null, null, null]) }} className="font-medium text-accent-700 underline underline-offset-2">
                 Retake
               </button>
             )}
           </span>
         ) : allAnswered && !allCorrect ? (
-          <span className="text-red-800">Not all answers are correct. Have another look and change your answers.</span>
+          <span className="text-warning">Not all three are right yet. Have another look: you can change any answer.</span>
         ) : (
           <span className="text-slate-600">Answer all three to unlock the borrowing option.</span>
         )}
       </Status>
 
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
+      <div className="rounded-lg border border-amber-200 bg-warning-bg p-4 text-help">
         <div className="flex items-center justify-between gap-4">
           <span id="optin-label" className="font-medium text-slate-900">
             Allow borrowing to invest (above 1.0×)
@@ -346,7 +420,7 @@ function KnowledgeCheck() {
             aria-labelledby="optin-label"
             disabled={!passed}
             onClick={() => setAnswers({ leverageOptIn: !optIn })}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600 ${optIn ? 'bg-accent-700' : 'bg-slate-300'}`}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700 ${optIn ? 'bg-accent-700' : 'bg-slate-300'}`}
           >
             <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${optIn ? 'left-5.5' : 'left-0.5'}`} />
           </button>
@@ -361,7 +435,7 @@ function KnowledgeCheck() {
 
 function Status({ children }: { children: ReactNode }) {
   return (
-    <p className="text-sm" role="status">
+    <p className="text-help" role="status">
       {children}
     </p>
   )
@@ -392,17 +466,17 @@ function Review({ profile: p, edited, onEdit }: { profile: Profile; edited: Part
   ]
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-600">Answers marked “default” use our starting values. You can change any of them.</p>
-      <dl className="divide-y divide-slate-100">
+      <p className="pb-2 text-help text-slate-600">Answers marked “default” use our starting values. You can change any of them.</p>
+      <dl className="divide-y divide-slate-200">
         {rows.map(([step, name, value, key]) => (
           <div key={name} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5">
-            <dt className="text-sm text-slate-600">{name}</dt>
-            <dd className="flex items-baseline gap-3 text-sm font-medium text-slate-900">
+            <dt className="text-help text-slate-600">{name}</dt>
+            <dd className="flex items-baseline gap-3 text-help font-medium text-slate-900">
               <span>
                 {value}
                 {edited[key] === undefined && <span className="ml-1.5 text-xs font-normal text-slate-500">default</span>}
               </span>
-              <button type="button" onClick={() => onEdit(step)} className="text-xs font-medium text-accent-700 underline focus-visible:outline-2 focus-visible:outline-accent-600" aria-label={`Edit ${name}`}>
+              <button type="button" onClick={() => onEdit(step)} className="rounded text-[13px] font-medium text-accent-700 hover:text-accent-800 focus-visible:outline-2 focus-visible:outline-accent-700" aria-label={`Edit ${name}`}>
                 Edit
               </button>
             </dd>

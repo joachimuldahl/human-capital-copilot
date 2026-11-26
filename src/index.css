@@ -1,7 +1,11 @@
+@import "@fontsource-variable/inter";
 @import "tailwindcss";
 
+/* Design tokens (BUILD_SPEC section 15). */
 @theme {
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Primary teal: #0F766E, hover #115E59, tint #F0FDFA */
   --color-accent-50: #f0fdfa;
   --color-accent-100: #ccfbf1;
   --color-accent-200: #99f6e4;
@@ -9,8 +13,122 @@
   --color-accent-600: #0d9488;
   --color-accent-700: #0f766e;
   --color-accent-800: #115e59;
+
+  --color-warning: #b45309;
+  --color-warning-bg: #fffbeb;
+  --color-alert: #b91c1c;
+  --color-alert-bg: #fef2f2;
+  --color-success: #15803d;
+  --color-success-bg: #f0fdf4;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04);
+}
+
+/* Type scale. */
+@utility text-page-title {
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@utility text-step-title {
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@utility text-section {
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+@utility text-question {
+  font-size: 16px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+@utility text-body {
+  font-size: 15px;
+  line-height: 1.55;
+}
+@utility text-help {
+  font-size: 14px;
+  line-height: 1.5;
+}
+@utility text-caption {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+@utility text-hero {
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+html {
+  font-size: 16px;
 }
 
 body {
-  @apply bg-white text-slate-900 antialiased;
+  @apply bg-slate-50 text-slate-900 antialiased;
+  font-size: 15px;
+  line-height: 1.55;
+  /* Tabular figures on every number. */
+  font-feature-settings: "tnum";
+}
+
+/* Slider: thin 4px track, 18px thumb (BUILD_SPEC 15). --fill is set inline as a percentage. */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+}
+.range:focus {
+  outline: none;
+}
+.range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--color-accent-700) var(--fill, 0%), var(--color-slate-200) var(--fill, 0%));
+}
+.range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-slate-200);
+}
+.range::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-accent-700);
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -7px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid var(--color-accent-700);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+.range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid var(--color-accent-700);
+}
+.range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px var(--color-accent-200);
+}
+.range:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 4px var(--color-accent-200);
 }

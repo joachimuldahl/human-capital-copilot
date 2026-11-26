@@ -17,7 +17,7 @@ vi.mock('react', async (importOriginal) => {
   return { ...actual, default: { ...actual, useSyncExternalStore }, useSyncExternalStore }
 })
 
-type Page = 'Landing' | 'Onboarding' | 'Results' | 'Portfolio' | 'Plan'
+type Page = 'Landing' | 'Onboarding' | 'Results' | 'Portfolio' | 'Plan' | 'Method'
 
 /** Server-render a page with the given profile state. */
 async function renderPage(
@@ -82,19 +82,57 @@ describe('Results presets (Phase 3 acceptance)', () => {
 })
 
 describe('Onboarding', () => {
-  it('starts at step 1 with the live needle on the defaults', async () => {
+  it('starts at step 1 with the summary panel on the defaults, marked preliminary', async () => {
     const t = await renderPage('Onboarding')
-    expect(t).toContain('Step 1 of 4: About you')
+    expect(t).toContain('Step 1 of 4')
+    expect(t).toContain('About you')
     expect(t).toContain('How old are you?')
-    expect(t).toContain('Risk Capacity so far')
-    // Defaults: max loss = 30% of €10,000 → G4 = 3,000 / (0.5 · 10,000) = 0.60×, which binds before the 1.0× borrowing rule
+    expect(t).toContain('Your answers stay in your browser. Nothing is sent anywhere.')
+    expect(t).toContain('You can change any answer later.')
+    expect(t).toContain('Your risk capacity')
+    expect(t).toContain('Preliminary')
+    expect(t).toContain("Based on defaults for 16 questions you haven't answered yet.")
+    // Defaults: max loss = 30% of €10,000 → G4 = 3,000 / (0.5 · 10,000) = 0.60×, which binds before the 1.0× borrowing rule.
     expect(t).toContain('0.60×')
-    expect(t).toContain('Limited by the most you said you could lose in a bad year (€3,000).')
+    // Q14 unanswered: the default is never quoted as the user's own words (7.2).
+    expect(t).toContain('Limited by our starting loss limit of €3,000 (30% of what you invest). Set your own in question 14.')
+    expect(t).not.toContain('the most you said you could lose')
+    expect(t).toContain('What drives this')
   })
 
   it('the needle follows saved answers', async () => {
     const t = await renderPage('Onboarding', { active: 'mine', answers: { maxLossMoney: 4000 } })
     expect(t).toContain('0.80×')
+    expect(t).toContain("Based on defaults for 15 questions you haven't answered yet.")
+    expect(t).toContain('Limited by the most you said you could lose in a bad year (€4,000).')
+  })
+
+  it('no Preliminary chip once every question is answered', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: PERSONAS.sofie.profile })
+    expect(t).not.toContain('Preliminary')
+    expect(t).toContain('1.50×')
+  })
+
+  it('every question has a "Why we ask" panel with the 4 parts and the method link', async () => {
+    const t = await renderPage('Onboarding')
+    expect(t.match(/Why we ask/g)).toHaveLength(4)
+    for (const part of ['Why it matters', 'How we use it', "Your answer's effect", 'Research', 'Read the full method']) expect(t).toContain(part)
+    expect(t).toContain('Bodie, Merton & Samuelson (1992); Cocco, Gomes & Maenhout (2005)')
+  })
+})
+
+describe('Method page', () => {
+  it('shows Sofie\'s worked example from the engine, the gates and all references', async () => {
+    const t = await renderPage('Method')
+    expect(t).toContain('w* = 0.8789')
+    expect(t).toContain('H = €219,484')
+    expect(t).toContain('βH = 0.20')
+    expect(t).toContain('= 15.78×')
+    expect(t).toContain('final 1.50×')
+    for (const s of ['Limits and gates', 'What this model does not do', 'Not investment advice', 'assumption, editable']) expect(t).toContain(s)
+    const { REFERENCES } = await import('../content/references')
+    expect(REFERENCES).toHaveLength(13)
+    for (const r of REFERENCES) expect(t).toContain(r.split('.')[0])
   })
 })
 

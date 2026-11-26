@@ -30,7 +30,7 @@ export default function AssumptionsDialog() {
       <button
         type="button"
         onClick={() => ref.current?.showModal()}
-        className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+        className="inline-flex h-10 items-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700"
       >
         Assumptions
       </button>
@@ -38,13 +38,13 @@ export default function AssumptionsDialog() {
         ref={ref}
         aria-labelledby="assumptions-title"
         onClick={(e) => e.target === ref.current && ref.current?.close()}
-        className="m-auto max-h-[85vh] w-[min(42rem,calc(100vw-2rem))] rounded-2xl p-0 shadow-xl backdrop:bg-slate-900/40"
+        className="m-auto max-h-[85vh] w-[min(42rem,calc(100vw-2rem))] rounded-xl p-0 shadow-xl backdrop:bg-slate-900/40"
       >
         <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
           <h2 id="assumptions-title" className="font-semibold">
             Assumptions
           </h2>
-          <button type="button" onClick={() => ref.current?.close()} className="rounded-lg px-2 py-1 text-sm font-medium text-accent-700 focus-visible:outline-2 focus-visible:outline-accent-600" aria-label="Close assumptions">
+          <button type="button" onClick={() => ref.current?.close()} className="rounded-lg px-2 py-1 text-sm font-medium text-accent-700 focus-visible:outline-2 focus-visible:outline-accent-700" aria-label="Close assumptions">
             Close
           </button>
         </div>

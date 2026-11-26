@@ -43,3 +43,9 @@
 - Headless-Chrome QA of 16 page states at 375 px and 1280 px: no console errors, no horizontal overflow. Fixed: Plan table wider than a phone screen, tab rows cut off (now wrap), donut chart warning in hidden tabs.
 - Wording: income-type card title ("Mixed"), asset-class caption grammar.
 - README rewritten for submission (live link, pitch, features, how to run, team, disclaimer); draft docs/Application-Description.md with screenshots in docs/screenshots/.
+
+## 2026-11-26 · Phase 3b · Design system, "Why we ask", Method page
+- Section 15 tokens across the app: self-hosted Inter with tabular figures, 64px header with underline nav, 1120px width, 12px cards, type scale (nothing above 28px except hero numbers), 40px buttons, segmented persona switcher, Method link in the footer.
+- Onboarding rebuilt: step header + 4-segment progress, privacy line, question blocks, 44px inputs with thousands separators, slider value pills, radio cards, "I'm not sure" (Q6/8/14), summary panel with semicircle gauge, Preliminary chip and drivers; 56px bar on mobile.
+- "Why we ask" is a 4-part panel with the section 16 text and a live effect line from the new engine helper answerEffect (one open at a time). The G4 explanation no longer quotes the default loss limit as the user's words.
+- New Method page (/#/method) with Sofie's worked example from the engine, assumption justifications, gates, limitations and references. 181 tests.

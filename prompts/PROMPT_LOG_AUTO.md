@@ -64,3 +64,9 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 ### 2026-11-26 15:36:40 +02:00 · session 87554b23
 > no let's go with your recommendation, continue please
 
+### 2026-11-26 15:37:57 +02:00 · session feec8825
+> Read BUILD_SPEC.md sections 7.2, 15, 16 and 17. Redesign the global layout and the Onboarding page to match section 15 exactly (Inter, tokens, header, two-column layout, question blocks, inputs, sliders, radio cards, semicircle gauge with the Preliminary state). Replace every "Why we ask" with the 4-part panel and the section 16 text, including the live effect line computed with the engine. Add the Method page (section 17) and link it from the footer and every panel. Don't change engine maths. When done, check the result at 375px and 1280px (take screenshots with Playwright if available) and list anything that still deviates from section 15.
+
+### 2026-11-26 16:06:39 +02:00 · session feec8825
+> so what are we still missing?
+

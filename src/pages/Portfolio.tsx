@@ -61,7 +61,7 @@ export default function Portfolio() {
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Portfolio</h1>
+          <h1 className="text-page-title">Portfolio</h1>
           <IllustrativeBadge />
         </div>
         <PersonaSwitcher />
@@ -124,7 +124,7 @@ function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
       <section aria-label="Summary" className="grid gap-4 md:grid-cols-3">
         <Card className="flex flex-col gap-1">
           <h2 className="text-sm font-medium text-slate-600">Net worth in this portfolio</h2>
-          <p className="text-3xl font-semibold tabular-nums">{formatEUR(total)}</p>
+          <p className="text-[28px] font-semibold leading-tight">{formatEUR(total)}</p>
           <p className="text-xs text-slate-500">
             {holdings.length} holdings in {accounts.length} {accounts.length === 1 ? 'account' : 'accounts'}
           </p>
@@ -136,7 +136,7 @@ function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
         </Card>
         <Card className="flex flex-col gap-2">
           <h2 className="text-sm font-medium text-slate-600">Crash test today</h2>
-          <p className="text-3xl font-semibold tabular-nums text-red-700">−{formatEUR(Math.max(-stress.money, 0))}</p>
+          <p className="text-[28px] font-semibold leading-tight text-alert">−{formatEUR(Math.max(-stress.money, 0))}</p>
           <p className="text-sm text-slate-700">{explainStress(stress)}</p>
           <p className={`text-sm font-medium ${ok ? 'text-emerald-800' : 'text-red-800'}`}>
             <span aria-hidden>{ok ? '✔ ' : '✘ '}</span>
@@ -273,10 +273,10 @@ function Analysis({ holdings, accounts, profile, isPersona }: AnalysisProps) {
       </section>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Link to="/plan" className="rounded-xl bg-accent-700 px-5 py-3 text-center font-semibold text-white hover:bg-accent-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600">
+        <Link to="/plan" className="inline-flex h-10 items-center justify-center rounded-lg bg-accent-700 px-4 text-sm font-semibold text-white hover:bg-accent-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700">
           See my plan
         </Link>
-        <Link to="/results" className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600">
+        <Link to="/results" className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700">
           Back to results ({formatRatio(target)})
         </Link>
       </div>
@@ -334,7 +334,7 @@ function QuickEntry() {
     <Card className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-semibold">Quick entry</h2>
-        <button type="button" onClick={resetQuick} className="text-sm font-medium text-accent-700 underline focus-visible:outline-2 focus-visible:outline-accent-600">
+        <button type="button" onClick={resetQuick} className="text-sm font-medium text-accent-700 underline focus-visible:outline-2 focus-visible:outline-accent-700">
           Clear all
         </button>
       </div>
@@ -356,7 +356,7 @@ function QuickEntry() {
 function MismatchBanner({ total, F, canUpdate }: { total: number; F: number; canUpdate: boolean }) {
   const setAnswer = useProfileStore((s) => s.setAnswer)
   return (
-    <div role="status" className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+    <div role="status" className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-warning-bg p-4 text-help sm:flex-row sm:items-center sm:justify-between">
       <p className="text-slate-800">
         This portfolio adds up to <strong>{formatEUR(total)}</strong>, but your profile says you have <strong>{formatEUR(F)}</strong> invested. Your Risk
         Capacity is based on the profile amount.

@@ -3,16 +3,16 @@ import type { ReactNode } from 'react'
 export type BadgeTone = 'neutral' | 'accent' | 'warning' | 'alert' | 'success'
 
 const TONES: Record<BadgeTone, string> = {
-  neutral: 'bg-slate-100 text-slate-700 ring-slate-200',
-  accent: 'bg-accent-50 text-accent-800 ring-accent-200',
-  warning: 'bg-amber-50 text-amber-800 ring-amber-200',
-  alert: 'bg-red-50 text-red-800 ring-red-200',
-  success: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+  neutral: 'bg-slate-100 text-slate-700',
+  accent: 'bg-accent-50 text-accent-800',
+  warning: 'bg-warning-bg text-warning',
+  alert: 'bg-alert-bg text-alert',
+  success: 'bg-success-bg text-success',
 }
 
 export default function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: BadgeTone }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${TONES[tone]}`}>
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${TONES[tone]}`}>
       {children}
     </span>
   )

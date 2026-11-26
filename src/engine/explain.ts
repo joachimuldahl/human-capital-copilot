@@ -2,7 +2,7 @@
  * Plain-English explanation templates filled with engine numbers (BUILD_SPEC 5.5, decision D-14: no AI).
  * Also the display formatters (section 7: 1.50×, €10,000, 14.4%), so wording and numbers stay consistent.
  */
-import { minBufferMonths, policyCap, expensiveDebtRate, floor } from './assumptions'
+import { minBufferMonths, policyCap, expensiveDebtRate, floor, defaultMaxLossShare } from './assumptions'
 import { solveAllocation } from './allocation'
 import type { PlanSleeve, SleeveRow } from './plan'
 import { growthRate } from './humanCapital'
@@ -67,12 +67,15 @@ export function betaLabel(betaH: number): string {
 }
 
 /** Why the final Risk Capacity is what it is (the binding constraint). */
-export function explainBinding(t: TargetResult, p: Profile): string {
+export function explainBinding(t: TargetResult, p: Profile, opts: { lossIsDefault?: boolean } = {}): string {
   switch (t.binding) {
     case 'policy_cap':
       return `Limited by our ${policyCap}× safety cap. Your future savings would justify more, but we never go above ${policyCap}×.`
     case 'G4_loss':
-      return `Limited by the most you said you could lose in a bad year (${formatEUR(p.maxLossMoney)}).`
+      // BUILD_SPEC 7.2: never quote a default as if the user had said it.
+      return opts.lossIsDefault
+        ? `Limited by our starting loss limit of ${formatEUR(p.maxLossMoney)} (${roundHalfAway(defaultMaxLossShare * 100, 0)}% of what you invest). Set your own in question 14.`
+        : `Limited by the most you said you could lose in a bad year (${formatEUR(p.maxLossMoney)}).`
     case 'G1_buffer':
       return `Capped at 1.0× until you have a ${minBufferMonths}-month emergency buffer.`
     case 'G2_debt':
@@ -86,6 +89,15 @@ export function explainBinding(t: TargetResult, p: Profile): string {
         ? `Your income already behaves like stocks (${betaLabel(t.betaH)}), so your portfolio should carry less market risk.`
         : `This is what your risk attitude and future savings add up to (income ${betaLabel(t.betaH)}). No cap was needed.`
   }
+}
+
+/** The three drivers in the onboarding summary panel ("What drives this"). */
+export function driverLines(t: TargetResult): { label: string; value: string }[] {
+  return [
+    { label: 'Risk attitude', value: `${BAND_LABEL[t.band]} · ${formatPct(t.wStar)} in stocks` },
+    { label: 'Future savings', value: `${formatEUR(t.pvfs)} · ${formatPct(t.hcRatio)} of wealth` },
+    { label: 'Income type', value: `${incomeTypeTitle(t.betaH)} · βH ${roundHalfAway(t.betaH, 2).toFixed(2)}` },
+  ]
 }
 
 /** "95.6% of your lifetime investable wealth is still in your future salary (future savings worth €219,484)." */

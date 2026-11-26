@@ -16,7 +16,7 @@ export default function PersonaCards() {
               loadPersona(p.id)
               navigate('/results')
             }}
-            className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-accent-600 hover:shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+            className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left shadow-card transition hover:border-accent-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700"
           >
             <span className="block font-semibold text-slate-900">{p.name}</span>
             <span className="block text-sm text-slate-600">{p.story}</span>

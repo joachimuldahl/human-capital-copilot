@@ -9,12 +9,13 @@ const Onboarding = lazy(() => import('./pages/Onboarding'))
 const Results = lazy(() => import('./pages/Results'))
 const Portfolio = lazy(() => import('./pages/Portfolio'))
 const Plan = lazy(() => import('./pages/Plan'))
+const Method = lazy(() => import('./pages/Method'))
 
 export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
       <Nav />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+      <main className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-8 sm:px-6">
         <Suspense fallback={<p className="text-slate-500">Loading…</p>}>
           <Routes>
             <Route path="/" element={<Landing />} />
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/results" element={<Results />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/plan" element={<Plan />} />
+            <Route path="/method" element={<Method />} />
             <Route path="*" element={<Landing />} />
           </Routes>
         </Suspense>

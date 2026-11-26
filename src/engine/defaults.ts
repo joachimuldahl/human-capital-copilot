@@ -32,3 +32,28 @@ export function resolveProfile(answers: Partial<Profile>): Profile {
     maxLossMoney: answers.maxLossMoney ?? Math.round(defaultMaxLossShare * base.investableAssets),
   }
 }
+
+/** Which profile field each onboarding question (1–16) sets. Question 16 also sets leverageOptIn. */
+export const QUESTION_KEYS: Record<number, keyof Profile> = {
+  1: 'age',
+  2: 'retireAge',
+  3: 'investableAssets',
+  4: 'savingsRate',
+  5: 'incomeNow',
+  6: 'income10y',
+  7: 'sector',
+  8: 'variablePayShare',
+  9: 'incomeSecurity',
+  10: 'bufferMonths',
+  11: 'maxDebtRate',
+  12: 'drawdownReaction',
+  13: 'incomeGamble',
+  14: 'maxLossMoney',
+  15: 'experience',
+  16: 'knowledgeCheckPassed',
+}
+
+/** Number of onboarding questions that still use a default (drives the "Preliminary" chip). */
+export function unansweredCount(answers: Partial<Profile>): number {
+  return Object.values(QUESTION_KEYS).filter((k) => answers[k] === undefined).length
+}

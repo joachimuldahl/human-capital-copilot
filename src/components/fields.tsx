@@ -1,62 +1,48 @@
-/** Accessible form fields for onboarding and what-if controls. */
-import { useId, useState, type ReactNode } from 'react'
+/** Accessible form fields styled to BUILD_SPEC section 15 (used by onboarding, what-if, quick entry and the plan). */
+import { useState, type ReactNode } from 'react'
 
-const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600'
-
-/** "Why we ask" toggle with a one-sentence reason. */
-export function WhyWeAsk({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false)
-  const id = useId()
-  return (
-    <span className="inline-block">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => setOpen((o) => !o)}
-        className={`rounded text-xs font-medium text-accent-700 underline decoration-dotted underline-offset-2 ${focusRing}`}
-      >
-        Why we ask
-      </button>
-      {open && (
-        <span id={id} className="mt-1 block text-xs text-slate-600">
-          {children}
-        </span>
-      )}
-    </span>
-  )
-}
+const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700'
 
 interface QuestionProps {
   number: number
   label: ReactNode
-  why: ReactNode
+  /** One-line hint under the question (14px slate-500). */
+  hint?: ReactNode
+  /** "Why we ask" button + panel. */
+  why?: ReactNode
   htmlFor?: string
   children: ReactNode
 }
 
-/** One numbered question with label, "Why we ask" and its input. */
-export function Question({ number, label, why, htmlFor, children }: QuestionProps) {
+/** One numbered question: number + question (16px/600), optional hint, "Why we ask", then the input. */
+export function Question({ number, label, hint, why, htmlFor, children }: QuestionProps) {
+  const text = (
+    <>
+      <span className="mr-1.5 text-slate-400">{number}.</span>
+      {label}
+    </>
+  )
   return (
-    <div className="space-y-2">
-      <div className="flex flex-col gap-1">
+    <div className="space-y-3 py-6 first:pt-0 last:pb-0">
+      <div className="space-y-1">
         {htmlFor ? (
-          <label htmlFor={htmlFor} className="font-medium text-slate-900">
-            <span className="mr-1.5 text-slate-400">{number}.</span>
-            {label}
+          <label htmlFor={htmlFor} className="block text-question text-slate-900">
+            {text}
           </label>
         ) : (
-          <p className="font-medium text-slate-900" aria-hidden>
-            <span className="mr-1.5 text-slate-400">{number}.</span>
-            {label}
+          <p className="text-question text-slate-900" aria-hidden>
+            {text}
           </p>
         )}
-        <WhyWeAsk>{why}</WhyWeAsk>
+        {hint && <p className="text-help text-slate-500">{hint}</p>}
+        {why}
       </div>
       {children}
     </div>
   )
 }
+
+const MONEY = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
 
 interface NumberFieldProps {
   id: string
@@ -65,43 +51,63 @@ interface NumberFieldProps {
   min?: number
   max?: number
   step?: number
+  /** Shown inside the field on the left; "€" turns on thousands separators. */
   prefix?: string
+  /** Muted unit inside the field on the right ("years", "%"). */
   suffix?: string
+  /** Friendly message for a rule that involves other answers. */
+  message?: string
+  describedBy?: string
 }
 
 /** Number input that keeps a draft while typing and only commits valid numbers within [min, max]. */
-export function NumberField({ id, value, onChange, min = 0, max = Number.MAX_SAFE_INTEGER, step = 1, prefix, suffix }: NumberFieldProps) {
+export function NumberField({ id, value, onChange, min = 0, max = Number.MAX_SAFE_INTEGER, step = 1, prefix, suffix, message, describedBy }: NumberFieldProps) {
+  const money = prefix === '€'
   const [draft, setDraft] = useState<string | null>(null)
-  const invalid = draft !== null && !isValid(draft)
-  function isValid(s: string) {
-    const n = Number(s)
+  const parse = (s: string) => Number(money ? s.replace(/,/g, '') : s)
+  const isValid = (s: string) => {
+    const n = parse(s)
     return s.trim() !== '' && Number.isFinite(n) && n >= min && n <= max
   }
+  const invalid = draft !== null && !isValid(draft)
+  const shown = draft ?? (money ? MONEY.format(value) : String(value))
+  const note = invalid ? `Please enter a number between ${MONEY.format(min)} and ${MONEY.format(max)}.` : message
+  const noteId = `${id}-note`
   return (
     <div>
-      <div className={`flex max-w-xs items-center rounded-lg border bg-white ${invalid ? 'border-red-500' : 'border-slate-300'} focus-within:border-accent-600 focus-within:ring-2 focus-within:ring-accent-200`}>
+      <div
+        className={`flex h-11 w-full max-w-xs items-center rounded-lg border bg-white transition-colors focus-within:border-accent-700 focus-within:ring-3 focus-within:ring-accent-100 ${
+          note ? 'border-warning' : 'border-slate-300'
+        }`}
+      >
         {prefix && <span className="pl-3 text-slate-500">{prefix}</span>}
         <input
           id={id}
-          type="number"
-          inputMode="decimal"
-          min={min}
-          max={max}
-          step={step}
-          value={draft ?? String(value)}
+          type={money ? 'text' : 'number'}
+          inputMode={money ? 'numeric' : 'decimal'}
+          min={money ? undefined : min}
+          max={money ? undefined : max}
+          step={money ? undefined : step}
+          value={shown}
           aria-invalid={invalid}
+          aria-describedby={[note ? noteId : '', describedBy ?? ''].filter(Boolean).join(' ') || undefined}
           onChange={(e) => {
-            setDraft(e.target.value)
-            if (isValid(e.target.value)) onChange(Number(e.target.value))
+            let s = e.target.value
+            if (money) {
+              const digits = s.replace(/[^\d]/g, '')
+              s = digits === '' ? '' : MONEY.format(Number(digits))
+            }
+            setDraft(s)
+            if (isValid(s)) onChange(parse(s))
           }}
           onBlur={() => setDraft(null)}
-          className="w-full rounded-lg bg-transparent px-3 py-2 text-slate-900 outline-none"
+          className={`h-full w-full min-w-0 rounded-lg bg-transparent text-slate-900 outline-none ${prefix ? 'pl-1.5' : 'pl-3'} ${suffix ? 'pr-1.5' : 'pr-3'}`}
         />
-        {suffix && <span className="pr-3 text-slate-500">{suffix}</span>}
+        {suffix && <span className="whitespace-nowrap pr-3 text-help text-slate-400">{suffix}</span>}
       </div>
-      {invalid && (
-        <p className="mt-1 text-xs text-red-700" role="alert">
-          Enter a number between {min.toLocaleString('en-US')} and {max.toLocaleString('en-US')}.
+      {note && (
+        <p id={noteId} className="mt-1.5 text-help text-warning" role="status">
+          {note}
         </p>
       )}
     </div>
@@ -115,15 +121,29 @@ interface SliderFieldProps {
   min: number
   max: number
   step: number
-  /** Text shown next to the slider, e.g. "15%". */
+  /** Text in the pill above the thumb, e.g. "15%". */
   display: string
   hint?: ReactNode
+  /** Labels under the track's ends. */
+  minLabel?: string
+  maxLabel?: string
 }
 
-export function SliderField({ id, value, onChange, min, max, step, display, hint }: SliderFieldProps) {
+/** Thin slider with the value in a pill above the thumb and min/max labels underneath. */
+export function SliderField({ id, value, onChange, min, max, step, display, hint, minLabel, maxLabel }: SliderFieldProps) {
+  const frac = max > min ? Math.min(Math.max((value - min) / (max - min), 0), 1) : 0
+  // Thumb centre = frac · (width − 18px) + 9px.
+  const left = `calc(${frac * 100}% + ${9 - frac * 18}px)`
   return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-3">
+    <div className="max-w-md space-y-1.5">
+      <div className="relative pt-8">
+        <output
+          htmlFor={id}
+          className="pointer-events-none absolute top-0 whitespace-nowrap rounded-full bg-accent-50 px-2 py-0.5 text-[13px] font-semibold text-accent-800 ring-1 ring-accent-200"
+          style={{ left, transform: `translateX(-${frac * 100}%)` }}
+        >
+          {display}
+        </output>
         <input
           id={id}
           type="range"
@@ -133,13 +153,17 @@ export function SliderField({ id, value, onChange, min, max, step, display, hint
           value={value}
           aria-valuetext={display}
           onChange={(e) => onChange(Number(e.target.value))}
-          className={`h-2 w-full max-w-md cursor-pointer accent-accent-700 ${focusRing}`}
+          className="range block"
+          style={{ ['--fill' as string]: `${frac * 100}%` }}
         />
-        <output htmlFor={id} className="min-w-20 text-right font-semibold tabular-nums text-slate-900">
-          {display}
-        </output>
       </div>
-      {hint && <p className="text-xs text-slate-600">{hint}</p>}
+      {(minLabel || maxLabel) && (
+        <div className="flex justify-between text-xs text-slate-400" aria-hidden>
+          <span>{minLabel}</span>
+          <span>{maxLabel}</span>
+        </div>
+      )}
+      {hint && <p className="text-help text-slate-600">{hint}</p>}
     </div>
   )
 }
@@ -156,12 +180,13 @@ interface RadioCardsProps<T extends string | number> {
   options: RadioOption<T>[]
   value: T
   onChange: (v: T) => void
+  /** 2 (default): two columns from tablet width up. 1: always one column. */
   columns?: 1 | 2 | 3
 }
 
-/** Radio group drawn as cards (native radios for keyboard and screen reader support). */
+/** Radio group drawn as cards (native radios kept for keyboard and screen readers, visually hidden). */
 export function RadioCards<T extends string | number>({ name, legend, options, value, onChange, columns = 2 }: RadioCardsProps<T>) {
-  const cols = columns === 1 ? '' : columns === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'
+  const cols = columns === 1 ? '' : columns === 2 ? 'sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'
   return (
     <fieldset>
       <legend className="sr-only">{legend}</legend>
@@ -171,26 +196,30 @@ export function RadioCards<T extends string | number>({ name, legend, options, v
           return (
             <label
               key={String(o.value)}
-              className={`flex cursor-pointer gap-3 rounded-xl border p-3 text-sm transition focus-within:ring-2 focus-within:ring-accent-600 ${
-                checked ? 'border-accent-600 bg-accent-50' : 'border-slate-200 bg-white hover:border-slate-300'
+              className={`relative cursor-pointer rounded-lg border px-3.5 py-3 transition-colors focus-within:ring-2 focus-within:ring-accent-700 focus-within:ring-offset-1 ${
+                checked ? 'border-accent-700 bg-accent-50' : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
-              <input
-                type="radio"
-                name={name}
-                value={String(o.value)}
-                checked={checked}
-                onChange={() => onChange(o.value)}
-                className="mt-0.5 accent-accent-700"
-              />
-              <span>
-                <span className="block font-medium text-slate-900">{o.label}</span>
-                {o.description && <span className="block text-slate-600">{o.description}</span>}
-              </span>
+              <input type="radio" name={name} value={String(o.value)} checked={checked} onChange={() => onChange(o.value)} className="sr-only" />
+              <span className={`block text-[15px] text-slate-900 ${o.description || o.label.length < 40 ? 'font-semibold' : 'font-medium'}`}>{o.label}</span>
+              {o.description && <span className="mt-0.5 block text-[13px] leading-snug text-slate-500">{o.description}</span>}
             </label>
           )
         })}
       </div>
     </fieldset>
+  )
+}
+
+/** Small "I'm not sure" toggle for questions 6, 8 and 14: uses the default and says so. */
+export function NotSure({ active, onClick, defaultText }: { active: boolean; onClick: () => void; defaultText: string }) {
+  return active ? (
+    <p className="text-help text-slate-600" role="status">
+      Using our default: {defaultText}. Change the answer to set your own.
+    </p>
+  ) : (
+    <button type="button" onClick={onClick} className={`rounded text-[13px] font-medium text-slate-600 underline decoration-slate-300 underline-offset-2 hover:text-slate-900 ${focusRing}`}>
+      I'm not sure
+    </button>
   )
 }

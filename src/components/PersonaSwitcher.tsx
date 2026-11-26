@@ -13,7 +13,7 @@ export default function PersonaSwitcher() {
   const showMyAnswers = useProfileStore((s) => s.showMyAnswers)
   const loadPersona = usePersonaLoader()
   return (
-    <div role="group" aria-label="Show results for" className="flex flex-wrap gap-1.5">
+    <div role="group" aria-label="Show results for" className="inline-flex max-w-full overflow-x-auto rounded-lg border border-slate-200 bg-white p-0.5 shadow-card">
       {OPTIONS.map((o) => {
         const on = o.id === active
         return (
@@ -22,8 +22,8 @@ export default function PersonaSwitcher() {
             type="button"
             aria-pressed={on}
             onClick={() => (o.id === 'mine' ? showMyAnswers() : loadPersona(o.id))}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium ring-1 ring-inset focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600 ${
-              on ? 'bg-accent-700 text-white ring-accent-700' : 'bg-white text-slate-700 ring-slate-300 hover:bg-slate-50'
+            className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent-700 ${
+              on ? 'bg-accent-50 text-accent-800 shadow-[inset_0_0_0_1px_var(--color-accent-200)]' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             {o.label}

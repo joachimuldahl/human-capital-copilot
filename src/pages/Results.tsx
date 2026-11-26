@@ -28,14 +28,16 @@ import {
 } from '../engine'
 import { PERSONAS } from '../data/personas'
 import { useActiveProfile } from '../store/hooks'
+import { useProfileStore } from '../store/profileStore'
 
 type WhatIf = Partial<Pick<Profile, 'savingsRate' | 'maxLossMoney'>>
 
 const btn =
-  'rounded-xl px-5 py-3 text-center font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600'
+  'rounded-xl px-5 py-3 text-center font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700'
 
 export default function Results() {
   const { active, profile: saved, hasAnswers } = useActiveProfile()
+  const lossIsDefault = useProfileStore((s) => active === 'mine' && s.answers.maxLossMoney === undefined)
   const [whatIf, setWhatIf] = useState<WhatIf>({})
   const [whatIfFor, setWhatIfFor] = useState(active)
   // What-if values belong to one profile: drop them when the user switches persona.
@@ -88,14 +90,14 @@ export default function Results() {
           {isPersona && <IllustrativeBadge />}
           {whatIfOn && <Badge tone="warning">What-if</Badge>}
         </div>
-        <p className="text-6xl font-semibold tabular-nums tracking-tight text-slate-900 sm:text-7xl">{formatRatio(t.finalEEE)}</p>
+        <p className="text-hero text-slate-900">{formatRatio(t.finalEEE)}</p>
         <p className="text-lg text-slate-700">{riskSentence(t.finalEEE)}</p>
         <div className="max-w-md">
           <NeedleBar value={t.finalEEE} max={1.5} />
         </div>
         <div className="space-y-2">
           <Badge tone="accent">{BINDING_LABEL[t.binding]}</Badge>
-          <Explain>{explainBinding(t, profile)}</Explain>
+          <Explain>{explainBinding(t, profile, { lossIsDefault })}</Explain>
         </div>
       </section>
 
@@ -176,7 +178,7 @@ export default function Results() {
             type="button"
             onClick={() => setWhatIf({})}
             disabled={!whatIfOn}
-            className="rounded-lg px-3 py-1.5 text-sm font-medium text-accent-700 underline disabled:text-slate-400 disabled:no-underline focus-visible:outline-2 focus-visible:outline-accent-600"
+            className="rounded-lg px-3 py-1.5 text-sm font-medium text-accent-700 underline disabled:text-slate-400 disabled:no-underline focus-visible:outline-2 focus-visible:outline-accent-700"
           >
             Reset
           </button>
@@ -222,7 +224,7 @@ export default function Results() {
 function Header() {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Results</h1>
+      <h1 className="text-page-title">Results</h1>
       <PersonaSwitcher />
     </div>
   )

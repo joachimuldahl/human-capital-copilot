@@ -11,6 +11,7 @@ export const ROUTES: AppRoute[] = [
   { path: '/results', label: 'Results', inNav: true },
   { path: '/portfolio', label: 'Portfolio', inNav: true },
   { path: '/plan', label: 'Plan', inNav: true },
+  { path: '/method', label: 'Method', inNav: false },
 ]
 
 export const NAV_ROUTES = ROUTES.filter((r) => r.inNav)

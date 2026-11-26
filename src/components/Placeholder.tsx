@@ -10,7 +10,7 @@ interface PlaceholderProps {
 export default function Placeholder({ title, phase, children }: PlaceholderProps) {
   return (
     <section className="space-y-3">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
+      <h1 className="text-page-title">{title}</h1>
       {children}
       <p className="text-slate-600">Placeholder. This page is built in Phase {phase}.</p>
     </section>

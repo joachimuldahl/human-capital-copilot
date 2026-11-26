@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { NAV_ROUTES, ROUTES } from './routes'
 
 describe('routes', () => {
-  it('has the five pages from BUILD_SPEC section 4', () => {
-    expect(ROUTES.map((r) => r.path)).toEqual(['/', '/onboarding', '/results', '/portfolio', '/plan'])
+  it('has the pages from BUILD_SPEC sections 4 and 17', () => {
+    expect(ROUTES.map((r) => r.path)).toEqual(['/', '/onboarding', '/results', '/portfolio', '/plan', '/method'])
   })
 
   it('shows Onboarding · Results · Portfolio · Plan in the nav', () => {

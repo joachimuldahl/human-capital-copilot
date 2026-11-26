@@ -56,7 +56,7 @@ export default function Plan() {
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{isPersona ? `${PERSONAS[active].name}'s plan` : 'Your plan'}</h1>
+          <h1 className="text-page-title">{isPersona ? `${PERSONAS[active].name}'s plan` : 'Your plan'}</h1>
           <AssumptionsDialog />
         </div>
         <PersonaSwitcher />
@@ -108,7 +108,7 @@ function PlanBody({ profile: p, holdings, sat, setSat }: PlanBodyProps) {
           {gates.map((g) => {
             const c = gateCard(g, p)
             return (
-              <div key={g} className="rounded-2xl border border-amber-300 bg-amber-50 p-5">
+              <div key={g} className="rounded-xl border border-amber-200 bg-warning-bg p-4 lg:p-6">
                 <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">Do this first</p>
                 <h2 className="mt-1 text-lg font-semibold text-slate-900">{c.title}</h2>
                 <p className="mt-1 text-sm text-slate-700">{c.text}</p>
@@ -330,7 +330,7 @@ function StressTile({ title, s, limit }: { title: string; s: StressResult | null
   return (
     <Card className="space-y-1">
       <h3 className="text-sm font-medium text-slate-600">{title}</h3>
-      <p className="text-3xl font-semibold tabular-nums text-red-700">−{formatEUR(Math.max(-s.money, 0))}</p>
+      <p className="text-[28px] font-semibold leading-tight text-alert">−{formatEUR(Math.max(-s.money, 0))}</p>
       <p className="text-sm text-slate-600">{formatPct(Math.max(-s.pct, 0))} of the portfolio</p>
       <p className={`text-sm font-medium ${ok ? 'text-emerald-800' : 'text-red-800'}`}>
         {ok ? '✔ Within' : '✘ Above'} your limit of {formatEUR(limit)}

@@ -2,7 +2,7 @@
 
 *26 Nov 2026 · Audited by Claude Code for Joachim · Nothing in `src/` was changed.*
 
-**Location.** The package was already inside the repo, at `Team/Damien/Headroom_package/` (not `team/damien/`), so nothing was moved. The folder structure is kept as Damien delivered it. The 10 factsheet PDFs are git-ignored (third-party documents); their URLs stay in `etfs.csv`.
+**Location.** The package was already inside the repo (delivered as Team/Damien/Headroom_package, renamed to lowercase `team/damien/Headroom_package/` for the submission), so nothing was moved. The folder structure is kept as Damien delivered it. The 10 factsheet PDFs are git-ignored (third-party documents); their URLs stay in `etfs.csv`.
 
 **Method.** Word files were read with macOS `textutil`. PDF text was extracted with macOS PDFKit. Where a factsheet shows splits only as a chart, or its text layer is jumbled, the page was rendered to an image and read visually. CSV totals and links were checked with a script. Figures were checked against the PDFs in the package; prices and issuer web pages were **not** checked online.
 

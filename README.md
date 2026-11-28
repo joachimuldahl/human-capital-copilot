@@ -42,13 +42,17 @@ Stack: Vite + React + TypeScript (strict), Tailwind CSS, React Router (HashRoute
 - `src/pages/`, `src/components/`: the UI
 - `BUILD_SPEC.md`: the full specification (source of truth)
 - `docs/Application-Description.md`: the description document
-- `prompts/`: the prompts used to build the app: `design-phase-log.md` (design phase with Claude), `PROMPT_LOG_AUTO.md` (build phase, verbatim), `PROMPT_LOG.md` (what the AI did per task) and `team/damien.md` (Damien's prompts, a summary, not verbatim)
-- `Team/Damien/`: Damien's delivery (demo data CSVs, notes, description draft); the issuer factsheet PDFs are kept out of the repo
+- `prompts/`: the prompts used to build the app: `design-phase-log.md` (design phase with Claude), `PROMPT_LOG_AUTO.md` (build phase, verbatim), `PROMPT_LOG.md` (what the AI did per task) and `team/damien.md` (Damien's original prompts, mostly in French, with an English summary)
+- `team/damien/`: Damien's delivery (demo data CSVs, notes, description draft); the issuer factsheet PDFs are kept out of the repo
 - `docs/audit-damien.md`: the audit of that delivery
 
 ## Team
 
-Jens, Damien and Joachim (CBS team assignment).
+The product idea was developed and registered by the whole team.
+
+- **Joachim Uldahl**: product specification and risk model; the full build with Claude Code, deployment and prompt logging; integration of the team's inputs; description, README and submission package.
+- **Damien**: pitch deck and script; co-presented the pitch; verified ETF demo data from 10 factsheets, three example users, and the first draft of the description.
+- **Jens**: co-presented the initial pitch.
 
 ## Research basis
 

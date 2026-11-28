@@ -80,7 +80,7 @@
 - Method page: FX table with date and source, growth-cap note. 87 new tests, including currency invariance for every persona × currency.
 
 ## 2026-11-26 · Team delivery · Damien's package audited
-- Added Damien's package (`Team/Damien/Headroom_package/`); the 10 third-party factsheet PDFs are git-ignored (URLs stay in `etfs.csv`).
+- Added Damien's package (`team/damien/Headroom_package/`); the 10 third-party factsheet PDFs are git-ignored (URLs stay in `etfs.csv`).
 - docs/audit-damien.md: inventory, factsheet check of all 10 ETFs (no errors found), example users, description citations, conflicts with the build, recommendations.
 - prompts/team/damien.md: Damien's prompts as a summary (not verbatim, originals requested), linked from the description (section 7) and PROMPT_LOG.md.
 
@@ -96,3 +96,7 @@
 ## 2026-11-28 · Hand-in preparation
 - README brought up to date: currency choice, verified product data, `npm run data:etf`, prompt files, Damien's folder and audit, disclaimer.
 - design-phase-log.md: D-009 now notes that D-007 is omitted.
+
+## 2026-11-28 · Final submission
+- Team contributions section; human checks filled; Damien's original prompts (mostly French) with his English summary; description exported to PDF (12 pages); Lighthouse accessibility 100 re-measured on all pages.
+- Damien's folder renamed to lowercase `team/damien/` (paths updated everywhere); his original-prompts .docx added. Description dated 14 Dec 2026.

@@ -1,9 +1,9 @@
 /** The generated verified data (src/data/verifiedEtfs.ts) must match Damien's factsheet CSVs exactly. */
 import { describe, expect, it } from 'vitest'
-import etfsCsv from '../../Team/Damien/Headroom_package/2_Demo_data/etfs.csv?raw'
-import topCsv from '../../Team/Damien/Headroom_package/2_Demo_data/etf_top_holdings.csv?raw'
-import regionsCsv from '../../Team/Damien/Headroom_package/2_Demo_data/etf_regions.csv?raw'
-import sectorsCsv from '../../Team/Damien/Headroom_package/2_Demo_data/etf_sectors.csv?raw'
+import etfsCsv from '../../team/damien/Headroom_package/2_Demo_data/etfs.csv?raw'
+import topCsv from '../../team/damien/Headroom_package/2_Demo_data/etf_top_holdings.csv?raw'
+import regionsCsv from '../../team/damien/Headroom_package/2_Demo_data/etf_regions.csv?raw'
+import sectorsCsv from '../../team/damien/Headroom_package/2_Demo_data/etf_sectors.csv?raw'
 import { VERIFIED_ETFS } from './verifiedEtfs'
 import type { VerifiedProductId } from './verifiedTypes'
 

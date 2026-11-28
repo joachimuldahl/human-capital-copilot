@@ -376,7 +376,7 @@ Region and sector splits each sum to 100. Bonds, gold, bitcoin and cash are show
 
 ### 6.5 Verified product data (v1.5)
 
-Five products use Damien's factsheet extracts (`Team/Damien/Headroom_package/2_Demo_data`, audited in `docs/audit-damien.md`), matched on ISIN and generated into `src/data/verifiedEtfs.ts` by `npm run data:etf`:
+Five products use Damien's factsheet extracts (`team/damien/Headroom_package/2_Demo_data`, audited in `docs/audit-damien.md`), matched on ISIN and generated into `src/data/verifiedEtfs.ts` by `npm run data:etf`:
 
 | Our id | Factsheet ETF | Ticker | ISIN | TER | Factsheet date |
 |---|---|---|---|---|---|

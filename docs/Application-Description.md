@@ -1,8 +1,6 @@
 # Human Capital Copilot: application description
 
-*Draft · 26 Nov 2026 · Team: Jens, Damien, Joachim · Live demo: https://building-your-wealth.vercel.app/*
-
-> **Draft notes for the team (delete before submission):** check the wording of each section, export this file to PDF, replace `prompts/team/damien.md` with Damien's original prompts when they arrive, and add any prompts from Jens to `prompts/`. Screenshots are in `docs/screenshots/`.
+*14 Dec 2026 · Team: Jens, Damien, Joachim · Live demo: https://building-your-wealth.vercel.app/*
 
 ## 1. Problem
 
@@ -64,7 +62,28 @@ Students and young professionals (roughly 20–35) who have started investing or
 | Plan | Safety gates, satellites, target vs current, example products, crash test, borrowing panel, how to get there, Assumptions | `screenshots/desktop-plan-sofie.png`, `screenshots/mobile-plan-gates.png` |
 | Method | For the examiner: the five calculation steps with Sofie's worked example (computed live by the engine), every assumption with a one-line justification, the limits and gates, limitations and full references | `screenshots/desktop-method.png` |
 
-The app works on phones (375 px) and desktops, saves answers in the browser (no login), and needs no backend. The design follows a written design system (BUILD_SPEC section 15, v1.3): a dark interface (near-black background, layered surfaces and 1px borders instead of shadows), one lime accent for the user's own number and actions, sky blue for future savings and values below 1.0×, amber for warnings, Space Grotesk for headings and big numbers and Inter for text, with tabular figures throughout. The team approved three mockups (landing, onboarding question, results) on a design canvas; the app rebuilds them with its own components. Colour pairs pass WCAG AA, and Lighthouse rates accessibility 100 on every page (Landing, Onboarding, Results, Portfolio, Plan and Method, with a demo person loaded, on phone and desktop).
+The app works on phones (375 px) and desktops, saves answers in the browser (no login), and needs no backend. The design follows a written design system (BUILD_SPEC section 15, v1.3): a dark interface (near-black background, layered surfaces and 1px borders instead of shadows), one lime accent for the user's own number and actions, sky blue for future savings and values below 1.0×, amber for warnings, Space Grotesk for headings and big numbers and Inter for text, with tabular figures throughout. The team approved three mockups (landing, onboarding question, results) on a design canvas; the app rebuilds them with its own components. Colour pairs pass WCAG AA, and Lighthouse (12.6.1, re-measured on the live site on 28 Nov 2026) rates accessibility 100 on every page (Landing, Onboarding, Results, Portfolio, Plan and Method, with a demo person loaded on the last three, on phone and desktop).
+
+### Screenshots
+
+![Landing page](screenshots/desktop-landing.png)
+*Landing page: the promise, the demo people and how it works.*
+
+![Onboarding question](screenshots/desktop-onboarding-7.png)
+*Onboarding: one question per screen with a "Why we ask" card, and the live Risk Capacity panel on the right.*
+
+![Results for Sofie](screenshots/desktop-results-sofie.png)
+*Results (demo person Sofie): Risk Capacity 1.50×, the limit that applies, the four drivers, the glide path and the lifetime balance sheet.*
+
+![Portfolio look-through for Sofie](screenshots/desktop-portfolio-sofie-conc.png)
+*Portfolio: risk fit, crash test and ETF look-through. Apple is 14.4% of Sofie's portfolio once her ETFs are counted.*
+
+![Plan for Sofie](screenshots/desktop-plan-sofie.png)
+*Plan: target vs current allocation, example products with their factsheet fees, crash test and the borrowing panel.*
+
+<p class="pair"><img src="screenshots/mobile-results-sofie.png" alt="Results on a phone"> <img src="screenshots/mobile-plan-gates.png" alt="Plan with safety gates on a phone"></p>
+
+*On a phone (375 px): Results, and the Plan with both safety gates (emergency buffer and expensive debt) active.*
 
 ## 6. Method
 
@@ -97,10 +116,16 @@ The app was built with **Claude Code** (Anthropic's coding agent) working from a
 - **A design system as a spec.** The first build worked but looked unpolished. Instead of asking for "nicer", the team wrote exact design rules (tokens, sizes, components) and research-backed help text into the spec (v1.2), and the AI rebuilt the layout against them, then checked the result at phone and desktop width.
 - **Mockups as the target.** For the final redesign (spec v1.3) the team approved three static mockups and asked the AI to rebuild them with the app's own components, not copy them. Onboarding changed from four questions per page to one question per screen, while the engine and all 190+ tests stayed unchanged. The AI compared its screenshots side by side with the mockups and fixed the differences it found (for example buttons that wrapped in a narrow card).
 - **Automated browser checks.** The AI drove a headless Chrome to load every page at phone and desktop width, check for console errors and sideways scrolling, and review screenshots. This found a table that was too wide on phones and a chart warning, which were fixed. Once, the check itself was wrong: it seemed to show onboarding losing saved answers, but the cause was the test script reusing an old page in memory. The AI traced this before changing any app code.
-- **Team prompts.** Damien's prompts (pitch, demo data, his description draft) are in `prompts/team/damien.md`. That file is a summary written by Damien with AI assistance, NOT verbatim; his original prompts were requested on 26 Nov 2026 and will replace it when received.
+- **Team prompts.** Damien's prompts (pitch, demo data, his description draft) are in `prompts/team/damien.md`: his original prompts, verbatim and mostly in French, followed by an English summary.
 - **Humans decided.** Joachim approved every plan, every dependency outside the agreed stack, every commit and every push, and checked the result in the browser.
 
-**Team contributions.** Damien collected the ETF demo data from ten official issuer factsheets (October 2026) and wrote the first draft of this description, including the evidence on robo-advisors and the research that disagrees. Claude Code audited his data against the factsheet PDFs (`docs/audit-damien.md`, no errors found), imported the five products we use, and checked the citations; only those listed in the Method page references or verified to exist were kept.
+## Team contributions
+
+The product idea was developed and registered by the whole team.
+
+- **Joachim Uldahl**: product specification and the human-capital risk model (methodology, formulas, assumptions and validation of the reference values); the full build of the application with Claude Code, including design iterations, tests, deployment on Vercel and the automated prompt logging; integration of the team's inputs; this document, the README and the submission package.
+- **Damien**: pitch deck and presentation script; co-presented the initial pitch; verified ETF demo data extracted from 10 official factsheets (now used for five of the app's products), three example users, and the first draft of the application description, including the evidence on robo-advisors and the research that challenges the approach.
+- **Jens**: co-presented the initial pitch.
 
 ## 8. Limitations
 

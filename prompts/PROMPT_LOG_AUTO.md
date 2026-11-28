@@ -185,3 +185,19 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 ### 2026-11-26 22:31:51 +02:00 · session 8de8bac7
 > 2
 
+### 2026-11-28 16:54:20 +02:00 · session 8de8bac7
+>
+>
+> <pasted_content id="e8ab">
+> Final submission pass:
+> 1. Make the folder name consistent: git mv Team/Damien to team/damien (lowercase, via a temporary name if needed), then check that every link in docs/, prompts/ and README points to an existing path with the exact same capitals.
+> 2. Add team/damien/Original_prompts_DV.docx to the repo (the factsheet PDFs stay ignored).
+> 3. Fill every empty "Human check" line in prompts/PROMPT_LOG.md (C-020 and anything newer) the same way as before, from my prompts in PROMPT_LOG_AUTO.md.
+> 4. If any screen changed since the screenshots were taken, retake those screenshots. Set the date under the description's title to today and regenerate docs/Application-Description.pdf.
+> 5. Run tests, lint and build. Commit everything (including PROMPT_LOG_AUTO.md) as "chore: final submission", push, wait for the Vercel deploy, then run npm run zip.
+> 6. Unzip the ZIP into a temporary folder, check that every link in README and docs resolves inside it, and list its top-level contents (no node_modules, dist, .git or .env).
+> Show me the results. Make no other changes.
+> </pasted_content id="e8ab">
+>
+>  - correction, set the date for the submission to be on the 14th of december, 2026.
+

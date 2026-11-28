@@ -151,7 +151,7 @@ Required for submission ("All prompts used during the development process"). Eve
 
 **What the AI did:** Handed over the S0 prompt verbatim, with what to expect (pre-flight confirmations, permission prompts, the stop before GitHub). Suggested setting up the Anthropic Console (step 7) while S0 runs.
 **Human intervention:** Joachim added the school email to GitHub and opened Claude Code in the new project folder.
-**Lesson:** From here on, prompts run in Claude Code and are logged there as C-entries. Entries D-007 to D-009 exist only in project doc 07 and must be merged into the repo's log before submission (S11).
+**Lesson:** From here on, prompts run in Claude Code and are logged there as C-entries. Entries D-007 (omitted from this file) to D-009 exist only in project doc 07 and must be merged into the repo's log before submission (S11).
 
 ### D-010 · 2026-11-02 · Joachim · Claude (Cowork) · Recap after a break
 **Prompt:**

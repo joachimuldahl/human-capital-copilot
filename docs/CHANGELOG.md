@@ -92,3 +92,7 @@
 ## 2026-11-26 · Design-phase prompt log
 - Added prompts/design-phase-log.md (D-entries from the Claude/Cowork design phase). Remarks about teammates' workload are shortened with a visible marker; two personal account-setup entries (D-005, D-007) are omitted, as noted in the file.
 - Auto prompt log: two lines listing account-related search terms shortened with a visible marker.
+
+## 2026-11-28 · Hand-in preparation
+- README brought up to date: currency choice, verified product data, `npm run data:etf`, prompt files, Damien's folder and audit, disclaimer.
+- design-phase-log.md: D-009 now notes that D-007 is omitted.

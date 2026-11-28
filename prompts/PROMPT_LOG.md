@@ -162,3 +162,11 @@ Team prompts: Damien → `prompts/team/damien.md` (summary written by Damien wit
 **Result:** tests ✔ · lint ✔ · build ✔ (no code changed)
 **Human check:** (to fill in by Joachim)
 **Lesson:** A verbatim auto log also captures the instructions about what to hide, so it needs the same check as any other file before it is published.
+
+### C-020 · 2026-11-28 · Joachim · Claude Code · Hand-in readiness check
+**Prompt:** asked with the "nolog:" prefix, so it is not in PROMPT_LOG_AUTO.md: whether anything was missing before hand-in, then "go ahead with the ones you can do".
+**What the AI did:** Checked the build against the submission checklist (BUILD_SPEC 14): live site serves the current build; listed open items (README, D-009 reference, empty human checks, Jens's contribution, Damien's original prompts, PDF export, phone walkthrough, final commit and ZIP). Updated the README (currency, verified product data, data:etf, prompt files, Damien's folder and audit, disclaimer) and marked D-007 as omitted in D-009's lesson.
+**Files changed:** README.md, prompts/design-phase-log.md, prompts/PROMPT_LOG.md, docs/CHANGELOG.md
+**Result:** tests ✔ · lint ✔ · build ✔ (no code changed)
+**Human check:** (to fill in by Joachim)
+**Lesson:** A README written at Phase 6 goes stale quietly; check it against what changed since, not just the checklist.

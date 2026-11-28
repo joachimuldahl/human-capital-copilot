@@ -41,7 +41,7 @@ describe('profileStore', () => {
     useProfileStore.getState().setAnswer('age', 33)
     useProfileStore.getState().loadPersona('mads')
     const saved = JSON.parse(localStorage.getItem('hcc-profile')!)
-    expect(saved.state).toEqual({ active: 'mads', currency: 'EUR', answers: { age: 33 } })
+    expect(saved.state).toEqual({ active: 'mads', currency: 'EUR', answers: { age: 33 }, knowledgePicks: [null, null, null] })
 
     // Simulate a page reload: the in-memory state is reset, but storage still holds the saved answers.
     const raw = localStorage.getItem('hcc-profile')!
@@ -125,5 +125,20 @@ describe('currency (BUILD_SPEC 18.1)', () => {
     await useProfileStore.persist.rehydrate()
     expect(useProfileStore.getState().currency).toBe('EUR')
     expect(useProfileStore.getState().answers.investableAssets).toBe(20000)
+  })
+})
+
+describe('Q16 answers (v3)', () => {
+  it('a saved v2 "passed" without the three answers is dropped, so the check is asked again', async () => {
+    localStorage.setItem('hcc-profile', JSON.stringify({ state: { active: 'mine', currency: 'EUR', answers: { age: 30, knowledgeCheckPassed: true, leverageOptIn: true } }, version: 2 }))
+    await useProfileStore.persist.rehydrate()
+    const s = useProfileStore.getState()
+    expect(s.answers).toEqual({ age: 30 })
+    expect(s.knowledgePicks).toEqual([null, null, null])
+  })
+  it('reset clears the borrowing choice and the saved answers', () => {
+    useProfileStore.setState({ borrowChoice: 'yes', knowledgePicks: [1, 1, 2] })
+    useProfileStore.getState().reset()
+    expect(useProfileStore.getState()).toMatchObject({ borrowChoice: undefined, knowledgePicks: [null, null, null] })
   })
 })

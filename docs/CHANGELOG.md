@@ -100,3 +100,21 @@
 ## 2026-11-28 · Final submission
 - Team contributions section; human checks filled; Damien's original prompts (mostly French) with his English summary; description exported to PDF (12 pages); Lighthouse accessibility 100 re-measured on all pages.
 - Damien's folder renamed to lowercase `team/damien/` (paths updated everywhere); his original-prompts .docx added. Description dated 14 Dec 2026.
+
+## 2026-11-28 · Results wording for extreme inputs
+- Limits card: only the safety cap and a binding loss limit show multiples; the loss limit otherwise shows the user's amount ("€6,500 · not limiting"); buffer, debt and borrowing rules read "ok", "applies" or "not limiting".
+- The model value before limits reads "far above the 1.5× cap" above 10×; the hero says "about the same risk" at exactly 1.00×.
+- What-if loss slider runs from 0 to the largest loss at 1.5× (0.75 × invested, at least 500) and shows what a 50% crash would cost at the current target. Onboarding Q3 asks "Did you mean …?" for amounts below 100.
+
+## 2026-11-28 · Spec v1.6 · Q16 rework
+- Bug fix: "Knowledge check passed" only shows when all three answers are given and correct; the answers are saved and shown again.
+- Q16 is skipped when borrowing can't change the result (target without the borrowing rule ≤ 1.0×); the counter becomes "of 15".
+- Q16 starts with "Would you consider borrowing to invest?" (Yes / No / Not sure); only Yes leads to the knowledge check and opt-in. Results explain a declined loan; Why-we-ask cites ESMA suitability.
+
+## 2026-11-28 · Sticky header
+- The main header and the onboarding top bar stay at the top while scrolling; anchor jumps and the onboarding side panel start below them.
+
+## 2026-11-28 · Spec v1.7 · Plan page redesign (section 19)
+- Engine: `projection.ts` (expected real return and volatility of a mix, 5,000 seeded log-normal paths with p10/p50/p90, odds of ending below money paid in, one-year good/typical/bad range where "bad" is the existing crash test) and `planView.ts` (summary sentence, adaptive callout, odds, captions, numbered checklist, own-vs-plan bars). New projection assumptions; section 9 values unchanged.
+- Plan page: summary hero → growth fan chart (5/10/20/30 years or until retirement, vs current mix or all in cash) → good/bad-year tab (amber; red only above the user's limit) → what you'd own → products → how to get there → Advanced (borrowing, satellites).
+- Method page: new "Projections" section with formulas, returns table and limitations. Description: honest-range paragraph, Plan and Method screenshots retaken, PDF regenerated (13 pages).

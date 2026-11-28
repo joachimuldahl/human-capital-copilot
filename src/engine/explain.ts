@@ -2,7 +2,7 @@
  * Plain-English explanation templates filled with engine numbers (BUILD_SPEC 5.5, decision D-14: no AI).
  * Also the display formatters (section 7: 1.50×, €10,000, 14.4%), so wording and numbers stay consistent.
  */
-import { minBufferMonths, policyCap, expensiveDebtRate, floor, defaultMaxLossShare, growthCap, minAssetsForLeverage, minYearsForLeverage } from './assumptions'
+import { minBufferMonths, policyCap, expensiveDebtRate, floor, defaultMaxLossShare, growthCap, minAssetsForLeverage, minYearsForLeverage, equityShock } from './assumptions'
 import { solveAllocation } from './allocation'
 import type { PlanSleeve, SleeveRow } from './plan'
 import { growthRate, rawGrowthRate } from './humanCapital'
@@ -103,7 +103,10 @@ export function betaLabel(betaH: number): string {
 }
 
 /** Why the final Risk Capacity is what it is (the binding constraint). */
-export function explainBinding(t: TargetResult, p: Profile, opts: { lossIsDefault?: boolean; currency?: Currency } = {}): string {
+/** How the borrowing rule (G3) is explained: the user declined borrowing in Q16, or Q16 was skipped as irrelevant. */
+export type BorrowingNote = 'declined' | 'not-needed'
+
+export function explainBinding(t: TargetResult, p: Profile, opts: { lossIsDefault?: boolean; currency?: Currency; borrowing?: BorrowingNote } = {}): string {
   const money = (x: number) => formatMoney(x, opts.currency)
   switch (t.binding) {
     case 'policy_cap':
@@ -118,6 +121,8 @@ export function explainBinding(t: TargetResult, p: Profile, opts: { lossIsDefaul
     case 'G2_debt':
       return `Capped at 1.0× while you have debt above ${roundHalfAway(expensiveDebtRate * 100, 1)}% interest. Paying it off first is a guaranteed return.`
     case 'G3_leverage':
+      if (opts.borrowing === 'declined') return 'Capped at 1.0× because you chose not to borrow.'
+      if (opts.borrowing === 'not-needed') return 'Kept at 1.0× or below by your other limits, so borrowing could not change your result.'
       return `Capped at 1.0× because borrowing to invest needs the knowledge check, opt-in, ${minYearsForLeverage}+ years to retirement and at least ${money(minAssetsForLeverage * (p.fx ?? 1))}.`
     case 'floor':
       return `Kept at our minimum of ${formatRatio(floor)}, so your savings still grow with the market.`
@@ -152,9 +157,9 @@ const GATE_QUESTION: Partial<Record<Binding, keyof Profile>> = {
 export function panelExplanation(
   t: TargetResult,
   p: Profile,
-  status: { answers: Partial<Profile>; estimate: boolean; unanswered: number; currency?: Currency },
+  status: { answers: Partial<Profile>; estimate: boolean; unanswered: number; currency?: Currency; borrowing?: BorrowingNote },
 ): string[] {
-  const binding = explainBinding(t, p, { currency: status.currency })
+  const binding = explainBinding(t, p, { currency: status.currency, borrowing: status.borrowing })
   if (!status.estimate && status.unanswered === 0) return [binding]
   const note = status.estimate ? ESTIMATE_NOTE : defaultsNote(status.unanswered)
   const q = GATE_QUESTION[t.binding]
@@ -219,7 +224,58 @@ export function formatTimes(x: number): string {
 
 /** Results hero sentence. */
 export function riskSentence(finalEEE: number): string {
+  if (roundHalfAway(finalEEE, 2) === 1) return 'You can carry about the same risk as the global stock market.'
   return `You can carry about ${formatTimes(finalEEE)} times the risk of the global stock market.`
+}
+
+/** Above this the unconstrained model value is not shown as a number (it can reach thousands with tiny F). */
+export const RAW_DISPLAY_MAX = 10
+
+/** The model result before limits: "7.80×", or "far above the 1.5× cap" when it is above 10×. */
+export function rawEEELabel(raw: number): string {
+  return raw > RAW_DISPLAY_MAX ? `far above the ${policyCap}× cap` : formatRatio(raw)
+}
+
+/** Hero sentence about the model before limits. */
+export function modelBeforeLimitsSentence(raw: number): string {
+  return raw > RAW_DISPLAY_MAX ? `Before limits, the model's result is far above the ${policyCap}× cap.` : `The model before limits says ${formatRatio(raw)}.`
+}
+
+/** "A 50% crash would cost you about €4,000 at your current target." */
+export function explainCrashCost(cost: number, currency: Currency = 'EUR'): string {
+  return `A ${roundHalfAway(equityShock * 100, 0)}% crash would cost you about ${formatMoney(cost, currency)} at your current target.`
+}
+
+export interface LimitRow {
+  id: CapId
+  label: string
+  /** "1.50×", "1.20× · applies", "€6,500 · not limiting", "ok", "applies" or "not limiting". */
+  value: string
+  binding: boolean
+}
+
+const GATE_IDS = ['G1_buffer', 'G2_debt', 'G3_leverage'] as const
+
+/**
+ * Rows for the Results "Limits checked" card. Only the safety cap and a binding loss limit are shown as multiples;
+ * the loss limit otherwise shows the user's amount ("€6,500 · not limiting"), and the buffer, debt and borrowing
+ * rules read "ok" (rule met), "applies" (caps the result) or "not limiting" (in force, but the result is lower anyway).
+ */
+export function limitRows(t: TargetResult, p: Profile, currency: Currency = 'EUR'): LimitRow[] {
+  const cap = (id: CapId) => t.caps.find((c) => c.id === id)
+  const rows: LimitRow[] = []
+  const policy = cap('policy_cap')
+  if (policy) rows.push({ id: 'policy_cap', label: CAP_LABEL.policy_cap, value: `${formatRatio(policy.value)}${t.binding === 'policy_cap' ? ' · applies' : ''}`, binding: t.binding === 'policy_cap' })
+  for (const id of GATE_IDS) {
+    const binding = t.binding === id
+    rows.push({ id, label: CAP_LABEL[id], value: binding ? 'applies' : cap(id) ? 'not limiting' : 'ok', binding })
+  }
+  const loss = cap('G4_loss')
+  if (loss) {
+    const binding = t.binding === 'G4_loss'
+    rows.push({ id: 'G4_loss', label: CAP_LABEL.G4_loss, value: binding ? `${formatRatio(loss.value)} · applies` : `${formatMoney(p.maxLossMoney, currency)} · not limiting`, binding })
+  }
+  return rows
 }
 
 export const BAND_LABEL: Record<Band, string> = {
@@ -365,7 +421,7 @@ export const SLEEVE_LABEL: Record<PlanSleeve, string> = {
 }
 
 /** Sleeve names inside sentences (keeps "Bitcoin" capitalised). */
-const SLEEVE_IN_SENTENCE: Record<PlanSleeve, string> = {
+export const SLEEVE_IN_SENTENCE: Record<PlanSleeve, string> = {
   equity: 'stocks (global equity)',
   bonds: 'bonds',
   gold: 'gold',

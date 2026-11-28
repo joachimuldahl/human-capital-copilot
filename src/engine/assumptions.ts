@@ -130,3 +130,32 @@ export const portfolioMismatchTolerance = 0.05
 
 /** "How to get there" lists only changes larger than this share of F. Assumption, editable. */
 export const planChangeThreshold = 0.02
+
+// ---- Projections (BUILD_SPEC section 19, v1.7) ----
+
+/** Inflation used to turn nominal expected returns into real ones (today's money). Assumption, editable. */
+export const inflation = 0.02
+/** Expected nominal bond return. Assumption, editable. */
+export const bondsNominal = 0.04
+/** Expected nominal gold return. Assumption, editable. */
+export const goldNominal = 0.045
+/** Expected nominal bitcoin return: no credible basis, deliberately set equal to equity. Assumption, editable. */
+export const btcNominal = 0.075
+/** Expected nominal return per asset used in projections. equity − inflation = rfReal + erp = 5.5%. Assumption, editable. */
+export const EXPECTED_NOMINAL = {
+  equity: equityNominal,
+  bonds: bondsNominal,
+  gold: goldNominal,
+  btc: btcNominal,
+  cash: cashNominal,
+} as const
+/** Nominal interest on a broker loan: cashNominal + borrowSpread (4.5%). Assumption, editable. */
+export const loanRate = cashNominal + borrowSpread
+/** Number of simulated paths per projection. Assumption, editable. */
+export const projectionPaths = 5000
+/** Seed for the projection random numbers, so every run gives the same result. Assumption, editable. */
+export const projectionSeed = 42
+/** Horizon choices on the Plan page (years); "Until retirement" is added from the profile. Assumption, editable. */
+export const PROJECTION_HORIZONS = [5, 10, 20, 30] as const
+/** Default horizon on the Plan page (years). Assumption, editable. */
+export const defaultHorizon = 10

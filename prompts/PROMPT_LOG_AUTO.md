@@ -201,3 +201,43 @@ Prompts typed before the hook existed, recovered from this project's Claude Code
 >
 >  - correction, set the date for the submission to be on the 14th of december, 2026.
 
+### 2026-11-28 17:30:04 +02:00 · session 8de8bac7
+>
+>
+> <pasted_content id="e8ab">
+> Results page fixes (screenshot: invested €7, max loss €6,500 shows "1857.14×"):
+> 1. Limits card: show non-binding caps in plain words, not as multiples. Safety cap stays "1.50×". Max loss shows "€6,500 · not limiting" when it doesn't bind, and its multiple only when it binds (e.g. "1.20× · applies"). Same pattern for buffer, debt and borrowing rules: "ok" or "applies".
+> 2. Never show a multiple above 10×: replace "The model before limits says 13543.92×" and "Model result before limits" with "far above the 1.5× cap" when rawEEE > 10, and with 2 decimals otherwise.
+> 3. Onboarding Q3 (invested today): if the amount is above 0 but below 100 in the chosen currency, show a gentle check: "Did you mean {amount × 1,000}?" with buttons to keep the amount or correct it.
+> 4. What-if "Max loss in a bad year" slider: the range runs from 0 to the largest loss possible at 1.5× (0.75 × invested amount, minimum 500 in the chosen currency). Show the current crash loss under it: "A 50% crash would cost you about €X at your current target."
+> 5. Hero sentence: at exactly 1.00× say "about the same risk as the global stock market"; otherwise keep "about X times".
+> Add tests for 1, 2 and 4. Retake any screenshot that shows these elements.
+> </pasted_content id="e8ab">
+>
+
+### 2026-11-28 17:47:11 +02:00 · session 8de8bac7
+>
+>
+> <pasted_content id="e8ab">
+> Rework onboarding Q16 (knowledge check + borrowing opt-in) and fix a bug. Update BUILD_SPEC sections 7.2 and 16 to match.
+>
+> 1. Bug: "Knowledge check passed" shows while none of the three answers is selected. "Passed" must only show when all three are answered AND correct, and the radio buttons must show the saved answers.
+> 2. Skip logic: compute the user's target ignoring the borrowing rule (G3). If that is 1.0× or lower, skip Q16 entirely (borrowing can't change the result) and make the question counter dynamic ("Question 15 of 15").
+> 3. Otherwise, start Q16 with one gating question: "Would you consider borrowing to invest, e.g. a loan from your broker, if your situation allows it?" with options Yes / No / Not sure, tell me more.
+>    - No: leverageOptIn = false; skip the knowledge check. Results explain: "Capped at 1.0× because you chose not to borrow."
+>    - Not sure: show 2–3 plain sentences on what borrowing to invest means (gains and losses magnified, margin calls), then the same choice again.
+>    - Yes: show the 3-question knowledge check, then the opt-in switch (enabled only when passed), as now.
+> 4. Why-we-ask text for Q16: add "We only test your knowledge if you want to borrow, just as suitability rules assess complex products when a client wants them (ESMA guidelines on MiFID II)."
+> 5. The engine and the section 9 values must not change. Add UI tests for the skip logic, the three answers and the bug. Retake any screenshot of this screen.
+> </pasted_content id="e8ab">
+>
+
+### 2026-11-28 17:53:42 +02:00 · session 8de8bac7
+> also, please make header sticky for scrolls,
+
+### 2026-11-28 18:02:46 +02:00 · session 8de8bac7
+> mv ~/Downloads/plan-page-redesign.md ~/Hcc/human-capital-copilot/docs/plan-page-redesign.md
+
+### 2026-11-28 18:03:21 +02:00 · session 62aeb5a5
+> Read docs/plan-page-redesign.md and implement it: the new engine functions with their tests, then the Plan page redesign, the Method page section and the description paragraph. Add the file to BUILD_SPEC as section 19 (v1.5). Engine section 9 values must not change. Check it at 375px and 1280px, retake the Plan screenshots, then commit and push. Show me Mads's and Jonas's 10-year numbers (plan vs current mix) when done.
+

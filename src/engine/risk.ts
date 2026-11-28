@@ -1,4 +1,4 @@
-import { STRESS_SHOCK, borrowSpread, cashNominal, maintMargin, sigmaEq } from './assumptions'
+import { STRESS_SHOCK, borrowSpread, cashNominal, equityShock, maintMargin, policyCap, sigmaEq } from './assumptions'
 import { portfolioVol } from './allocation'
 import type { Exposures, StressResult } from './types'
 
@@ -24,6 +24,22 @@ export function stressLoss(x: Exposures, F: number): StressResult {
     (x.cash ?? 0) * STRESS_SHOCK.cash +
     (x.loan ?? 0) * STRESS_SHOCK.loan
   return { pct, money: pct * F }
+}
+
+/**
+ * What a stock-market crash (equityShock, −50%) costs at a target exposure: equityShock · eee · F.
+ * At the G4 loss cap this equals maxLossMoney exactly, because G4 = maxLossMoney / (equityShock · F).
+ */
+export function crashCost(eee: number, F: number): number {
+  return equityShock * eee * Math.max(F, 0)
+}
+
+/**
+ * Range for the "max loss in a bad year" what-if slider: 0 to the largest loss possible at the policy cap,
+ * equityShock · policyCap · F (= 0.75 · F), but at least `minMax` (500 in the chosen currency).
+ */
+export function maxLossRange(F: number, minMax = 500): { min: number; max: number } {
+  return { min: 0, max: Math.max(equityShock * policyCap * Math.max(F, 0), minMax) }
 }
 
 /**

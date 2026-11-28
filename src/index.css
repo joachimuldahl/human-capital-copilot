@@ -102,6 +102,13 @@
 html {
   font-size: 16px;
   color-scheme: dark;
+  /* The header is sticky: anchor jumps and scrollIntoView stop below it. */
+  scroll-padding-top: 80px;
+}
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-top: 88px;
+  }
 }
 
 body {
@@ -191,4 +198,10 @@ details > summary::-webkit-details-marker {
 }
 .range:focus-visible::-moz-range-thumb {
   box-shadow: 0 0 0 2px var(--color-lime);
+}
+
+/* Hatched lime: borrowed money in the Plan page's "What you'd own" bars (section 19). */
+.bg-hatch-lime {
+  background-color: #141f08;
+  background-image: repeating-linear-gradient(135deg, #c8f560 0 3px, transparent 3px 7px);
 }

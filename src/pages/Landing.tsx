@@ -46,7 +46,7 @@ export default function Landing() {
         <ExampleCard />
       </section>
 
-      <section ref={personasRef} aria-labelledby="demo" className="flex scroll-mt-6 flex-col gap-5 py-6">
+      <section ref={personasRef} aria-labelledby="demo" className="flex flex-col gap-5 py-6">
         <div className="flex flex-wrap items-center gap-3">
           <h2 id="demo" className="font-display text-2xl font-semibold tracking-[-0.01em]">
             Try a demo person

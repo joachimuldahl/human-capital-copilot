@@ -87,9 +87,9 @@ export const WHY_WE_ASK: Record<QuestionNo, WhyWeAskContent> = {
     research: 'ESMA guidelines on MiFID II suitability (knowledge and experience)',
   },
   16: {
-    why: 'Borrowing to invest amplifies both gains and losses, and leveraged ETFs lose value in volatile markets. You should understand that before using either.',
+    why: 'Borrowing to invest amplifies both gains and losses, and leveraged ETFs lose value in volatile markets. You should understand that before using either. We only test your knowledge if you want to borrow, just as suitability rules assess complex products when a client wants them (ESMA guidelines on MiFID II).',
     how: 'Gate G3: leverage above 1.0× needs all 3 answers right, an explicit opt-in, 15+ years to retirement and {minAssets}+ invested. Even then we cap at 1.5× (Ayres & Nalebuff use 2.0×).',
-    research: 'Ayres & Nalebuff (2010); Cheng & Madhavan (2009)',
+    research: 'Ayres & Nalebuff (2010); Cheng & Madhavan (2009); ESMA guidelines on MiFID II suitability',
   },
 }
 

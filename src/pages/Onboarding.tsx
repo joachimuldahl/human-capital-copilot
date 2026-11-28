@@ -31,7 +31,7 @@ import {
   type Sector,
 } from '../engine'
 import { changeCurrency, useCurrency, useMyTarget } from '../store/hooks'
-import { useProfileStore } from '../store/profileStore'
+import { useProfileStore, type BorrowChoice, type KnowledgePicks } from '../store/profileStore'
 
 const QUESTION_STEPS = 4
 
@@ -136,12 +136,17 @@ const countOfStep = (step: number) => STEP_OF.filter((x) => x === step).length
 export default function Onboarding() {
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
-  const q = clampQ(Number(params.get('q')))
+  const rawQ = clampQ(Number(params.get('q')))
   const answers = useProfileStore((s) => s.answers)
+  const borrowChoice = useProfileStore((s) => s.borrowChoice)
   const setAnswer = useProfileStore((s) => s.setAnswer)
   const clearAnswer = useProfileStore((s) => s.clearAnswer)
   const showMyAnswers = useProfileStore((s) => s.showMyAnswers)
-  const { profile: p, target, pending } = useMyTarget()
+  const { profile: p, target, pending, borrowingMatters, estimate } = useMyTarget()
+  // Q16 is skipped when borrowing can't change the result (target without the borrowing rule ≤ 1.0×).
+  const skip16 = !borrowingMatters
+  const total = skip16 ? TOTAL - 1 : TOTAL
+  const q = skip16 && rawQ === 16 ? REVIEW : rawQ
   const { currency, fx, money } = useCurrency()
   const symbol = currencySymbol(currency)
   const range = (k: keyof typeof SLIDER_EUR) => ({ sliderMin: niceAmount(SLIDER_EUR[k][0] * fx), sliderMax: niceAmount(SLIDER_EUR[k][1] * fx) })
@@ -152,7 +157,9 @@ export default function Onboarding() {
 
   const set = <K extends keyof Profile>(k: K) => (v: Profile[K]) => setAnswer(k, v)
   const go = (n: number) => {
-    setParams({ q: String(clampQ(n)) })
+    let to = clampQ(n)
+    if (skip16 && to === 16) to = n > q ? REVIEW : 15
+    setParams({ q: String(to) })
     window.scrollTo({ top: 0 })
   }
   const finish = () => {
@@ -162,9 +169,11 @@ export default function Onboarding() {
   }
   const next = () => (q === REVIEW ? finish() : go(q + 1))
   const retireMsg = p.age >= p.retireAge ? 'Retirement age needs to be after your current age.' : undefined
-  const unanswered = unansweredCount(answers)
+  // A skipped Q16 doesn't count as unanswered.
+  const unanswered = unansweredCount(answers) - (skip16 && answers.knowledgeCheckPassed === undefined ? 1 : 0)
+  const borrowing = borrowChoice === 'no' ? 'declined' : skip16 ? 'not-needed' : undefined
   // G3/G4 are skipped while pending, so the explanation never names a limit the user hasn't answered (BUILD_SPEC 18.3).
-  const explanation = panelExplanation(target, p, { answers, estimate: pending.length > 0, unanswered, currency })
+  const explanation = panelExplanation(target, p, { answers, estimate, unanswered, currency, borrowing })
   const growthNotice = explainGrowthCap(p)
   const incomeBase = p.incomeNow > 0 ? p.incomeNow : niceAmount(40000 * fx)
   const isReview = q === REVIEW
@@ -184,7 +193,12 @@ export default function Onboarding() {
       label: 'How much do you have invested or saved for investing today?',
       hint: 'Funds, shares, crypto and cash you set aside for investing.',
       htmlFor: 'q-f',
-      body: <MoneyField id="q-f" value={p.investableAssets} onChange={set('investableAssets')} symbol={symbol} format={money} max={100_000_000 * fx} {...range('invested')} sliderLabel="Invested today, slider" />,
+      body: (
+        <div className="flex flex-col gap-4">
+          <MoneyField id="q-f" value={p.investableAssets} onChange={set('investableAssets')} symbol={symbol} format={money} max={100_000_000 * fx} {...range('invested')} sliderLabel="Invested today, slider" />
+          <SmallAmountCheck value={p.investableAssets} money={money} onCorrect={set('investableAssets')} />
+        </div>
+      ),
     },
     4: {
       step: 0,
@@ -275,12 +289,17 @@ export default function Onboarding() {
       ),
     },
     15: { step: 3, label: 'How much investing experience do you have?', hint: 'Have you held investments through a fall?', body: <RadioCards name="experience" legend="Investing experience" options={EXPERIENCE} value={p.experience} onChange={set('experience')} columns={3} /> },
-    16: { step: 3, label: 'Knowledge check and borrowing opt-in', hint: 'Three short questions. Borrowing can only be switched on when all three are right.', body: <KnowledgeCheck /> },
+    16: {
+      step: 3,
+      label: 'Would you consider borrowing to invest, e.g. a loan from your broker, if your situation allows it?',
+      hint: 'Your other answers support more than 1.0×, which is only possible with borrowing. If you say yes, three short questions check that you know the risks first.',
+      body: <BorrowingStep />,
+    },
   }
 
   return (
     <>
-      <OnboardingBar step={step} q={q} isReview={isReview} onSave={() => navigate('/')} />
+      <OnboardingBar step={step} q={q} isReview={isReview} skip16={skip16} onSave={() => navigate('/')} />
       <div className={`${pageWrap} flex flex-wrap items-start gap-12 pt-10 pb-28 sm:pt-14 lg:pb-20`}>
         <section
           aria-label={isReview ? 'Your answers' : STEP_TITLES[step]}
@@ -296,11 +315,11 @@ export default function Onboarding() {
         >
           <div key={q} className="q-enter">
             {isReview ? (
-              <Review profile={p} edited={answers} onEdit={go} currency={currency} money={money} />
+              <Review profile={p} edited={answers} onEdit={go} currency={currency} money={money} skip16={skip16} borrowChoice={borrowChoice} />
             ) : q === 0 ? (
               <Question
                 number={0}
-                total={TOTAL}
+                total={total}
                 eyebrow="BEFORE WE START"
                 label="Which currency should we use?"
                 hint="Every amount will be shown in this currency. You can change it later."
@@ -309,7 +328,7 @@ export default function Onboarding() {
                 <RadioCards name="currency" legend="Currency" options={CURRENCY_OPTIONS} value={currency} onChange={changeCurrency} columns={3} />
               </Question>
             ) : (
-              <Question number={q} total={TOTAL} label={screens[q as Q].label} hint={screens[q as Q].hint} htmlFor={screens[q as Q].htmlFor} why={<WhyWeAsk content={WHY_WE_ASK[q as Q]} minAssets={minAssets} effect={answerEffect(q as Q, p, { pending, currency })} />}>
+              <Question number={q} total={total} label={screens[q as Q].label} hint={screens[q as Q].hint} htmlFor={screens[q as Q].htmlFor} why={<WhyWeAsk content={WHY_WE_ASK[q as Q]} minAssets={minAssets} effect={answerEffect(q as Q, p, { pending, currency })} />}>
                 {screens[q as Q].body}
               </Question>
             )}
@@ -324,14 +343,14 @@ export default function Onboarding() {
                 or press <kbd className="rounded-md border border-line px-[7px] py-0.5 font-sans text-ink-2">Enter ↵</kbd>
               </span>
               <button type="button" onClick={next} className={btnPrimary}>
-                {isReview ? 'See my result' : q === TOTAL ? 'Review answers' : 'Continue'}
+                {isReview ? 'See my result' : q === total ? 'Review answers' : 'Continue'}
               </button>
             </div>
           </nav>
           <p className="text-[13px] text-muted">You can change any answer later.</p>
         </section>
 
-        <SummaryPanel value={target.finalEEE} estimate={pending.length > 0} unanswered={unanswered} lines={explanation} drivers={panelDrivers(driverLines(target, p.investableAssets, currency), target, answers, pending.length > 0)} />
+        <SummaryPanel value={target.finalEEE} estimate={estimate} unanswered={unanswered} lines={explanation} drivers={panelDrivers(driverLines(target, p.investableAssets, currency), target, answers, estimate)} />
       </div>
     </>
   )
@@ -364,11 +383,12 @@ function clampQ(n: number) {
 const roundPct = (x: number) => Math.round(x * 1000) / 10
 
 /** Top bar: logo, "Step 2 of 4 · Your income" with 4 progress segments, "Save and finish later". */
-function OnboardingBar({ step, q, isReview, onSave }: { step: number; q: number; isReview: boolean; onSave: () => void }) {
-  const fill = (i: number) => (i < step ? 1 : i > step ? 0 : isReview ? 1 : (q - firstOfStep(i) + 1) / countOfStep(i))
+function OnboardingBar({ step, q, isReview, skip16, onSave }: { step: number; q: number; isReview: boolean; skip16: boolean; onSave: () => void }) {
+  const count = (i: number) => countOfStep(i) - (skip16 && i === STEP_OF[16] ? 1 : 0)
+  const fill = (i: number) => (i < step ? 1 : i > step ? 0 : isReview ? 1 : (q - firstOfStep(i) + 1) / count(i))
   const done = isReview ? QUESTION_STEPS : step
   return (
-    <header className="border-b border-line">
+    <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur-md">
       <div className={`${pageWrap} flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-3.5 sm:py-[18px]`}>
         <Logo compact />
         <div className="order-3 flex w-full items-center gap-3.5 sm:order-none sm:w-auto sm:max-w-[520px] sm:flex-[1_1_320px]">
@@ -410,7 +430,7 @@ function SummaryPanel(props: PanelProps) {
   const sheet = useRef<HTMLDialogElement>(null)
   return (
     <>
-      <aside aria-label="Your Risk Capacity so far" className={`${card} hidden max-w-[400px] flex-[1_1_340px] rounded-[24px] p-7 lg:sticky lg:top-6 lg:block`}>
+      <aside aria-label="Your Risk Capacity so far" className={`${card} hidden max-w-[400px] flex-[1_1_340px] rounded-[24px] p-7 lg:sticky lg:top-[104px] lg:block`}>
         <PanelBody {...props} />
       </aside>
       <button
@@ -487,85 +507,154 @@ function PanelBody({ value, estimate, unanswered, lines, drivers }: PanelProps) 
   )
 }
 
-/** Question 16: three multiple-choice questions (all correct = passed), then the leverage opt-in switch. */
-function KnowledgeCheck() {
-  const passed = useProfileStore((s) => s.answers.knowledgeCheckPassed ?? false)
-  const optIn = useProfileStore((s) => s.answers.leverageOptIn ?? false)
-  const setAnswers = useProfileStore((s) => s.setAnswers)
-  const [picks, setPicks] = useState<(number | null)[]>([null, null, null])
-  const [retake, setRetake] = useState(false)
-  const allAnswered = picks.every((x) => x !== null)
-  const allCorrect = KNOWLEDGE.every((k, i) => picks[i] === k.correct)
-  const showQuiz = !passed || retake
+/** Below this amount (in the chosen currency) question 3 asks whether the user meant thousands. */
+const SMALL_AMOUNT = 100
 
-  function pick(i: number, v: number) {
-    const next = picks.map((x, j) => (j === i ? v : x))
-    setPicks(next)
+/**
+ * Gentle check on question 3: an amount above 0 but below 100 is often thousands typed without the zeros.
+ * Offers the ×1,000 amount; "keep" hides the check for that amount.
+ */
+function SmallAmountCheck({ value, money, onCorrect }: { value: number; money: (x: number) => string; onCorrect: (v: number) => void }) {
+  const [kept, setKept] = useState<number | null>(null)
+  if (!(value > 0 && value < SMALL_AMOUNT) || kept === value) return null
+  const thousands = value * 1000
+  return (
+    <div role="status" className="flex max-w-xl flex-col gap-3 rounded-2xl border border-warn-line bg-warn-bg p-4 text-help">
+      <p className="text-ink">
+        Did you mean <strong>{money(thousands)}</strong>?
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className={btnSmall} onClick={() => onCorrect(thousands)}>
+          Yes, use {money(thousands)}
+        </button>
+        <button type="button" className={btnSmall} onClick={() => setKept(value)}>
+          No, keep {money(value)}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+const BORROW_OPTIONS: RadioOption<BorrowChoice>[] = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+  { value: 'unsure', label: 'Not sure, tell me more' },
+]
+
+/** True only when all three knowledge-check answers are given and correct. */
+const knowledgePassed = (picks: KnowledgePicks) => KNOWLEDGE.every((k, i) => picks[i] === k.correct)
+
+/**
+ * Question 16. A gating question first ("Would you consider borrowing?"):
+ * No → borrowing off, no knowledge check. Not sure → a short explanation, then the same choice.
+ * Yes → three multiple-choice questions (saved, so the radios show them again), then the opt-in switch,
+ * which can only be switched on when all three answers are right.
+ */
+function BorrowingStep() {
+  const choice = useProfileStore((s) => s.borrowChoice)
+  const picks = useProfileStore((s) => s.knowledgePicks)
+  const optIn = useProfileStore((s) => s.answers.leverageOptIn ?? false)
+  const allAnswered = picks.every((x) => x !== null)
+  const passed = allAnswered && knowledgePassed(picks)
+
+  /** Saves the answers and keeps knowledgeCheckPassed in line with them (undefined until all three are answered). */
+  function saveCheck(next: KnowledgePicks) {
+    const st = useProfileStore.getState()
+    st.setKnowledgePicks(next)
     if (next.every((x) => x !== null)) {
-      const ok = KNOWLEDGE.every((k, j) => next[j] === k.correct)
-      setAnswers(ok ? { knowledgeCheckPassed: true } : { knowledgeCheckPassed: false, leverageOptIn: false })
-      if (ok) setRetake(false)
+      const ok = knowledgePassed(next)
+      st.setAnswers(ok ? { knowledgeCheckPassed: true } : { knowledgeCheckPassed: false, leverageOptIn: false })
+    } else {
+      st.clearAnswer('knowledgeCheckPassed')
+      st.setAnswers({ leverageOptIn: false })
     }
+  }
+
+  function choose(v: BorrowChoice) {
+    const st = useProfileStore.getState()
+    st.setBorrowChoice(v)
+    if (v === 'unsure') {
+      // Not an answer yet: Q16 stays open until Yes or No.
+      st.clearAnswer('knowledgeCheckPassed')
+      st.clearAnswer('leverageOptIn')
+      return
+    }
+    if (v === 'no') st.setAnswers({ knowledgeCheckPassed: false, leverageOptIn: false })
+    else saveCheck(st.knowledgePicks)
   }
 
   return (
     <div className="flex flex-col gap-6">
-      {showQuiz ? (
-        <ol className="flex flex-col gap-6">
-          {KNOWLEDGE.map((k, i) => (
-            <li key={k.q} className="flex flex-col gap-3">
-              <p className="text-base font-medium text-ink">
-                {String.fromCharCode(97 + i)}) {k.q}
-              </p>
-              <RadioCards name={`kc-${i}`} legend={k.q} options={k.options.map((label, v) => ({ value: v, label }))} value={picks[i] ?? -1} onChange={(v) => pick(i, v)} columns={1} />
-            </li>
-          ))}
-        </ol>
-      ) : null}
+      <RadioCards name="borrow" legend="Would you consider borrowing to invest?" options={BORROW_OPTIONS} value={choice ?? ('' as BorrowChoice)} onChange={choose} columns={3} />
 
-      <p className="text-help" role="status">
-        {passed ? (
-          <span className="inline-flex flex-wrap items-center gap-2 text-lime">
-            <Check size={16} strokeWidth={2.5} aria-hidden /> Knowledge check passed.
-            {!retake && (
+      {choice === 'unsure' && (
+        <div role="status" className="space-y-2 rounded-2xl border border-line bg-surface p-5 text-help text-panel">
+          <p>Borrowing to invest means taking a loan, usually from your broker, and investing it on top of your own money.</p>
+          <p>Gains and losses are both magnified: at 1.5×, a 20% fall in stocks costs you about 30% of your own money.</p>
+          <p>If prices fall far enough, the broker can demand more money or sell your investments for you (a margin call), often at the worst moment.</p>
+          <p className="font-medium text-ink">Knowing this, would you consider it? Choose Yes or No above.</p>
+        </div>
+      )}
+
+      {choice === 'no' && (
+        <p className="text-help text-ink-2" role="status">
+          Borrowing stays off, so your Risk Capacity is capped at 1.0×. You can change this at any time.
+        </p>
+      )}
+
+      {choice === 'yes' && (
+        <>
+          <ol className="flex flex-col gap-6">
+            {KNOWLEDGE.map((k, i) => (
+              <li key={k.q} className="flex flex-col gap-3">
+                <p className="text-base font-medium text-ink">
+                  {String.fromCharCode(97 + i)}) {k.q}
+                </p>
+                <RadioCards
+                  name={`kc-${i}`}
+                  legend={k.q}
+                  options={k.options.map((label, v) => ({ value: v, label }))}
+                  value={picks[i] ?? -1}
+                  onChange={(v) => saveCheck(picks.map((x, j) => (j === i ? v : x)) as KnowledgePicks)}
+                  columns={1}
+                />
+              </li>
+            ))}
+          </ol>
+
+          <p className="text-help" role="status">
+            {passed ? (
+              <span className="inline-flex items-center gap-2 text-lime">
+                <Check size={16} strokeWidth={2.5} aria-hidden /> Knowledge check passed.
+              </span>
+            ) : allAnswered ? (
+              <span className="text-warn">Not all three are right yet. Have another look: you can change any answer.</span>
+            ) : (
+              <span className="text-ink-2">Answer all three to unlock the borrowing option.</span>
+            )}
+          </p>
+
+          <div className="rounded-2xl border border-warn-line bg-warn-bg p-5 text-help">
+            <div className="flex items-center justify-between gap-4">
+              <span id="optin-label" className="font-semibold text-ink">
+                Allow borrowing to invest (above 1.0×)
+              </span>
               <button
                 type="button"
-                onClick={() => {
-                  setRetake(true)
-                  setPicks([null, null, null])
-                }}
-                className={`underline underline-offset-2 ${textLink}`}
+                role="switch"
+                aria-checked={optIn && passed}
+                aria-labelledby="optin-label"
+                disabled={!passed}
+                onClick={() => useProfileStore.getState().setAnswers({ leverageOptIn: !optIn })}
+                className={`relative h-7 w-12 shrink-0 rounded-full border transition disabled:cursor-not-allowed disabled:opacity-40 ${focusRing} ${optIn && passed ? 'border-lime bg-lime' : 'border-line-strong bg-surface-2'}`}
               >
-                Retake
+                <span className={`absolute top-[3px] h-5 w-5 rounded-full transition-all ${optIn && passed ? 'left-[23px] bg-on-lime' : 'left-[3px] bg-ink-2'}`} />
               </button>
-            )}
-          </span>
-        ) : allAnswered && !allCorrect ? (
-          <span className="text-warn">Not all three are right yet. Have another look: you can change any answer.</span>
-        ) : (
-          <span className="text-ink-2">Answer all three to unlock the borrowing option.</span>
-        )}
-      </p>
-
-      <div className="rounded-2xl border border-warn-line bg-warn-bg p-5 text-help">
-        <div className="flex items-center justify-between gap-4">
-          <span id="optin-label" className="font-semibold text-ink">
-            Allow borrowing to invest (above 1.0×)
-          </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={optIn}
-            aria-labelledby="optin-label"
-            disabled={!passed}
-            onClick={() => setAnswers({ leverageOptIn: !optIn })}
-            className={`relative h-7 w-12 shrink-0 rounded-full border transition disabled:cursor-not-allowed disabled:opacity-40 ${focusRing} ${optIn ? 'border-lime bg-lime' : 'border-line-strong bg-surface-2'}`}
-          >
-            <span className={`absolute top-[3px] h-5 w-5 rounded-full transition-all ${optIn ? 'left-[23px] bg-on-lime' : 'left-[3px] bg-ink-2'}`} />
-          </button>
-        </div>
-        <p className="mt-2 text-panel">Borrowing magnifies both gains and losses, and in a crash the broker can sell your holdings (a margin call). Off by default.</p>
-      </div>
+            </div>
+            <p className="mt-2 text-panel">Borrowing magnifies both gains and losses, and in a crash the broker can sell your holdings (a margin call). Off by default.</p>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -574,7 +663,7 @@ const BUFFER_LABEL = Object.fromEntries(BUFFER.map((o) => [o.value, o.label]))
 const label = <T extends string | number>(opts: RadioOption<T>[], v: T) => opts.find((o) => o.value === v)?.label ?? String(v)
 
 /** Summary of all 16 answers with links straight back to each question. */
-function Review({ profile: p, edited, onEdit, currency, money }: { profile: Profile; edited: Partial<Profile>; onEdit: (q: number) => void; currency: Currency; money: (x: number) => string }) {
+function Review({ profile: p, edited, onEdit, currency, money, skip16, borrowChoice }: { profile: Profile; edited: Partial<Profile>; onEdit: (q: number) => void; currency: Currency; money: (x: number) => string; skip16: boolean; borrowChoice?: BorrowChoice }) {
   const rows: [number, string, string, keyof Profile | null][] = [
     [0, 'Currency', `${currency} · ${CURRENCY_NAME[currency]}`, null],
     [1, 'Age', `${p.age}`, 'age'],
@@ -592,8 +681,8 @@ function Review({ profile: p, edited, onEdit, currency, money }: { profile: Prof
     [13, 'Largest income cut accepted', label(GAMBLE, p.incomeGamble), 'incomeGamble'],
     [14, 'Max loss in a bad year', money(p.maxLossMoney), 'maxLossMoney'],
     [15, 'Experience', label(EXPERIENCE, p.experience), 'experience'],
-    [16, 'Knowledge check / borrowing', `${p.knowledgeCheckPassed ? 'Passed' : 'Not passed'} · ${p.leverageOptIn ? 'opted in' : 'off'}`, 'knowledgeCheckPassed'],
-  ]
+    [16, 'Borrowing to invest', borrowChoice === 'no' ? 'No' : borrowChoice === 'unsure' ? 'Not decided yet' : `Knowledge check ${p.knowledgeCheckPassed ? 'passed' : 'not passed'} · borrowing ${p.leverageOptIn ? 'on' : 'off'}`, 'knowledgeCheckPassed'],
+  ].filter(([q]) => !(skip16 && q === 16)) as [number, string, string, keyof Profile | null][]
   return (
     <div className="flex flex-col gap-7">
       <div className="flex flex-col gap-3">

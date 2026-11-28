@@ -1,11 +1,11 @@
 /** React hooks on top of the stores. Selectors return stable values so components don't re-render in a loop. */
 import { useMemo } from 'react'
-import { exposures, formatMoney, netWorth, pendingCaps, portfolioEEE, riskFit, targetEEE, type Holding, type Profile, type RiskFit } from '../engine'
+import { exposures, formatMoney, netWorth, pendingCaps, portfolioEEE, riskFit, targetEEE, type Holding, type PendingCap, type Profile, type RiskFit } from '../engine'
 import { FX, type Currency } from '../data/fx'
 import { PRODUCTS } from '../data/products'
 import type { PersonaId } from '../data/personas'
 import { selectPortfolio, usePortfolioStore } from './portfolioStore'
-import { selectProfile, useProfileStore, type ActiveId } from './profileStore'
+import { selectProfile, useProfileStore, type ActiveId, type BorrowChoice } from './profileStore'
 
 /** The active profile (persona or "My answers" with defaults) and whether the user has answered anything. */
 export function useActiveProfile(): { active: ActiveId; profile: Profile; hasAnswers: boolean } {
@@ -26,8 +26,26 @@ export function useMyTarget() {
   return useMemo(() => {
     const profile = selectProfile({ active: 'mine', answers, currency })
     const pending = pendingCaps(answers)
-    return { profile, pending, target: targetEEE(profile, { pending }) }
+    const borrowingMatters = borrowingCanMatter(profile, pending)
+    // When borrowing can't change the result, Q16 is skipped: its limit no longer makes the number an "Estimate".
+    const estimate = pending.some((c) => c !== 'G3_leverage' || borrowingMatters)
+    return { profile, pending, target: targetEEE(profile, { pending }), borrowingMatters, estimate }
   }, [answers, currency])
+}
+
+/**
+ * Whether borrowing (gate G3) could change the user's result: the target computed without G3 (and without any other
+ * pending limit) is above 1.0×. If it is 1.0× or lower, onboarding skips Q16. Uses only targetEEE.
+ */
+export function borrowingCanMatter(profile: Profile, pending: readonly PendingCap[] = []): boolean {
+  const withoutBorrowing = targetEEE(profile, { pending: [...new Set<PendingCap>([...pending, 'G3_leverage'])] })
+  return withoutBorrowing.finalEEE > 1 + 1e-9
+}
+
+/** How the borrowing rule reads for "My answers": declined in Q16, or not needed because Q16 was skipped. */
+export function borrowingNote(profile: Profile, borrowChoice: BorrowChoice | undefined): 'declined' | 'not-needed' | undefined {
+  if (borrowChoice === 'no') return 'declined'
+  return borrowingCanMatter(profile) ? undefined : 'not-needed'
 }
 
 /** Loads a persona and its demo portfolio. */

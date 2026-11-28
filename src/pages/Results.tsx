@@ -12,23 +12,28 @@ import { btnPrimary, btnSecondary, card, pageWrap, textLink } from '../component
 import {
   BAND_LABEL,
   BINDING_LABEL,
-  CAP_LABEL,
   incomeTypeTitle,
+  crashCost,
   explainBinding,
+  explainCrashCost,
   explainHumanCapital,
   explainIncomeType,
   formatPct,
   formatWealthShare,
   formatRatio,
   glidePath,
+  limitRows,
   loanAmount,
+  maxLossRange,
+  modelBeforeLimitsSentence,
+  rawEEELabel,
   riskAttitudeLine,
   riskSentence,
   targetEEE,
   type Profile,
 } from '../engine'
 import { PERSONAS } from '../data/personas'
-import { useActivePortfolioRisk, useActiveProfile, useCurrency } from '../store/hooks'
+import { borrowingNote, useActivePortfolioRisk, useActiveProfile, useCurrency } from '../store/hooks'
 import { useProfileStore } from '../store/profileStore'
 
 type WhatIf = Partial<Pick<Profile, 'savingsRate' | 'maxLossMoney'>>
@@ -37,6 +42,7 @@ export default function Results() {
   const { active, profile: saved, hasAnswers } = useActiveProfile()
   const { currency, money } = useCurrency()
   const lossIsDefault = useProfileStore((s) => active === 'mine' && s.answers.maxLossMoney === undefined)
+  const borrowChoice = useProfileStore((s) => (active === 'mine' ? s.borrowChoice : undefined))
   const [whatIf, setWhatIf] = useState<WhatIf>({})
   const [whatIfFor, setWhatIfFor] = useState(active)
   // What-if values belong to one profile: drop them when the user switches persona.
@@ -79,6 +85,8 @@ export default function Results() {
   const name = isPersona ? PERSONAS[active].name : null
   const loan = loanAmount(t.finalEEE, F)
   const atCap = t.binding !== 'model' && t.binding !== 'floor'
+  // Slider: 0 to the largest loss possible at the 1.5× cap (0.75 · F), at least 500 in the chosen currency.
+  const lossRange = maxLossRange(F)
 
   return (
     <div className={`${pageWrap} flex flex-col gap-6 pt-8 pb-20 sm:pt-12`}>
@@ -106,8 +114,8 @@ export default function Results() {
             {BINDING_LABEL[t.binding]}
           </Badge>
           <p className="max-w-[620px] text-base leading-relaxed text-panel">
-            {explainBinding(t, profile, { lossIsDefault, currency })}
-            {atCap && ` The model before limits says ${formatRatio(t.rawEEE)}.`}
+            {explainBinding(t, profile, { lossIsDefault, currency, borrowing: active === 'mine' ? borrowingNote(profile, borrowChoice) : undefined })}
+            {atCap && ` ${modelBeforeLimitsSentence(t.rawEEE)}`}
             {loan > 0 && ` In practice: stock exposure of ${formatRatio(t.finalEEE)}, using a broker loan of about ${money(loan)}.`}
           </p>
         </div>
@@ -131,20 +139,14 @@ export default function Results() {
           <Card className="flex flex-col gap-2.5">
             <h3 className="text-[13px] font-medium text-ink-2">Limits checked</h3>
             <ul className="flex flex-col gap-2 text-help">
-              {t.caps.map((c) => {
-                const binding = c.id === t.binding
-                return (
-                  <li key={c.id} className={`flex justify-between gap-3 ${binding ? 'font-semibold text-lime' : 'text-ink-2'}`}>
-                    <span>{CAP_LABEL[c.id]}</span>
-                    <span className={`tabular-nums ${binding ? '' : 'text-ink'}`}>
-                      {formatRatio(c.value)}
-                      {binding && ' · applies'}
-                    </span>
-                  </li>
-                )
-              })}
+              {limitRows(t, profile, currency).map((r) => (
+                <li key={r.id} className={`flex justify-between gap-3 ${r.binding ? 'font-semibold text-lime' : 'text-ink-2'}`}>
+                  <span>{r.label}</span>
+                  <span className={`text-right tabular-nums ${r.binding ? '' : 'text-ink'}`}>{r.value}</span>
+                </li>
+              ))}
             </ul>
-            <p className="mt-auto text-xs text-muted">Model result before limits: {formatRatio(t.rawEEE)}</p>
+            <p className="mt-auto text-xs text-muted">Model result before limits: {rawEEELabel(t.rawEEE)}</p>
           </Card>
         </div>
       </section>
@@ -229,12 +231,15 @@ export default function Results() {
             </label>
             <SliderField
               id="wi-loss"
-              min={0}
-              max={Math.max(F, saved.maxLossMoney)}
-              step={100}
-              value={profile.maxLossMoney}
+              min={lossRange.min}
+              max={lossRange.max}
+              step={Math.max(1, Math.round(lossRange.max / 100))}
+              value={Math.min(profile.maxLossMoney, lossRange.max)}
               onChange={(v) => setWhatIf((w) => ({ ...w, maxLossMoney: v }))}
               display={money(profile.maxLossMoney)}
+              minLabel={money(lossRange.min)}
+              maxLabel={money(lossRange.max)}
+              hint={explainCrashCost(crashCost(t.finalEEE, F), currency)}
             />
           </div>
         </div>

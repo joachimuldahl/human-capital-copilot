@@ -34,6 +34,16 @@ export const ASSUMPTION_NOTES: Record<string, { label: string; why: string }> = 
   defaultMaxLossShare: { label: 'Default loss limit (share of investments)', why: 'Used until you answer question 14.' },
   portfolioMismatchTolerance: { label: 'Portfolio vs invested amount tolerance', why: 'Differences above 5% trigger a prompt to update your invested amount.' },
   planChangeThreshold: { label: 'Smallest change listed in the plan', why: 'Changes under 2% of your money are not worth the trading costs.' },
+  inflation: { label: 'Inflation (projections)', why: 'Close to the ECB’s 2% target; turns nominal returns into today’s money for the Plan projections.' },
+  bondsNominal: { label: 'Expected bond return (nominal)', why: 'Roughly today’s yield on global investment-grade bonds; used only in projections.' },
+  goldNominal: { label: 'Expected gold return (nominal)', why: 'About inflation plus a little; gold has no cash flows, so this is a modest long-run guess.' },
+  btcNominal: { label: 'Expected Bitcoin return (nominal)', why: 'No credible basis for an estimate, so deliberately set equal to stocks: crypto is never projected to beat stocks.' },
+  loanRate: { label: 'Broker loan rate (nominal)', why: 'Cash rate plus the loan spread; borrowing lowers the projected return by this cost.' },
+  projectionPaths: { label: 'Simulated paths per projection', why: 'Enough for stable 1-in-10 and median values while staying instant in the browser.' },
+  projectionSeed: { label: 'Random seed for projections', why: 'A fixed seed makes every projection repeatable, so numbers never change on reload.' },
+  defaultHorizon: { label: 'Default projection horizon (years)', why: 'Ten years is long enough to see compounding and short enough to feel concrete.' },
+  PROJECTION_HORIZONS: { label: 'Projection horizons (years)', why: 'Plus “until retirement” from your answers.' },
+  EXPECTED_NOMINAL: { label: 'Expected return per asset (nominal)', why: 'Used only for projections; stocks minus inflation equals the real risk-free rate plus the risk premium (5.5%).' },
   GAMMA: { label: 'Risk aversion (γ) by risk band', why: 'Spans the range estimated by Barsky et al. (1997) for typical investors.' },
   SPREAD: { label: 'Discount spread by income security', why: 'Riskier income is discounted more, like a riskier bond (Ibbotson et al. 2007).' },
   BETA_BASE: { label: 'βH by sector', why: 'Judgement-based and conservative; empirical correlations are usually lower.' },
@@ -65,6 +75,7 @@ export function assumptionRows(): AssumptionRow[] {
     let value: string | null = null
     if (typeof v === 'number') value = fmt(v)
     else if (key === 'CORR') value = (v as readonly (readonly number[])[]).map((r) => `[${r.join(', ')}]`).join(' ')
+    else if (Array.isArray(v)) value = v.join(' · ')
     else if (v && typeof v === 'object') value = rec(v as Record<string, number>)
     if (value === null) continue
     const note = ASSUMPTION_NOTES[key]

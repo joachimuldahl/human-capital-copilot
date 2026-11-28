@@ -7,12 +7,12 @@ import { focusRing } from './ui'
 /** Pages that show the persona segmented control in the header (BUILD_SPEC 7, 15). */
 const PERSONA_PAGES = ['/results', '/portfolio', '/plan']
 
-/** Header: lime logo tile + wordmark, nav with a 2px lime underline, persona control on Results/Portfolio/Plan. */
+/** Sticky header: lime logo tile + wordmark, nav with a 2px lime underline, persona control on Results/Portfolio/Plan. */
 export default function Nav() {
   const { pathname } = useLocation()
   const showPersonas = PERSONA_PAGES.includes(pathname)
   return (
-    <header className="border-b border-line">
+    <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 sm:gap-x-6 py-3.5 sm:px-8 sm:py-[18px]">
         <Logo compact />
         <nav aria-label="Main" className="min-w-0">

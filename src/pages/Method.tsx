@@ -6,13 +6,14 @@ import { FX, FX_DATE, FX_SOURCE, CURRENCIES, CURRENCY_NAME } from '../data/fx'
 import { useCurrency } from '../store/hooks'
 import { selectProfile } from '../store/profileStore'
 import { formatSourceDate, VERIFIED_PRODUCTS } from '../data/products'
-import { assumptions as A, BAND_LABEL, CAP_LABEL, formatPct, formatRatio, roundHalfAway, targetEEE } from '../engine'
+import { assumptions as A, BAND_LABEL, CAP_LABEL, formatPct, formatRatio, portfolioParams, roundHalfAway, targetEEE } from '../engine'
 
 const SECTIONS = [
   ['idea', 'The idea'],
   ['calculation', 'How your Risk Capacity is calculated'],
   ['assumptions', 'Assumptions'],
   ['limits', 'Limits and gates'],
+  ['projections', 'Projections'],
   ['limitations', 'What this model does not do'],
   ['not-advice', 'Not investment advice'],
   ['references', 'References'],
@@ -23,7 +24,7 @@ const n4 = (x: number) => roundHalfAway(x, 4).toFixed(4)
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-6 space-y-4 border-t border-line pt-8">
+    <section id={id} aria-labelledby={`${id}-title`} className="space-y-4 border-t border-line pt-8">
       <h2 id={`${id}-title`} className="font-display text-2xl font-semibold tracking-[-0.01em] text-ink">
         {title}
       </h2>
@@ -221,10 +222,77 @@ export default function Method() {
           </ul>
         </Section>
 
-        <Section id="limitations" title="5. What this model does not do">
+        <Section id="projections" title="5. Projections (Plan page)">
+          <p>
+            The Plan page shows where your money could be after 5 to 30 years, or at retirement, with the target plan and with your current mix (or all in cash). We always show the range next to the
+            likely value, never a single optimistic line. All amounts are in today’s money, before fees and taxes, and none of them is a guarantee.
+          </p>
+          <p>
+            <strong className="text-ink">Expected return and risk of a mix.</strong> Each asset’s expected nominal return minus {formatPct(A.inflation)} inflation, weighted by the plan. A broker loan
+            costs {formatPct(A.loanRate)} a year (cash rate plus the loan spread), so borrowing lowers the expected return. Volatility uses the same covariance matrix as the allocation.
+          </p>
+          <Formula>
+            μ = Σ wᵢ · (returnᵢ − inflation) + loan · (loanRate − inflation)
+            <br />σ = √(xᵀ · COV · x) over stocks, bonds, gold and Bitcoin (cash and the loan have no volatility)
+          </Formula>
+          <p>
+            <strong className="text-ink">Simulation.</strong> {A.projectionPaths.toLocaleString('en-US')} paths of yearly log-normal returns with that mean and volatility, from a fixed random seed ({A.projectionSeed}), so
+            the numbers are the same on every visit. Your monthly savings (constant in today’s money) are added at the end of each year.
+          </p>
+          <Formula>
+            s² = ln(1 + σ² / (1 + μ)²), m = ln(1 + μ) − s² / 2
+            <br />W(t+1) = W(t) · exp(m + s · Z) + 12 · monthly saving, Z ~ N(0, 1)
+          </Formula>
+          <p>
+            <strong className="text-ink">What we show.</strong> “Likely” is the median path, the “1 in 10 bad case” the 10th percentile and the “1 in 10 good case” the 90th. We also show the chance
+            of ending below the money you put in. The one-year “bad year” is the 2008-style crash test (section 4), so it matches the loss limit exactly.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <caption className="sr-only">Expected returns used in projections</caption>
+              <thead>
+                <tr className="border-b border-line text-xs text-muted">
+                  <th scope="col" className="py-2 font-medium">Asset</th>
+                  <th scope="col" className="py-2 text-right font-medium">Nominal</th>
+                  <th scope="col" className="py-2 text-right font-medium">Real (today’s money)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(
+                  [
+                    ['Stocks (global)', 'equity'],
+                    ['Bonds', 'bonds'],
+                    ['Gold', 'gold'],
+                    ['Bitcoin (no credible basis; set equal to stocks)', 'btc'],
+                    ['Cash', 'cash'],
+                  ] as const
+                ).map(([label, k]) => (
+                  <tr key={k} className="border-b border-line last:border-0">
+                    <th scope="row" className="py-2 font-normal text-ink">{label}</th>
+                    <td className="py-2 text-right font-mono text-xs text-ink">{formatPct(A.EXPECTED_NOMINAL[k])}</td>
+                    <td className="py-2 text-right font-mono text-xs text-ink">
+                      {formatPct(portfolioParams({ equity: 0, bonds: 0, gold: 0, btc: 0, cash: 0, [k]: 1 }).mu)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="font-semibold text-ink">Limitations of the projections</p>
+          <ul className="list-disc space-y-1 pl-5 marker:text-lime">
+            <li>Constant expected returns and volatility; real markets have regimes and fat tails.</li>
+            <li>Yearly steps.</li>
+            <li>No fees or taxes.</li>
+            <li>Savings constant in today’s money.</li>
+            <li>The target is held constant over the horizon (no glide path in the projection).</li>
+            <li>Simulated with {A.projectionPaths.toLocaleString('en-US')} seeded paths, so percentiles carry a small sampling error.</li>
+          </ul>
+        </Section>
+
+        <Section id="limitations" title="6. What this model does not do">
           <ul className="list-disc space-y-1 pl-5 marker:text-lime">
             <li>No taxes.</li>
-            <li>The glide path is deterministic (average returns), not a Monte Carlo simulation.</li>
+            <li>The glide path on Results is deterministic (average returns). Only the Plan projections are simulated (section 5).</li>
             <li>Sector betas (βH) are judgement-based, not estimated from data.</li>
             <li>The savings rate is held constant over your working life.</li>
             <li>No insurance, housing or pensions outside your portfolio.</li>
@@ -232,13 +300,13 @@ export default function Method() {
           </ul>
         </Section>
 
-        <Section id="not-advice" title="6. Not investment advice">
+        <Section id="not-advice" title="7. Not investment advice">
           <p>
             This is an educational demo. It shows examples, not recommendations. A personal recommendation of specific products would be regulated investment advice (for example under MiFID II in the EU).
           </p>
         </Section>
 
-        <Section id="references" title="7. References">
+        <Section id="references" title="8. References">
           <ul className="space-y-2 text-help">
             {REFERENCES.map((r) => (
               <li key={r}>{r}</li>

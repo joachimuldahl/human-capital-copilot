@@ -186,3 +186,35 @@ Team prompts: Damien → `prompts/team/damien.md` (his original prompts, verbati
 **Result:** tests ✔ · lint ✔ · build ✔
 **Human check:** Specified the final submission steps and corrected the submission date to 14 Dec 2026 (16:54:20).
 **Lesson:** On a case-insensitive Mac a capital-letter rename needs two git mv steps, and paths in tests and scripts must follow, or the build passes locally but breaks on a case-sensitive server.
+
+### C-023 · 2026-11-28 · Joachim · Claude Code · Results wording fixes
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entry 2026-11-28 17:30:04 +02:00 (Results page fixes from a screenshot: €7 invested, max loss €6,500 showed "1857.14×").
+**What the AI did:** Added engine helpers and used them on Results: `limitRows` (safety cap as a multiple; loss limit as money unless it binds; buffer, debt and borrowing rules "ok" / "applies" / "not limiting"), `rawEEELabel` and `modelBeforeLimitsSentence` (above 10× the model value reads "far above the 1.5× cap"), `maxLossRange` (what-if slider 0 to 0.75 × invested, at least 500) and `crashCost` with its sentence, and "about the same risk" at exactly 1.00×. Onboarding Q3 asks "Did you mean …?" for amounts above 0 and below 100. Retook the two Results screenshots and regenerated the description PDF.
+**Files changed:** src/engine/{explain,risk,index}.ts, src/engine/resultsDisplay.test.ts (new), src/pages/{Results,Onboarding}.tsx, src/pages/pages.test.tsx, docs/screenshots/{desktop,mobile}-results-sofie.png, docs/Application-Description.pdf, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (309/309) · lint ✔ · build ✔
+**Human check:** Reported the problem with a screenshot and specified the fixes (2026-11-28 17:30:04 +02:00).
+**Lesson:** A formula that is fine for realistic inputs (raw = … / F) explodes for tiny ones; display rules need limits as well as the maths.
+
+### C-024 · 2026-11-28 · Joachim · Claude Code · Q16 rework (spec v1.6)
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entry 2026-11-28 17:47:11 +02:00 (rework Q16, fix the "passed" bug, update BUILD_SPEC 7.2 and 16).
+**What the AI did:** Fixed the bug: the three knowledge-check answers are now saved in the profile store (shown again in the radios) and "Knowledge check passed" is derived from them, so it shows only when all three are answered and right; a v2 saved state with "passed" but no answers is migrated to "ask again". Added the skip rule (target with the borrowing rule G3 left pending ≤ 1.0× → Q16 skipped, counter "of 15", Q15 leads to the review) using the existing targetEEE option, and the gating question Yes / No / Not sure with its three paths; "No" explains "Capped at 1.0× because you chose not to borrow." Added the ESMA sentence to the Why-we-ask text. No engine maths changed (only explanation wording); section 9 tests unchanged. No existing screenshot shows Q16, so none retaken; checked the new screen at 375 and 1280 px.
+**Files changed:** src/store/{profileStore,hooks}.ts, src/pages/{Onboarding,Results}.tsx, src/engine/explain.ts, src/content/whyWeAsk.ts, src/pages/pages.test.tsx, src/store/stores.test.ts, BUILD_SPEC.md (v1.6: 7.2, 16), docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (318/318) · lint ✔ · build ✔
+**Human check:** Reported the "passed" bug and specified the new Q16 flow (2026-11-28 17:47:11 +02:00).
+**Lesson:** A status derived from stored answers can't drift from what the user sees; a separately stored "passed" flag did.
+
+### C-025 · 2026-11-28 · Joachim · Claude Code · Sticky header
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entry 2026-11-28 17:53:42 +02:00 ("make header sticky for scrolls").
+**What the AI did:** Made the main header and the onboarding top bar sticky (top 0, translucent background with blur, above page content). Moved the onboarding side panel's sticky offset below the header and added a global scroll-padding so anchor jumps (Landing "Try a demo person", Method section links) land below it. Checked in headless Chrome at 375 and 1280 px: the header stays at the top after scrolling on Landing, Results, Method and Onboarding, and nothing scrolls sideways.
+**Files changed:** src/components/Nav.tsx, src/pages/{Onboarding,Landing,Method}.tsx, src/index.css, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (318/318) · lint ✔ · build ✔
+**Human check:** Asked for the sticky header (2026-11-28 17:53:42 +02:00).
+**Lesson:** A sticky header changes every anchor and sticky panel below it; measure the header in the browser instead of guessing the offsets.
+
+### C-026 · 2026-11-28 · Joachim · Claude Code · Plan page redesign (spec v1.7)
+**Prompt:** see prompts/PROMPT_LOG_AUTO.md, entry 2026-11-28 18:03:21 +02:00 (implement docs/plan-page-redesign.md: engine, Plan page, Method section, description paragraph, BUILD_SPEC section 19, screenshots, commit and push, report Mads's and Jonas's 10-year numbers).
+**What the AI did:** Planned (approved; the user chose one combined commit with the uncommitted C-023–C-025 work and the label v1.7, because v1.5 was already taken). Wrote tests first, then `src/engine/projection.ts` (portfolioParams, seeded mulberry32 + Box–Muller log-normal paths, p10/p50/p90, odds, oneYearRange using the existing stressLoss) and `src/engine/planView.ts` (texts and bar segments). Rebuilt the Plan page in the section 19 order with a Recharts fan chart and hatched "borrowed" bars; added the Method "Projections" section and new assumption notes. Headless-Chrome check at 375/1280 px for all personas and the gate state found sideways scroll at 375 px from the hidden radio inputs in the horizon chips (fixed with `relative`); Lighthouse 12.8.2 on Plan flagged an aria-label that didn't match the visible text (removed; 100 with no failing audits). Retook the Plan and Method screenshots and regenerated the description PDF with a scratchpad converter.
+**Files changed:** src/engine/{assumptions,projection (new),planView (new),explain,index}.ts, src/engine/{projection,planView}.test.ts (new), src/components/{FanChart,OwnBars}.tsx (new), src/pages/{Plan,Method}.tsx, src/pages/pages.test.tsx, src/content/assumptionNotes.ts, src/index.css, BUILD_SPEC.md (v1.7, section 19), docs/plan-page-redesign.md, docs/Application-Description.{md,pdf}, docs/screenshots/{desktop-plan-sofie,mobile-plan-gates,desktop-method}.png, README.md, docs/CHANGELOG.md, prompts/PROMPT_LOG.md
+**Result:** tests ✔ (342/342) · lint ✔ · build ✔
+**Human check:** Wrote the redesign spec and chose the combined commit and the v1.7 label (2026-11-28 18:03:21).
+**Lesson:** A simulated projection needs a fixed seed to be testable and honest: the same numbers on every visit, and tests can pin the median against the analytic formula.

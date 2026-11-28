@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Profile } from '../engine'
 import { PERSONAS } from '../data/personas'
-import type { ActiveId } from '../store/profileStore'
+import type { ActiveId, BorrowChoice, KnowledgePicks } from '../store/profileStore'
 import type { QuickValues } from '../store/portfolioStore'
 import type { Currency } from '../data/fx'
 
@@ -23,13 +23,14 @@ type Page = 'Landing' | 'Onboarding' | 'Results' | 'Portfolio' | 'Plan' | 'Metho
 /** Server-render a page with the given profile state. */
 async function renderPage(
   page: Page,
-  state: { active: ActiveId; answers: Partial<Profile>; currency?: Currency } = { active: 'mine', answers: {} },
+  state: { active: ActiveId; answers: Partial<Profile>; currency?: Currency; borrowChoice?: BorrowChoice; knowledgePicks?: KnowledgePicks } = { active: 'mine', answers: {} },
   quick: Partial<QuickValues> = {},
   url = '/',
+  raw = false,
 ) {
   const { useProfileStore } = await import('../store/profileStore')
   const { usePortfolioStore, EMPTY_QUICK } = await import('../store/portfolioStore')
-  useProfileStore.setState({ currency: 'EUR', ...state })
+  useProfileStore.setState({ currency: 'EUR', borrowChoice: undefined, knowledgePicks: [null, null, null], ...state })
   usePortfolioStore.setState({ source: 'demo', quick: { ...EMPTY_QUICK, ...quick } })
   const mod = (await import(`./${page}.tsx`)) as { default: () => ReactElement }
   const Comp = mod.default
@@ -38,6 +39,7 @@ async function renderPage(
       <Comp />
     </MemoryRouter>,
   )
+  if (raw) return html
   // Strip tags so text split across elements can be matched.
   return html.replace(/<!-- -->/g, '').replace(/<[^>]+>/g, ' ').replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/\s+/g, ' ')
 }
@@ -113,11 +115,14 @@ describe('Onboarding', () => {
     expect(t).toContain('What drives this')
   })
 
-  it('after Q14 the loss limit applies; still an estimate until Q16', async () => {
+  it('after Q14 the loss limit applies; while borrowing could matter it stays an estimate until Q16', async () => {
     const t = await renderPage('Onboarding', { active: 'mine', answers: { maxLossMoney: 4000 } })
     expect(t).toContain('0.80×')
     expect(t).toContain('Limited by the most you said you could lose in a bad year (€4,000).')
-    expect(t).toContain('Estimate from your answers so far.')
+    // 0.80× without borrowing: Q16 is skipped, so the borrowing rule no longer makes it an estimate.
+    expect(t).not.toContain('Estimate from your answers so far.')
+    const u = await renderPage('Onboarding', { active: 'mine', answers: { maxLossMoney: 8000 } })
+    expect(u).toContain('Estimate from your answers so far.') // 1.50× without borrowing: Q16 still to come
   })
 
   it('after Q14 and Q16: Preliminary (other defaults), no estimate note', async () => {
@@ -229,6 +234,97 @@ describe('Currency (BUILD_SPEC 18)', () => {
   })
 })
 
+describe('Results wording for extreme inputs', () => {
+  it('€7 invested, max loss €6,500: no huge multiples, loss limit in money, slider 0–€500 with crash cost', async () => {
+    const t = await renderPage('Results', { active: 'mine', answers: { investableAssets: 7, maxLossMoney: 6500 } })
+    expect(t).not.toMatch(/\d{3,}\.\d{2}×/)
+    expect(t).toContain('Max loss in a bad year €6,500 · not limiting')
+    expect(t).toContain('Model result before limits: far above the 1.5× cap')
+    expect(t).toContain('€0 €500')
+    expect(t).toContain('A 50% crash would cost you about €4 at your current target.')
+  })
+  it('Sofie: the 15.78× model value is described, not shown', async () => {
+    const t = await renderPage('Results', { active: 'sofie', answers: {} })
+    expect(t).toContain("Before limits, the model's result is far above the 1.5× cap.")
+    expect(t).not.toContain('15.78×')
+    expect(t).toContain('Safety cap (1.5×) 1.50× · applies')
+  })
+  it('onboarding Q3: a tiny amount asks whether thousands were meant', async () => {
+    const t = await renderPage('Onboarding', { active: 'mine', answers: { investableAssets: 7 } }, {}, '/onboarding?q=3')
+    expect(t).toMatch(/Did you mean €7,000 ?\?/) // tag stripping adds a space before "?"
+    expect(t).toContain('Yes, use €7,000')
+    expect(t).toContain('No, keep €7')
+    const ok = await renderPage('Onboarding', { active: 'mine', answers: { investableAssets: 7000 } }, {}, '/onboarding?q=3')
+    expect(ok).not.toContain('Did you mean')
+  })
+})
+
+describe('Q16: borrowing, knowledge check and opt-in', () => {
+  const at = (q: number, state: Parameters<typeof renderPage>[1], raw = false) => renderPage('Onboarding', state, {}, `/onboarding?q=${q}`, raw)
+  // Target without the borrowing rule: €4,000 loss limit → 0.80× (borrowing can't matter); €8,000 → 1.50× (it can).
+  const SKIP = { maxLossMoney: 4000 }
+  const ASK = { maxLossMoney: 8000 }
+
+  it('skipped when the target without borrowing is 1.0× or lower: "of 15", Q15 leads to the review', async () => {
+    const t15 = await at(15, { active: 'mine', answers: SKIP })
+    expect(t15).toContain('QUESTION 15 OF 15')
+    expect(t15).toContain('Review answers')
+    const t16 = await at(16, { active: 'mine', answers: SKIP })
+    expect(t16).toContain('REVIEW')
+    expect(t16).not.toContain('Borrowing to invest')
+    expect(t16.match(/ Edit /g)).toHaveLength(16) // currency + 15 questions
+  })
+
+  it('asked when borrowing can matter: "of 16", gating question first, no knowledge check yet', async () => {
+    const t = await at(16, { active: 'mine', answers: ASK })
+    expect(t).toContain('QUESTION 16 OF 16')
+    expect(t).toContain('Would you consider borrowing to invest, e.g. a loan from your broker, if your situation allows it?')
+    for (const o of ['Yes', 'No', 'Not sure, tell me more']) expect(t).toContain(o)
+    expect(t).not.toContain('What is a margin call?')
+    expect(t).toContain('We only test your knowledge if you want to borrow, just as suitability rules assess complex products when a client wants them (ESMA guidelines on MiFID II).')
+  })
+
+  it('No: borrowing off, no knowledge check; Results explain the 1.0× cap as the user\'s choice', async () => {
+    const t = await at(16, { active: 'mine', answers: { ...ASK, knowledgeCheckPassed: false, leverageOptIn: false }, borrowChoice: 'no' })
+    expect(t).toContain('Borrowing stays off, so your Risk Capacity is capped at 1.0×.')
+    expect(t).not.toContain('What is a margin call?')
+    const r = await renderPage('Results', { active: 'mine', answers: { ...PERSONAS.sofie.profile, knowledgeCheckPassed: false, leverageOptIn: false }, borrowChoice: 'no' })
+    expect(r).toContain('Capped at 1.0× because you chose not to borrow.')
+  })
+
+  it('Not sure: plain explanation, then the same choice', async () => {
+    const t = await at(16, { active: 'mine', answers: ASK, borrowChoice: 'unsure' })
+    expect(t).toContain('Gains and losses are both magnified')
+    expect(t).toContain('a margin call')
+    expect(t).toContain('Choose Yes or No above.')
+    expect(t).not.toContain('What is a margin call?')
+  })
+
+  it('Yes: the three questions and the opt-in switch; "passed" only when all three are answered and right', async () => {
+    const none = await at(16, { active: 'mine', answers: ASK, borrowChoice: 'yes' })
+    expect(none).toContain('What is a margin call?')
+    expect(none).toContain('Answer all three to unlock the borrowing option.')
+    expect(none).not.toContain('Knowledge check passed')
+    const wrong = await at(16, { active: 'mine', answers: { ...ASK, knowledgeCheckPassed: false }, borrowChoice: 'yes', knowledgePicks: [0, 1, 2] })
+    expect(wrong).toContain('Not all three are right yet.')
+    const right = await at(16, { active: 'mine', answers: { ...ASK, knowledgeCheckPassed: true }, borrowChoice: 'yes', knowledgePicks: [1, 1, 2] })
+    expect(right).toContain('Knowledge check passed.')
+  })
+
+  it('bug: a saved "passed" without the three answers never shows "passed"', async () => {
+    const t = await at(16, { active: 'mine', answers: { ...ASK, knowledgeCheckPassed: true, leverageOptIn: true }, borrowChoice: 'yes' })
+    expect(t).not.toContain('Knowledge check passed')
+    expect(t).toContain('Answer all three to unlock the borrowing option.')
+  })
+
+  it('the radio buttons show the saved answers', async () => {
+    const html = await at(16, { active: 'mine', answers: { ...ASK, knowledgeCheckPassed: true }, borrowChoice: 'yes', knowledgePicks: [1, 1, 2] }, true)
+    const inputs = [...html.matchAll(/<input[^>]*type="radio"[^>]*>/g)].map((m) => m[0])
+    const checked = inputs.filter((i) => i.includes('checked=""') && /name="(kc-\d|borrow)"/.test(i)).map((i) => `${i.match(/name="([^"]+)"/)![1]}=${i.match(/value="([^"]+)"/)![1]}`)
+    expect(checked).toEqual(['borrow=yes', 'kc-0=1', 'kc-1=1', 'kc-2=2'])
+  })
+})
+
 describe('Method page', () => {
   it('shows Sofie\'s worked example from the engine, the gates and all references', async () => {
     const t = await renderPage('Method')
@@ -238,6 +334,11 @@ describe('Method page', () => {
     expect(t).toContain('= 15.78×')
     expect(t).toContain('final 1.50×')
     for (const s of ['Limits and gates', 'What this model does not do', 'Not investment advice', 'assumption, editable']) expect(t).toContain(s)
+    // Section 19: projections with real returns read from the engine (stocks 7.5% nominal → 5.5% real, cash 1.0%).
+    expect(t).toContain('5. Projections (Plan page)')
+    expect(t).toMatch(/Stocks \(global\) 7\.5% 5\.5%/)
+    expect(t).toMatch(/Cash 3\.0% 1\.0%/)
+    expect(t).toContain('5,000 seeded paths')
     const { REFERENCES } = await import('../content/references')
     expect(REFERENCES).toHaveLength(13)
     for (const r of REFERENCES) expect(t).toContain(r.split('.')[0])
@@ -312,11 +413,11 @@ describe('Plan (Phase 5 acceptance)', () => {
     ['mads', ['120.0%', '−20.0%', '€30,000', '−€5,000'], '€15,000', '60.0%'],
     ['lea', ['18.6%', '81.4%'], '€2,745', '6.9%'],
     ['jonas', ['63.4%', '36.6%'], '€4,593', '30.6%'],
-  ] as const)('%s: target allocation and crash test at target', async (id, weights, loss, pct) => {
+  ] as const)('%s: target allocation and bad-year tile = crash test at target', async (id, weights, loss, pct) => {
     const t = await renderPage('Plan', { active: id, answers: {} })
     for (const w of weights) expect(t).toContain(w)
-    expect(t).toContain(`−${loss}`)
-    expect(t).toContain(`${pct} of the portfolio`)
+    expect(t).toContain(`Bad year, like 2008 −${loss} −${pct}`)
+    expect(t).not.toContain('Crash test')
     expect(t).toContain('Example, not advice')
     expect(t).toContain('Changes to make at your own broker')
   })
@@ -347,10 +448,34 @@ describe('Plan (Phase 5 acceptance)', () => {
   it('Mads: next savings go to stocks; Assumptions dialog lists the engine values', async () => {
     const t = await renderPage('Plan', { active: 'mads', answers: {} })
     expect(t).toContain('Put your next monthly savings (€688) into stocks (global equity).')
-    expect(t).toContain('Increase stocks (global equity) by €25,000.')
+    expect(t).toContain('Move €20,000 from cash into stocks (global equity).')
+    expect(t).toContain('Optional: borrow €5,000 from your broker.')
     expect(t).toContain('Assumptions')
     expect(t).toContain('policyCap')
     expect(t).toContain('very high 1.75')
+  })
+
+  it('section 19 order: summary → growth (default tab) → good/bad year → own → products → how → advanced', async () => {
+    const t = await renderPage('Plan', { active: 'mads', answers: {} })
+    const order = ['Target Risk Capacity', 'Where your money could be', 'Growth over time', 'A good year vs a bad year', "What you'd own", 'Example products', 'How to get there', 'Advanced']
+    const idx = order.map((h) => t.indexOf(h))
+    idx.forEach((i) => expect(i).toBeGreaterThan(-1))
+    expect([...idx].sort((a, b) => a - b)).toEqual(idx)
+    expect(t).toContain("In today's money, before fees and taxes. Not a guarantee.")
+  })
+
+  it('callouts: Mads states the gap, Jonas gets the riskier wording', async () => {
+    const mads = await renderPage('Plan', { active: 'mads', answers: {} })
+    expect(mads).toMatch(/Staying as you are could leave you about €[\d,]+ less after 10 years/)
+    const jonas = await renderPage('Plan', { active: 'jonas', answers: {} })
+    expect(jonas).toMatch(/in the 1-in-10 bad case you'd end with €[\d,]+, below the €55,000 you put in/)
+  })
+
+  it('no red unless a loss exceeds the limit: Mads none, Jonas only on his current bad year', async () => {
+    const mads = await renderPage('Plan', { active: 'mads', answers: {} }, {}, '/', true)
+    expect(mads).not.toMatch(/text-alert|bg-alert/)
+    const jonas = await renderPage('Plan', { active: 'jonas', answers: {} }, {}, '/', true)
+    expect((jonas.match(/border-alert-line bg-alert-bg/g) ?? []).length).toBe(1)
   })
 
   it('empty state without answers', async () => {
